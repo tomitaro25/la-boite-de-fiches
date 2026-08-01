@@ -37,7 +37,7 @@ Pentru a publica o versiune nouă: încarcă fișierele modificate în acest rep
 
 - **Selecția și nivelizarea cuvintelor A1–B2** sunt construite (în lucru) **integral și independent** din rangul de frecvență reală de utilizare a limbii franceze, pe baza listei [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) (`content/2018/fr/fr_50k.txt`, derivată din corpus OpenSubtitles), licență **MIT**. Cuvintele sunt lematizate (formă de bază + tip gramatical) cu spaCy (`fr_core_news_sm`), verificate manual pentru a elimina nume proprii, forme flexionate duplicate și zgomot din subtitrări, apoi împărțite pe niveluri A1–B2 exclusiv după poziția lor în clasamentul de frecvență. Nicio parte din selecția A1–B2 nu depinde de curriculumul vreunei instituții de examinare.
 - Etichetele CEFR (A1, A2, B1, B2) sunt un standard public, deschis, al Consiliului Europei — nu proprietatea vreunei organizații.
-- Nucleul de start (57 cuvinte) din versiunea curentă e verificat integral manual, ca punct de plecare funcțional, înainte de integrarea listei complete extrase din frecvență.
+- Nivelul A1 (472 cuvinte) e construit din rangul de frecvență (`fr_50k.txt`), lematizat cu spaCy și corectat/verificat manual, cuvânt cu cuvânt, pentru erorile de conjugare neregulată identificate. Nivelurile A2, B1, B2 sunt în lucru, pe aceeași metodologie.
 - Traducerile în limba română sunt muncă originală.
 - Acest proiect e o resursă personală de studiu, nu revendică nicio afiliere cu hermitdave, Reverso, Anthropic sau alte instituții/persoane menționate.
 
