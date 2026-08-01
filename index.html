@@ -38,6 +38,12 @@
     overflow:hidden;
   }
 
+  /* ---------- banda tricolora (accent vizual FR) ---------- */
+  .fr-ribbon{
+    flex-shrink:0; height:4px; width:100%;
+    background:linear-gradient(to right, #22578a 0 33.33%, #f7f4ec 33.33% 66.66%, #a5312a 66.66% 100%);
+  }
+
   /* ---------- top bar ---------- */
   .topbar{
     display:flex; align-items:center; justify-content:space-between;
@@ -68,8 +74,9 @@
     padding:22px 18px 18px; flex:1; display:flex; flex-direction:column; min-height:0;
   }
   .card::before{
-    content:""; position:absolute; top:0; left:20px; width:30px; height:12px;
-    background:rgba(201,154,46,0.35); border:1px solid rgba(201,154,46,0.5); transform:rotate(-2deg);
+    content:""; position:absolute; top:0; left:20px; width:34px; height:12px;
+    background:linear-gradient(to right, rgba(34,87,138,0.55) 0 33.33%, rgba(247,244,236,0.75) 33.33% 66.66%, rgba(165,49,42,0.55) 66.66% 100%);
+    border:1px solid rgba(87,96,107,0.35); transform:rotate(-2deg);
   }
   .tag-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; font-family:'IBM Plex Mono', monospace;
     font-size:0.66rem; color:var(--ink-soft); margin-bottom:16px; gap:8px; }
@@ -108,12 +115,13 @@
   .opt.wrong{ background:rgba(178,58,46,0.16); border-color:var(--red); }
 
   .stamp{
-    position:absolute; top:38%; right:16px; font-family:'Special Elite', monospace; font-size:1.15rem;
-    padding:6px 14px; border:3px solid; border-radius:6px; transform:rotate(-12deg) scale(0.7); opacity:0;
-    pointer-events:none; letter-spacing:1.5px; transition:transform 0.26s cubic-bezier(.36,1.4,.4,1), opacity 0.2s ease;
-    background:rgba(251,247,238,0.9);
+    position:absolute; top:38%; left:50%; font-family:'Special Elite', monospace; font-size:1.1rem;
+    padding:6px 14px; border:3px solid; border-radius:6px; transform:translate(-50%,-50%) rotate(-10deg) scale(0.7); opacity:0;
+    pointer-events:none; letter-spacing:1.5px; white-space:nowrap; z-index:5;
+    transition:transform 0.26s cubic-bezier(.36,1.4,.4,1), opacity 0.2s ease;
+    background:rgba(251,247,238,0.94);
   }
-  .stamp.show{ opacity:0.92; transform:rotate(-12deg) scale(1); }
+  .stamp.show{ opacity:0.92; transform:translate(-50%,-50%) rotate(-10deg) scale(1); }
   .stamp.ok{ color:var(--green); border-color:var(--green); }
   .stamp.no{ color:var(--red); border-color:var(--red); }
 
@@ -200,6 +208,7 @@
 </head>
 <body>
 
+<div class="fr-ribbon"></div>
 <div class="topbar">
   <div class="brand">La Boîte de Fiches<small>FR ⇄ RO · A1–B2</small></div>
   <div class="top-right">
@@ -388,9 +397,21 @@ function shuffle(arr){
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+function needsElision(word){
+  // elidare franceza: le/la -> l' inaintea unei vocale sau h mut (simplificare uzuala:
+  // tratam orice cuvant care incepe cu vocala sau "h" ca elidabil)
+  return /^[aeiouâàäéèêëïîôöùûüh]/i.test(word.trim());
+}
 function formatSide(word, side){
   if(side === 'fr'){
-    const artHtml = word.artikel ? `<span class="art art-${word.artikel}">${word.artikel}</span> ` : '';
+    let artHtml = '';
+    if(word.artikel){
+      if(needsElision(word.fr)){
+        artHtml = `<span class="art art-${word.artikel}">l'</span>`;
+      } else {
+        artHtml = `<span class="art art-${word.artikel}">${word.artikel}</span> `;
+      }
+    }
     return { value: word.fr, html: artHtml + escapeHtml(word.fr) };
   }
   return { value: word.ro, html: escapeHtml(word.ro) };
@@ -637,8 +658,10 @@ function handleAnswer(btn, q){
   });
 
   const stamp = document.getElementById('stamp');
-  stamp.textContent = isCorrect ? 'CORRECT !' : 'GREȘIT';
+  stamp.textContent = isCorrect ? 'CORRECT !' : 'INCORRECT !';
   stamp.classList.add(isCorrect ? 'ok' : 'no');
+  stamp.style.top = (btn.offsetTop + btn.offsetHeight / 2) + 'px';
+  stamp.style.left = (btn.offsetLeft + btn.offsetWidth / 2) + 'px';
   requestAnimationFrame(()=> stamp.classList.add('show'));
   document.getElementById('nextBtnBottom').classList.add('show');
 }
