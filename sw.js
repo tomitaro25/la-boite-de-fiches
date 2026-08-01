@@ -1,4 +1,4 @@
-const CACHE_NAME = 'boite-de-fiches-v3';
+const CACHE_NAME = 'boite-de-fiches-v4';
 const APP_SHELL = [
   './index.html',
   './manifest.json',
