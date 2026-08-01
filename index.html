@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="La Boîte de Fiches">
+<meta name="theme-color" content="#F2E9D8">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>La Boîte de Fiches — Français ⇄ Română</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --paper:#F2E9D8; --paper-dark:#E7DAC0; --ink:#242A31; --ink-soft:#57606b;
+    --red:#B23A2E; --green:#3F7D53; --gold:#2E6F82; --line:#c9bba0;
+    --le:#2C5F8A; --la:#B23A6A;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html, body{ height:100%; overscroll-behavior-y:contain; }
+  body{
+    margin:0;
+    height:100dvh;
+    background:
+      radial-gradient(circle at 15% 8%, rgba(255,255,255,0.35), transparent 40%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 26px),
+      var(--paper);
+    color:var(--ink); font-family:'Literata', serif;
+    display:flex; flex-direction:column;
+    padding-top:calc(var(--safe-top) + 10px);
+    overflow:hidden;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:6px 16px 12px; border-bottom:2px solid var(--ink); flex-shrink:0;
+  }
+  .brand{ font-family:'Special Elite', monospace; font-size:1rem; line-height:1.15; }
+  .brand small{ display:block; font-family:'IBM Plex Mono', monospace; font-size:0.56rem; letter-spacing:1.5px;
+    text-transform:uppercase; color:var(--ink-soft); margin-top:3px; }
+  .top-right{ display:flex; align-items:center; gap:10px; }
+  .stats{ font-family:'IBM Plex Mono', monospace; font-size:0.68rem; text-align:right; color:var(--ink-soft); line-height:1.4; }
+  .stats b{ color:var(--ink); font-size:0.85rem; }
+  .gear-btn{
+    width:40px; height:40px; border-radius:50%; border:1.5px solid var(--ink); background:var(--paper);
+    font-size:1.15rem; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .gear-btn:active{ background:var(--paper-dark); }
+  .summary-line{
+    padding:4px 16px 0; font-family:'IBM Plex Mono', monospace; font-size:0.66rem; color:var(--ink-soft);
+    text-align:center; flex-shrink:0;
+  }
+
+  /* ---------- main scroll area ---------- */
+  .main{ flex:1; overflow-y:auto; padding:16px 16px 8px; display:flex; flex-direction:column; -webkit-overflow-scrolling:touch; }
+
+  .card{
+    position:relative; background:#fbf7ee; border:1px solid var(--line); border-radius:14px;
+    box-shadow: 0 14px 30px rgba(36,42,49,0.16), 0 2px 6px rgba(36,42,49,0.1);
+    padding:22px 18px 18px; flex:1; display:flex; flex-direction:column; min-height:0;
+  }
+  .card::before{
+    content:""; position:absolute; top:0; left:20px; width:30px; height:12px;
+    background:rgba(201,154,46,0.35); border:1px solid rgba(201,154,46,0.5); transform:rotate(-2deg);
+  }
+  .tag-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; font-family:'IBM Plex Mono', monospace;
+    font-size:0.66rem; color:var(--ink-soft); margin-bottom:16px; gap:8px; }
+  .skip-btn{
+    font-family:'IBM Plex Mono', monospace; font-size:0.66rem; background:none; border:1px solid var(--line);
+    color:var(--ink-soft); border-radius:14px; padding:4px 10px; cursor:pointer; margin-left:auto;
+  }
+  .skip-btn:active{ background:var(--paper-dark); }
+  .tag{ border:1px solid var(--line); border-radius:20px; padding:3px 10px; }
+  .direction-tag{ font-weight:600; letter-spacing:1px; color:var(--ink); border-color:var(--ink); }
+  .prompt-label{ font-family:'IBM Plex Mono', monospace; font-size:0.62rem; letter-spacing:2px; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:8px; }
+  .prompt-word{ font-size:clamp(1.5rem, 7vw, 2rem); font-weight:700; line-height:1.2; margin-bottom:20px; }
+  .art{ font-weight:600; }
+  .art-le{color:var(--le);} .art-la{color:var(--la);}
+  .prompt-row{ display:flex; align-items:center; gap:10px; }
+  .speak-btn{
+    flex-shrink:0; width:38px; height:38px; border-radius:50%; border:1.5px solid var(--ink-soft);
+    background:var(--paper); font-size:1rem; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    text-decoration:none; color:inherit;
+  }
+  .speak-btn:active{ background:var(--paper-dark); }
+  .speak-btn.inline{ width:30px; height:30px; font-size:0.85rem; margin-left:8px; }
+
+  .options{ display:flex; flex-direction:column; gap:10px; margin-top:auto; }
+  .opt{
+    text-align:left; font-family:'Literata', serif; font-size:1rem; background:var(--paper);
+    border:1.5px solid var(--ink); border-radius:10px; padding:14px 14px; cursor:pointer;
+    display:flex; gap:10px; align-items:flex-start; min-height:52px;
+    transition:background 0.12s ease, transform 0.06s ease;
+  }
+  .opt .letter{ font-family:'IBM Plex Mono', monospace; font-weight:600; color:var(--ink-soft); flex-shrink:0; }
+  .opt:active:not(:disabled){ background:var(--paper-dark); transform:scale(0.98); }
+  .opt:disabled{ cursor:default; }
+  .opt.correct{ background:rgba(63,125,83,0.18); border-color:var(--green); }
+  .opt.wrong{ background:rgba(178,58,46,0.16); border-color:var(--red); }
+
+  .stamp{
+    position:absolute; top:38%; right:16px; font-family:'Special Elite', monospace; font-size:1.15rem;
+    padding:6px 14px; border:3px solid; border-radius:6px; transform:rotate(-12deg) scale(0.7); opacity:0;
+    pointer-events:none; letter-spacing:1.5px; transition:transform 0.26s cubic-bezier(.36,1.4,.4,1), opacity 0.2s ease;
+    background:rgba(251,247,238,0.9);
+  }
+  .stamp.show{ opacity:0.92; transform:rotate(-12deg) scale(1); }
+  .stamp.ok{ color:var(--green); border-color:var(--green); }
+  .stamp.no{ color:var(--red); border-color:var(--red); }
+
+  .warning{ font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--red); text-align:center; margin:auto; padding:0 10px; }
+
+  /* ---------- bottom action bar (sticky) ---------- */
+  .bottombar{
+    flex-shrink:0; padding:10px 16px calc(12px + var(--safe-bottom));
+    background:linear-gradient(to top, var(--paper) 60%, transparent);
+  }
+  .progress-track{ height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin-bottom:10px; }
+  .progress-fill{ height:100%; background:var(--ink); width:0%; transition:width 0.25s ease; }
+  .next-btn{
+    width:100%; font-family:'IBM Plex Mono', monospace; font-size:0.9rem; letter-spacing:1px;
+    background:var(--ink); color:var(--paper); border:none; border-radius:10px; padding:15px 18px;
+    min-height:52px; opacity:0; pointer-events:none; transition:opacity 0.15s ease;
+  }
+  .next-btn.show{ opacity:1; pointer-events:auto; }
+  .next-btn:active{ background:#3a4149; }
+
+  .end-screen{ text-align:center; margin:auto; padding:10px; }
+  .end-screen .stamp-final{
+    display:inline-block; font-family:'Special Elite', monospace; font-size:1.15rem;
+    border:3px solid var(--ink); border-radius:8px; padding:8px 20px; transform:rotate(-3deg); margin-bottom:18px; letter-spacing:1.5px;
+  }
+  .score-big{ font-family:'IBM Plex Mono', monospace; font-size:2.4rem; font-weight:600; margin-bottom:4px; }
+  .score-sub{ color:var(--ink-soft); font-family:'IBM Plex Mono', monospace; font-size:0.78rem; margin-bottom:22px; }
+  .restart-btn{
+    font-family:'IBM Plex Mono', monospace; font-size:0.85rem; letter-spacing:1px; background:var(--ink);
+    color:var(--paper); border:none; border-radius:10px; padding:14px 24px; min-height:52px; width:100%; max-width:280px;
+  }
+  .restart-btn:active{ background:#3a4149; }
+  .signature{
+    font-family:'Special Elite', monospace; font-size:0.8rem; color:var(--ink-soft);
+    margin-top:22px; transform:rotate(-2deg); opacity:0.85;
+  }
+
+  /* ---------- settings bottom sheet ---------- */
+  .sheet-overlay{
+    position:fixed; inset:0; background:rgba(36,42,49,0.45); z-index:50;
+    opacity:0; pointer-events:none; transition:opacity 0.2s ease;
+  }
+  .sheet-overlay.show{ opacity:1; pointer-events:auto; }
+  .sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:51;
+    background:var(--paper); border-radius:20px 20px 0 0;
+    box-shadow:0 -8px 30px rgba(0,0,0,0.25);
+    padding:10px 18px calc(20px + var(--safe-bottom));
+    max-height:78vh; overflow-y:auto;
+    transform:translateY(100%); transition:transform 0.25s cubic-bezier(.32,.72,0,1);
+  }
+  .sheet.show{ transform:translateY(0); }
+  .sheet-handle{ width:36px; height:4px; background:var(--line); border-radius:2px; margin:6px auto 14px; }
+  .sheet-title{ font-family:'Special Elite', monospace; font-size:1rem; margin-bottom:14px; }
+  .sheet-section{ margin-bottom:20px; }
+  .sheet-label{ font-family:'IBM Plex Mono', monospace; font-size:0.66rem; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:10px; }
+  .chip-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    font-family:'IBM Plex Mono', monospace; font-size:0.82rem; border:1.5px solid var(--ink); border-radius:20px;
+    padding:9px 16px; background:var(--paper); user-select:none; min-height:40px; display:flex; align-items:center;
+  }
+  .chip.active{ background:var(--ink); color:var(--paper); }
+  .chip.disabled{ opacity:0.4; }
+  .btn-row{ display:flex; flex-direction:column; gap:8px; }
+  .btn-block{
+    font-family:'IBM Plex Mono', monospace; font-size:0.8rem; background:var(--paper); text-align:left;
+    border:1.5px solid var(--ink-soft); color:var(--ink); border-radius:10px; padding:13px 14px; min-height:48px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .btn-block:active{ background:var(--paper-dark); }
+  .btn-block:disabled{ opacity:0.4; }
+  .file-input{ display:none; }
+  .legend{ font-family:'IBM Plex Mono', monospace; font-size:0.66rem; color:var(--ink-soft); display:flex; flex-wrap:wrap; gap:12px; }
+  .legend span.art{ font-weight:600; margin-right:3px; }
+  .upload-status{ font-family:'IBM Plex Mono', monospace; font-size:0.7rem; color:var(--ink-soft); margin-top:8px; }
+  .upload-status.ok{ color:var(--green); }
+  .upload-status.err{ color:var(--red); }
+  .sheet-close{
+    width:100%; font-family:'IBM Plex Mono', monospace; font-size:0.85rem; background:var(--ink); color:var(--paper);
+    border:none; border-radius:10px; padding:14px; min-height:50px; margin-top:6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">La Boîte de Fiches<small>FR ⇄ RO · A1–B2</small></div>
+  <div class="top-right">
+    <div class="stats">rundă <b id="roundNo">1</b><br>scor: <b id="sessionScore">0</b>/<span id="sessionTotal">0</span></div>
+    <button class="gear-btn" id="openSheetBtn" aria-label="Setări">⚙</button>
+  </div>
+</div>
+<div class="summary-line" id="summaryLine"></div>
+
+<div class="main">
+  <div class="card" id="card"></div>
+</div>
+
+<div class="bottombar">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <button class="next-btn" id="nextBtnBottom">Următoarea →</button>
+</div>
+
+<div class="sheet-overlay" id="sheetOverlay"></div>
+<div class="sheet" id="settingsSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Setări listă</div>
+
+  <div class="sheet-section">
+    <div class="sheet-label">Niveluri</div>
+    <div class="chip-row">
+      <span class="chip level-chip active" data-level="A1">A1</span>
+      <span class="chip level-chip" data-level="A2">A2</span>
+      <span class="chip level-chip" data-level="B1">B1</span>
+      <span class="chip level-chip" data-level="B2">B2</span>
+      <span class="chip level-chip" data-level="EXT">Suplimentar</span>
+      <span class="chip" id="customChip" data-level="Custom" style="opacity:0.4;">Custom (0)</span>
+    </div>
+    <div class="upload-status" style="margin-top:8px;">Niveluri A1–B2 pe bază de frecvență reală (nu curriculum instituțional) · „Suplimentar" = cuvinte în afara topului celor mai frecvente 50.000</div>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-label">Direcție</div>
+    <div class="chip-row">
+      <span class="chip direction-chip active" data-dir="mixed">Ambele (mixt)</span>
+      <span class="chip direction-chip" data-dir="fr-ro">FR → RO</span>
+      <span class="chip direction-chip" data-dir="ro-fr">RO → FR</span>
+    </div>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-label">Mod de exersare</div>
+    <div class="chip-row">
+      <span class="chip mode-chip active" data-mode="smart">Inteligent (recapitulare)</span>
+      <span class="chip mode-chip" data-mode="random">Complet aleator</span>
+    </div>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-label">Listă proprie</div>
+    <div class="btn-row">
+      <button class="btn-block" id="uploadBtn"><span>Încarcă fișier (CSV / XLSX)</span><span>›</span></button>
+      <input type="file" id="fileInput" class="file-input" accept=".csv,.tsv,.txt,.xlsx,.xls">
+      <button class="btn-block" id="templateBtn"><span>Descarcă template CSV</span><span>›</span></button>
+    </div>
+    <div class="upload-status" id="uploadStatus"></div>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-label">Export</div>
+    <div class="btn-row">
+      <button class="btn-block" id="exportWordsBtn"><span>Exportă cuvintele curente</span><span>›</span></button>
+      <button class="btn-block" id="exportStatsBtn"><span>Exportă statisticile</span><span>›</span></button>
+    </div>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-label">Voce (pronunție 🔊)</div>
+    <select id="voiceSelect" class="btn-block" style="width:100%; appearance:none;">
+      <option value="">Se caută voci franceze...</option>
+    </select>
+    <button class="btn-block" id="testVoiceBtn" style="margin-top:8px;"><span>Testează vocea (spune „table")</span><span>▶</span></button>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-label">Legendă gen</div>
+    <div class="legend">
+      <span><span class="art art-le">le</span> masc.</span>
+      <span><span class="art art-la">la</span> fem.</span>
+    </div>
+  </div>
+
+  <button class="sheet-close" id="closeSheetBtn">Închide</button>
+  <div class="signature" style="text-align:center; margin-top:14px;">für Symo, viel Erfolg beim Lernen ♥</div>
+</div>
+
+<script src="vocab-data.js"></script>
+<script>
+
+/* Sursa completa e in vocab-data.js (VOCAB_DATA), incarcat separat pentru cache offline curat. */
+const BUILTIN = VOCAB_DATA.map(r => ({id:r[0], fr:r[1], ro:r[2], artikel:r[3], level:r[4], category:r[5]||''}));
+
+let customWords = [];
+let selectedLevels = new Set(["A1"]);
+let customActive = false;
+let selectedDirection = 'mixed'; // 'mixed' | 'fr-ro' | 'ro-fr'
+let practiceMode = 'smart'; // 'smart' (repetitie spatiata) | 'random'
+let wordStats = {};
+
+let pool = [];
+let currentIndex = 0;
+let roundSize = 15;
+let roundQuestions = [];
+let sessionScore = 0;
+let sessionTotal = 0;
+let roundNumber = 1;
+
+/* ---------- storage helpers ---------- */
+async function loadStats(){
+  try{
+    const raw = localStorage.getItem('wordStats');
+    wordStats = raw ? JSON.parse(raw) : {};
+  }catch(e){ wordStats = {}; }
+}
+async function saveStats(){
+  try{ localStorage.setItem('wordStats', JSON.stringify(wordStats)); }catch(e){}
+}
+
+/* ---------- preferences persistence (niveluri, directie, mod, B2 scope/teme) ---------- */
+function savePreferences(){
+  try{
+    const prefs = {
+      levels: Array.from(selectedLevels),
+      direction: selectedDirection,
+      mode: practiceMode
+    };
+    localStorage.setItem('prefs', JSON.stringify(prefs));
+  }catch(e){}
+}
+
+function loadPreferences(){
+  try{
+    const raw = localStorage.getItem('prefs');
+    if(!raw) return;
+    const prefs = JSON.parse(raw);
+    if(Array.isArray(prefs.levels) && prefs.levels.length){
+      selectedLevels = new Set(prefs.levels);
+      document.querySelectorAll('.level-chip').forEach(chip=>{
+        chip.classList.toggle('active', selectedLevels.has(chip.dataset.level));
+      });
+    }
+    if(prefs.direction){
+      selectedDirection = prefs.direction;
+      document.querySelectorAll('.direction-chip').forEach(chip=>{
+        chip.classList.toggle('active', chip.dataset.dir === selectedDirection);
+      });
+    }
+    if(prefs.mode){
+      practiceMode = prefs.mode;
+      document.querySelectorAll('.mode-chip').forEach(chip=>{
+        chip.classList.toggle('active', chip.dataset.mode === practiceMode);
+      });
+    }
+  }catch(e){ /* preferinte corupte sau inexistente - pastram valorile implicite */ }
+}
+
+const LEVEL_LABELS = {A1:'A1', A2:'A2', B1:'B1', B2:'B2', EXT:'Suplimentar'};
+const DIRECTION_LABELS = {mixed:'ambele direcții', 'fr-ro':'FR→RO', 'ro-fr':'RO→FR'};
+const MODE_LABELS = {smart:'inteligent', random:'aleator'};
+function updateSummaryLine(){
+  const el = document.getElementById('summaryLine');
+  if(!el) return;
+  const levelsTxt = Array.from(selectedLevels).map(l => LEVEL_LABELS[l] || l).join('+') || '—';
+  let txt = `${levelsTxt} · ${DIRECTION_LABELS[selectedDirection] || selectedDirection} · ${MODE_LABELS[practiceMode] || practiceMode}`;
+  if(customActive) txt += ' · +Custom';
+  el.textContent = txt;
+}
+function recordAnswer(id, correct){
+  if(!wordStats[id]) wordStats[id] = {attempts:0, correct:0};
+  wordStats[id].attempts++;
+  if(correct) wordStats[id].correct++;
+  saveStats();
+}
+
+/* ---------- utils ---------- */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function formatSide(word, side){
+  if(side === 'fr'){
+    const artHtml = word.artikel ? `<span class="art art-${word.artikel}">${word.artikel}</span> ` : '';
+    return { value: word.fr, html: artHtml + escapeHtml(word.fr) };
+  }
+  return { value: word.ro, html: escapeHtml(word.ro) };
+}
+function allWordsById(){
+  const map = {};
+  BUILTIN.forEach(w => map[w.id] = w);
+  customWords.forEach(w => map[w.id] = w);
+  return map;
+}
+function csvEscape(v){
+  const s = String(v == null ? '' : v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+function downloadBlob(content, filename, type){
+  const blob = new Blob([content], {type});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ---------- active pool ---------- */
+function activeWords(){
+  let words = BUILTIN.filter(w => selectedLevels.has(w.level));
+  if(customActive) words = words.concat(customWords);
+  return words;
+}
+
+/* ---------- speech synthesis (pronunție franceză, cu alegere de voce) ---------- */
+let availableVoices = [];
+let selectedVoiceURI = '';
+
+async function loadVoicePref(){
+  try{
+    selectedVoiceURI = localStorage.getItem('voiceURI') || '';
+  }catch(e){ selectedVoiceURI = ''; }
+}
+async function saveVoicePref(uri){
+  try{ localStorage.setItem('voiceURI', uri); }catch(e){}
+}
+
+function populateVoiceList(){
+  if(!('speechSynthesis' in window)) return;
+  const all = window.speechSynthesis.getVoices();
+  availableVoices = all.filter(v => v.lang && v.lang.toLowerCase().startsWith('fr'));
+  const select = document.getElementById('voiceSelect');
+  if(!select) return;
+  if(availableVoices.length === 0){
+    select.innerHTML = '<option value="">Nicio voce franceză găsită pe acest dispozitiv</option>';
+    return;
+  }
+  select.innerHTML = availableVoices.map(v =>
+    `<option value="${v.voiceURI}">${v.name} (${v.lang})${v.localService ? '' : ' · rețea'}</option>`
+  ).join('');
+  // preselecteaza vocea salvata, daca mai exista in lista; altfel prima voce de retea (de obicei mai naturala), altfel prima disponibila
+  const savedExists = availableVoices.some(v => v.voiceURI === selectedVoiceURI);
+  if(savedExists){
+    select.value = selectedVoiceURI;
+  } else {
+    const networkVoice = availableVoices.find(v => !v.localService);
+    selectedVoiceURI = (networkVoice || availableVoices[0]).voiceURI;
+    select.value = selectedVoiceURI;
+    saveVoicePref(selectedVoiceURI);
+  }
+}
+
+function speakFrench(text){
+  try{
+    if(!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel(); // opreste orice rostire anterioara
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'fr-FR';
+    utter.rate = 0.9;
+    const chosen = availableVoices.find(v => v.voiceURI === selectedVoiceURI);
+    if(chosen) utter.voice = chosen;
+    window.speechSynthesis.speak(utter);
+  }catch(e){ /* TTS indisponibil pe acest dispozitiv - esuam silentios */ }
+}
+
+/* ---------- repetitie spatiata: scor de prioritate per cuvant ---------- */
+function priorityWeight(word){
+  const s = wordStats[word.id];
+  if(!s || s.attempts === 0) return 2.2; // cuvinte nevazute inca: prioritate moderata
+  const accuracy = s.correct / s.attempts;
+  // cu cat acuratetea e mai mica, cu atat greutatea creste (mai des in rotatie)
+  return 0.4 + (1 - accuracy) * 4.2;
+}
+// selectie ponderata fara repetitie (Efraimidis-Spirakis weighted sampling)
+function weightedSample(words, n){
+  const keyed = words.map(w => ({ w, key: Math.pow(Math.random(), 1 / priorityWeight(w)) }));
+  keyed.sort((a, b) => b.key - a.key);
+  return keyed.slice(0, n).map(k => k.w);
+}
+
+/* ---------- round building ---------- */
+/* ---------- clasificare gramaticala (pentru distractori de aceeasi categorie) ---------- */
+const FUNCTION_WORDS = new Set([
+  // prepozitii
+  "à","de","en","dans","sur","sous","avec","sans","pour","par","chez","vers","entre","parmi","depuis",
+  "pendant","avant","après","dès","jusque","jusqu'à","contre","selon","malgré","sauf","hors","outre",
+  // conjunctii
+  "et","ou","mais","donc","or","ni","car","que","si","quand","comme","puisque","lorsque","tandis",
+  "quoique","bien","alors","ainsi","cependant","toutefois","néanmoins","pourtant","d'ailleurs",
+  // pronume / determinanti
+  "je","tu","il","elle","on","nous","vous","ils","elles","me","te","se","le","la","les","lui","leur",
+  "moi","toi","soi","mon","ton","son","notre","votre","leur","ce","cet","cette","ces","celui","celle",
+  "ceux","celles","qui","quoi","dont","où","quel","quelle","quels","quelles","chaque","tout","tous",
+  "toute","toutes","quelque","quelques","aucun","aucune","personne","rien","quelqu'un","chacun",
+  // adverbe/particule foarte comune (functionale, nu descriptive)
+  "oui","non","ne","pas","plus","très","aussi","déjà","encore","toujours","jamais","bien","mal",
+  "ici","là","y","en","comment","pourquoi","combien"
+]);
+
+function classifyWord(word){
+  const fr = word.fr.trim();
+  if(word.artikel) return 'noun';
+  if(fr.includes(' ')) return 'phrase'; // expresii/verbe cu particula, locutiuni
+  const lower = fr.toLowerCase();
+  if(FUNCTION_WORDS.has(lower)) return 'function';
+  if(/(er|ir|re|oir)$/.test(lower) && lower.length > 3) return 'verb';
+  return 'other'; // adjective, adverbe, alte cuvinte descriptive
+}
+
+function buildRound(){
+  updateSummaryLine();
+  savePreferences();
+  const words = activeWords();
+  const card = document.getElementById('card');
+  if(words.length < 4){
+    card.innerHTML = `<div class="warning">Selectează mai multe niveluri sau încarcă o listă mai mare<br>(minim 4 cuvinte distincte necesare).</div>`;
+    document.getElementById('nextBtnBottom').classList.remove('show');
+    return;
+  }
+  const size = Math.min(roundSize, words.length);
+  pool = practiceMode === 'smart' ? weightedSample(words, size) : shuffle(words).slice(0, size);
+
+  roundQuestions = pool.map(word => {
+    let frToRo;
+    if(selectedDirection === 'fr-ro') frToRo = true;
+    else if(selectedDirection === 'ro-fr') frToRo = false;
+    else frToRo = Math.random() < 0.5;
+
+    const promptSide = frToRo ? 'fr' : 'ro';
+    const answerSide = frToRo ? 'ro' : 'fr';
+    const prompt = formatSide(word, promptSide);
+    const correct = formatSide(word, answerSide);
+    const others = shuffle(words.filter(w => w.id !== word.id));
+    const wordCategory = classifyWord(word);
+    const sameCategory = others.filter(o => classifyWord(o) === wordCategory);
+    const candidatePools = [sameCategory, others]; // incercam mai intai aceeasi categorie, apoi relaxam
+    const distractors = [];
+    for(const pool2 of candidatePools){
+      for(const o of pool2){
+        const val = formatSide(o, answerSide);
+        if(val.value !== correct.value && !distractors.some(d => d.value === val.value)) distractors.push(val);
+        if(distractors.length === 3) break;
+      }
+      if(distractors.length === 3) break;
+    }
+    const options = shuffle([correct, ...distractors]);
+    return {
+      id: word.id, prompt, correct, options, promptSide, answerSide,
+      frenchText: word.fr, // textul francez ramane word.fr indiferent de directie
+      direction: frToRo ? 'FR → RO' : 'RO → FR'
+    };
+  });
+  currentIndex = 0;
+  document.getElementById('roundNo').textContent = roundNumber;
+  renderQuestion();
+}
+
+function reversoUrl(text){
+  const clean = text.split(',')[0].split('(')[0].split('/')[0].trim();
+  return 'https://dictionary.reverso.net/french-romanian/' + encodeURIComponent(clean);
+}
+
+function renderQuestion(){
+  const q = roundQuestions[currentIndex];
+  const letters = ['a','b','c','d'];
+  const card = document.getElementById('card');
+  const promptSpeaker = q.promptSide === 'fr'
+    ? `<button class="speak-btn" id="speakPrompt" aria-label="Ascultă">🔊</button>
+       <a class="speak-btn" href="${reversoUrl(q.prompt.value)}" target="_blank" rel="noopener" aria-label="Reverso">📖</a>` : '';
+  card.innerHTML = `
+    <div class="tag-row">
+      <span class="tag direction-tag">${q.direction}</span>
+      <span class="tag">${currentIndex+1}/${roundQuestions.length}</span>
+      <button class="skip-btn" id="skipBtn">Sari →</button>
+    </div>
+    <div class="prompt-label">Traduce</div>
+    <div class="prompt-row">
+      <div class="prompt-word">${q.prompt.html}</div>
+      ${promptSpeaker}
+    </div>
+    <div class="options" id="options">
+      ${q.options.map((opt,i)=>`<button class="opt" data-value="${encodeURIComponent(opt.value)}"><span class="letter">${letters[i]})</span> <span>${opt.html}</span></button>`).join("")}
+    </div>
+    <div class="stamp" id="stamp"></div>
+  `;
+  document.getElementById('progressFill').style.width = ((currentIndex)/roundQuestions.length)*100 + '%';
+  document.getElementById('nextBtnBottom').classList.remove('show');
+  document.querySelectorAll('.opt').forEach(btn => btn.addEventListener('click', () => handleAnswer(btn, q)));
+  document.getElementById('skipBtn').addEventListener('click', nextQuestion);
+  if(q.promptSide === 'fr'){
+    document.getElementById('speakPrompt').addEventListener('click', () => speakFrench(q.prompt.value));
+  }
+}
+
+function handleAnswer(btn, q){
+  const chosen = decodeURIComponent(btn.dataset.value);
+  const isCorrect = chosen === q.correct.value;
+  sessionTotal++; if(isCorrect) sessionScore++;
+  document.getElementById('sessionScore').textContent = sessionScore;
+  document.getElementById('sessionTotal').textContent = sessionTotal;
+  recordAnswer(q.id, isCorrect);
+  document.getElementById('skipBtn').style.display = 'none';
+
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled = true;
+    const val = decodeURIComponent(b.dataset.value);
+    if(val === q.correct.value){
+      b.classList.add('correct');
+      if(q.answerSide === 'fr'){
+        const speakSpan = document.createElement('button');
+        speakSpan.className = 'speak-btn inline';
+        speakSpan.setAttribute('aria-label', 'Ascultă');
+        speakSpan.textContent = '🔊';
+        speakSpan.addEventListener('click', (ev) => { ev.stopPropagation(); speakFrench(q.correct.value); });
+        b.appendChild(speakSpan);
+
+        const dictLink = document.createElement('a');
+        dictLink.className = 'speak-btn inline';
+        dictLink.href = reversoUrl(q.correct.value);
+        dictLink.target = '_blank'; dictLink.rel = 'noopener';
+        dictLink.setAttribute('aria-label', 'Reverso');
+        dictLink.textContent = '📖';
+        dictLink.addEventListener('click', (ev) => ev.stopPropagation());
+        b.appendChild(dictLink);
+      }
+    }
+    if(b === btn && !isCorrect) b.classList.add('wrong');
+  });
+
+  const stamp = document.getElementById('stamp');
+  stamp.textContent = isCorrect ? 'CORRECT !' : 'GREȘIT';
+  stamp.classList.add(isCorrect ? 'ok' : 'no');
+  requestAnimationFrame(()=> stamp.classList.add('show'));
+  document.getElementById('nextBtnBottom').classList.add('show');
+}
+
+function nextQuestion(){
+  if(currentIndex < roundQuestions.length - 1){ currentIndex++; renderQuestion(); }
+  else showEndScreen();
+}
+document.getElementById('nextBtnBottom').addEventListener('click', nextQuestion);
+
+function showEndScreen(){
+  const card = document.getElementById('card');
+  const pct = sessionTotal ? Math.round((sessionScore/sessionTotal)*100) : 0;
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="stamp-final">RUNDĂ TERMINATĂ</div>
+      <div class="score-big">${sessionScore} / ${sessionTotal}</div>
+      <div class="score-sub">scor total pe sesiune · ${pct}% corecte</div>
+      <button class="restart-btn" id="restartBtn">Rundă nouă →</button>
+      <div class="signature">— für Symo ♥</div>
+    </div>`;
+  document.getElementById('nextBtnBottom').classList.remove('show');
+  document.getElementById('restartBtn').addEventListener('click', ()=>{ roundNumber++; buildRound(); });
+}
+
+/* ---------- bottom sheet open/close ---------- */
+const sheet = document.getElementById('settingsSheet');
+const sheetOverlay = document.getElementById('sheetOverlay');
+function openSheet(){ sheet.classList.add('show'); sheetOverlay.classList.add('show'); }
+function closeSheet(){ sheet.classList.remove('show'); sheetOverlay.classList.remove('show'); }
+document.getElementById('openSheetBtn').addEventListener('click', openSheet);
+document.getElementById('closeSheetBtn').addEventListener('click', closeSheet);
+sheetOverlay.addEventListener('click', closeSheet);
+
+/* ---------- level chips ---------- */
+document.querySelectorAll('.level-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    const lvl = chip.dataset.level;
+    if(selectedLevels.has(lvl)){
+      if(selectedLevels.size === 1 && !customActive) return;
+      selectedLevels.delete(lvl); chip.classList.remove('active');
+    } else {
+      selectedLevels.add(lvl); chip.classList.add('active');
+    }
+    roundNumber = 1;
+    buildRound();
+  });
+});
+
+const customChip = document.getElementById('customChip');
+customChip.addEventListener('click', ()=>{
+  if(customWords.length === 0) return;
+  customActive = !customActive;
+  customChip.classList.toggle('active', customActive);
+  roundNumber = 1;
+  buildRound();
+});
+
+/* ---------- direction chips (single-select) ---------- */
+document.querySelectorAll('.direction-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('.direction-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    selectedDirection = chip.dataset.dir;
+    roundNumber = 1;
+    buildRound();
+  });
+});
+
+/* ---------- practice mode chips (single-select) ---------- */
+document.querySelectorAll('.mode-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('.mode-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    practiceMode = chip.dataset.mode;
+    roundNumber = 1;
+    buildRound();
+  });
+});
+
+/* ---------- file upload ---------- */
+document.getElementById('uploadBtn').addEventListener('click', ()=> document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', handleFile);
+
+function normalizeHeader(h){
+  return String(h||'').trim().toLowerCase()
+    .replace('romană','romana').replace('română','romana').replace('nivel','nivel');
+}
+
+function parseRowsToWords(rows){
+  if(!rows.length) throw new Error('Fișierul este gol.');
+  const header = rows[0].map(normalizeHeader);
+  const idxId = header.indexOf('id');
+  const idxFr = header.findIndex(h => h==='french' || h==='franceza' || h==='franceză');
+  const idxRo = header.findIndex(h => h==='romana');
+  const idxArt = header.indexOf('artikel');
+  const idxLevel = header.indexOf('nivel');
+  if(idxFr === -1 || idxRo === -1) throw new Error('Lipsesc coloanele obligatorii "french" și/sau "romana".');
+
+  const words = [];
+  for(let i=1;i<rows.length;i++){
+    const row = rows[i];
+    if(!row || row.every(c => String(c||'').trim()==='')) continue;
+    const fr = String(row[idxFr]||'').trim();
+    const ro = String(row[idxRo]||'').trim();
+    if(!fr || !ro) continue;
+    let artikel = idxArt !== -1 ? String(row[idxArt]||'').trim().toLowerCase() : '';
+    if(artikel && !['le','la'].includes(artikel)){
+      throw new Error(`Rândul ${i+1}: articol necunoscut "${artikel}".`);
+    }
+    const id = idxId !== -1 && row[idxId] ? String(row[idxId]).trim() : `C-${String(words.length+1).padStart(3,'0')}`;
+    words.push({id, fr, ro, artikel, level:'Custom'});
+  }
+  if(words.length < 4) throw new Error('Fișierul trebuie să conțină cel puțin 4 cuvinte valide.');
+  return words;
+}
+
+function parseDelimited(text, delimiter){
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){ if(text[i+1] === '"'){ field += '"'; i++; } else inQuotes = false; }
+      else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === delimiter){ row.push(field); field=''; }
+      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else if(c === '\r'){ }
+      else field += c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.length && !(r.length===1 && r[0]===''));
+}
+
+function handleFile(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const status = document.getElementById('uploadStatus');
+  status.textContent = 'Se încarcă...'; status.className = 'upload-status';
+  const name = file.name.toLowerCase();
+
+  const finish = (words) => {
+    customWords = words;
+    customActive = true;
+    customChip.style.opacity = '1';
+    customChip.textContent = `Custom (${words.length})`;
+    customChip.classList.add('active');
+    status.textContent = `✓ ${words.length} cuvinte încărcate din "${file.name}".`;
+    status.className = 'upload-status ok';
+    roundNumber = 1;
+    buildRound();
+  };
+  const fail = (err) => { status.textContent = `Eroare: ${err.message}`; status.className = 'upload-status err'; };
+
+  if(name.endsWith('.xlsx') || name.endsWith('.xls')){
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      try{
+        const data = new Uint8Array(ev.target.result);
+        const wb = XLSX.read(data, {type:'array'});
+        const sheet2 = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet2, {header:1});
+        finish(parseRowsToWords(rows));
+      }catch(err){ fail(err); }
+    };
+    reader.onerror = ()=> fail(new Error('Nu s-a putut citi fișierul.'));
+    reader.readAsArrayBuffer(file);
+  } else {
+    const delimiter = name.endsWith('.tsv') ? '\t' : ',';
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      try{ finish(parseRowsToWords(parseDelimited(ev.target.result, delimiter))); }
+      catch(err){ fail(err); }
+    };
+    reader.onerror = ()=> fail(new Error('Nu s-a putut citi fișierul.'));
+    reader.readAsText(file, 'UTF-8');
+  }
+}
+
+/* ---------- template & exports ---------- */
+document.getElementById('templateBtn').addEventListener('click', ()=>{
+  const content = 'id,french,romana,artikel,nivel\n'
+    + 'M-001,table,masă,la,A1\n' + 'M-002,manger,a mânca,,A1\n'
+    + 'M-003,lait,lapte,le,A1\n' + 'M-004,maison,casă,la,A1\n';
+  downloadBlob(content, 'template-vocabular.csv', 'text/csv;charset=utf-8');
+});
+
+document.getElementById('exportWordsBtn').addEventListener('click', ()=>{
+  const words = activeWords();
+  if(!words.length) return;
+  let content = 'id,french,romana,artikel,nivel\n';
+  words.forEach(w => { content += [w.id, w.fr, w.ro, w.artikel, w.level].map(csvEscape).join(',') + '\n'; });
+  downloadBlob(content, 'cuvinte-selectie.csv', 'text/csv;charset=utf-8');
+});
+
+document.getElementById('exportStatsBtn').addEventListener('click', ()=>{
+  const map = allWordsById();
+  const ids = Object.keys(wordStats);
+  if(!ids.length){ alert('Nu există încă statistici — răspunde la câteva întrebări mai întâi.'); return; }
+  let content = 'id,french,romana,incercari,corecte,procent\n';
+  ids.forEach(id=>{
+    const w = map[id]; const s = wordStats[id];
+    const pct = s.attempts ? Math.round((s.correct/s.attempts)*100) : 0;
+    content += [id, w?w.fr:'', w?w.ro:'', s.attempts, s.correct, pct+'%'].map(csvEscape).join(',') + '\n';
+  });
+  downloadBlob(content, 'statistici-vocabular.csv', 'text/csv;charset=utf-8');
+});
+
+/* ---------- init ---------- */
+(async function init(){
+  await loadStats();
+  await loadVoicePref();
+  loadPreferences();
+  buildRound();
+})();
+
+/* ---------- voice picker wiring ---------- */
+if('speechSynthesis' in window){
+  populateVoiceList();
+  // vocile se incarca adesea asincron pe Android/Chrome
+  window.speechSynthesis.onvoiceschanged = populateVoiceList;
+}
+const voiceSelect = document.getElementById('voiceSelect');
+if(voiceSelect){
+  voiceSelect.addEventListener('change', () => {
+    selectedVoiceURI = voiceSelect.value;
+    saveVoicePref(selectedVoiceURI);
+  });
+}
+const testVoiceBtn = document.getElementById('testVoiceBtn');
+if(testVoiceBtn){
+  testVoiceBtn.addEventListener('click', () => speakFrench('table'));
+}
+
+/* ---------- service worker registration (enables offline + installability) ---------- */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* offline install still works without SW */ });
+  });
+}
+</script>
+
+</body>
+</html>
