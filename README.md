@@ -13,7 +13,7 @@ Aplicație de exersat vocabular francez-român, sub formă de PWA (Progressive W
 ## Funcționalități
 
 - Traducere franceză ⇄ română, grilă cu 4 variante de răspuns, cu distractori din aceeași categorie gramaticală (substantiv/verb/expresie/cuvânt funcțional)
-- Niveluri selectabile A1–B2 + Suplimentar, combinabile între ele
+- Niveluri selectabile A1–B2, combinabile între ele
 - Selector de direcție: FR→RO, RO→FR, sau ambele amestecat
 - Mod de exersare "inteligent" (repetiție spațiată bazată pe istoricul de răspunsuri) sau complet aleator
 - Pronunție audio a cuvintelor franceze (Web Speech API), cu alegere de voce
@@ -37,7 +37,7 @@ Pentru a publica o versiune nouă: încarcă fișierele modificate în acest rep
 
 - **Selecția și nivelizarea cuvintelor A1–B2** sunt construite (în lucru) **integral și independent** din rangul de frecvență reală de utilizare a limbii franceze, pe baza listei [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) (`content/2018/fr/fr_50k.txt`, derivată din corpus OpenSubtitles), licență **MIT**. Cuvintele sunt lematizate (formă de bază + tip gramatical) cu spaCy (`fr_core_news_sm`), verificate manual pentru a elimina nume proprii, forme flexionate duplicate și zgomot din subtitrări, apoi împărțite pe niveluri A1–B2 exclusiv după poziția lor în clasamentul de frecvență. Nicio parte din selecția A1–B2 nu depinde de curriculumul vreunei instituții de examinare.
 - Etichetele CEFR (A1, A2, B1, B2) sunt un standard public, deschis, al Consiliului Europei — nu proprietatea vreunei organizații.
-- Nivelurile A1 (472 cuvinte), A2 (444 cuvinte) și B1 (789 cuvinte) sunt construite din rangul de frecvență (`fr_50k.txt`), lematizate cu spaCy și corectate/verificate manual, cuvânt cu cuvânt, pentru erorile de conjugare neregulată identificate; au fost excluse și nume proprii/personaje din subtitrări (extrem de frecvente la acest interval de rang) și vulgarisme. Nivelul B2 e în lucru, pe aceeași metodologie.
+- Nivelurile A1 (472 cuvinte), A2 (444 cuvinte), B1 (789 cuvinte) și B2 (546 cuvinte) — 2251 de cuvinte în total — sunt construite din rangul de frecvență (`fr_50k.txt`), lematizate cu spaCy și corectate/verificate manual, cuvânt cu cuvânt, pentru erorile de conjugare neregulată identificate; au fost excluse și nume proprii/personaje din subtitrări (extrem de frecvente la rang mare) și vulgarisme. Toate cele 4 niveluri CEFR sunt acum complete.
 - Traducerile în limba română sunt muncă originală.
 - Acest proiect e o resursă personală de studiu, nu revendică nicio afiliere cu hermitdave, Reverso, Anthropic sau alte instituții/persoane menționate.
 
