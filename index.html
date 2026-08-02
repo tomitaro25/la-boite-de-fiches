@@ -239,6 +239,8 @@
       <span class="chip level-chip" data-level="A2">A2</span>
       <span class="chip level-chip" data-level="B1">B1</span>
       <span class="chip level-chip" data-level="B2">B2</span>
+      <span class="chip level-chip" data-level="C1">C1</span>
+      <span class="chip level-chip" data-level="C2">C2</span>
       <span class="chip" id="customChip" data-level="Custom" style="opacity:0.4;">Custom (0)</span>
     </div>
     <div class="upload-status" style="margin-top:8px;">Niveluri A1–B2 pe bază de frecvență reală (nu curriculum instituțional)</div>
@@ -369,7 +371,7 @@ function loadPreferences(){
   }catch(e){ /* preferinte corupte sau inexistente - pastram valorile implicite */ }
 }
 
-const LEVEL_LABELS = {A1:'A1', A2:'A2', B1:'B1', B2:'B2'};
+const LEVEL_LABELS = {A1:'A1', A2:'A2', B1:'B1', B2:'B2', C1:'C1', C2:'C2'};
 const DIRECTION_LABELS = {mixed:'ambele direcții', 'fr-ro':'FR→RO', 'ro-fr':'RO→FR'};
 const MODE_LABELS = {smart:'inteligent', random:'aleator'};
 function updateSummaryLine(){
