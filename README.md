@@ -5,22 +5,28 @@ Aplicație de exersat vocabular francez-român, sub formă de PWA (Progressive W
 ## Ce conține
 
 - `index.html` — aplicația
-- `vocab-data.js` — baza de vocabular (3543 cuvinte, niveluri A1-C2 complete, verificate manual)
+- `vocab-data.js` — baza de vocabular (3541 cuvinte, niveluri A1-C2 complete, verificate manual, resortate după rangul real de frecvență)
 - `manifest.json` — configurare PWA (nume, iconițe, mod de afișare)
 - `sw.js` — service worker (funcționare offline)
-- `icon-192.png`, `icon-512.png` — iconițele aplicației (aceeași temă vizuală ca Karteikarten DE-RO, cu bandă adezivă albastru-petrol în loc de auriu, ca semn distinctiv de serie)
+- `icon-192.png`, `icon-512.png` — iconițele aplicației (aceeași temă vizuală și aceleași proporții ca Karteikarten DE-RO, cu banda adezivă tricoloră — albastru-alb-roșu, benzi verticale ca steagul francez — în loc de banda solidă a variantei germane, ca semn distinctiv de serie)
 
 ## Funcționalități
 
 - Traducere franceză ⇄ română, grilă cu 4 variante de răspuns, cu distractori din aceeași categorie gramaticală (substantiv/verb/expresie/cuvânt funcțional)
-- Niveluri selectabile A1–C2, combinabile între ele
+- Niveluri selectabile A1–C2, combinabile între ele, plus **Cuvintele mele** (listă proprie), **Antonime & Sinonime** și **Conjugare verbe** — module noi, exclusiv franceze
+- Sistem de priorități pe bază de streak (răspunsuri corecte consecutive) și stelute vizuale (aurii/verzi/roșii cu „iertare" după 3 reușite) — la A1-B2, cuvintele noi apar în ordinea reală de frecvență, pe benzi de 200
+- **Cuvintele mele** — listă personală, cu adăugare din căutare (lipire din clipboard, evidențiată vizual, cu curățare automată a textului copiat din Reverso), suprascriere cu păstrarea progresului acumulat
+- **Antonime & Sinonime** — 136 perechi antonime + 46 perechi sinonime, verificate manual, exclusiv în franceză
+- **Conjugare verbe** — 136 verbe, présent + passé composé, cu reguli être/avoir corecte (inclusiv verbe reflexive) și acord de număr la participiu
+- **🤖 AI (Claude)** — traducere liberă cu propria cheie API, dictare vocală, imagine cu text (galerie/clipboard), export text/PDF — opțional, experimental
 - Selector de direcție: FR→RO, RO→FR, sau ambele amestecat
-- Mod de exersare "inteligent" (repetiție spațiată bazată pe istoricul de răspunsuri) sau complet aleator
 - Pronunție audio a cuvintelor franceze (Web Speech API), cu alegere de voce
 - Link direct către Reverso (`dictionary.reverso.net/french-romanian`) pentru fiecare cuvânt francez, ca sursă suplimentară (dict.cc nu are pereche franceză-română directă)
 - Buton "Sari peste" pentru a trece la următorul cuvânt fără să conteze ca greșeală
+- Căutare vocală (cu recunoaștere a elidării franceze: „l'ami" → „ami")
 - Încărcare de liste proprii de vocabular (CSV, TSV sau XLSX)
-- Export al listei curente și al statisticilor, ca fișiere CSV
+- Export al listei curente, statisticilor, și „Cuvintelor mele", ca fișiere CSV
+- Backup complet (progres + preferințe) exportabil/importabil ca fișier .json
 - Preferințele (niveluri, direcție, mod) și statisticile se salvează local, în browser, per dispozitiv
 
 ## Instalare pe telefon
@@ -37,14 +43,14 @@ Pentru a publica o versiune nouă: încarcă fișierele modificate în acest rep
 
 - **Selecția și nivelizarea cuvintelor** sunt construite **integral și independent** din rangul de frecvență reală de utilizare a limbii franceze, pe baza listei [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) (`content/2018/fr/fr_50k.txt`, derivată din corpus OpenSubtitles), licență **MIT**. Cuvintele sunt lematizate (formă de bază + tip gramatical) cu spaCy (`fr_core_news_sm`), verificate manual pentru a elimina nume proprii, forme flexionate duplicate și zgomot din subtitrări, apoi împărțite pe niveluri A1–C2 după poziția lor în clasamentul de frecvență. Nicio parte din selecție nu depinde de curriculumul vreunei instituții de examinare.
 - Etichetele CEFR (A1, A2, B1, B2, C1, C2) sunt un standard public, deschis, al Consiliului Europei — nu proprietatea vreunei organizații.
-- Toate cele 6 niveluri sunt complete: A1 (519), A2 (477), B1 (763), B2 (538), C1 (342), C2 (904) — **3543 de cuvinte în total**. La rang mare (C1/C2), frecvența e un indiciu mai slab pentru dificultate reală, iar corpusul conține un procent mult mai mare de nume proprii/personaje din subtitrări (sute excluse manual) și cuvinte vulgare.
+- Toate cele 6 niveluri sunt complete: A1 (519), A2 (477), B1 (763), B2 (538), C1 (342), C2 (902) — **3541 de cuvinte în total**. La rang mare (C1/C2), frecvența e un indiciu mai slab pentru dificultate reală, iar corpusul conține un procent mult mai mare de nume proprii/personaje din subtitrări (sute excluse manual) și cuvinte vulgare. Ordinea din interiorul fiecărui nivel reflectă rangul real de frecvență (esențial pentru sistemul de benzi/priorități) — verificată și resortată integral.
 - **Corecție manuală suplimentară de nivel**: cuvinte foarte banale (numerele de bază 1-90, culori de bază, animale/mâncare/corp comune) au fost mutate la nivelul CEFR corespunzător chiar și acolo unde frecvența lor brută în corpus le-ar fi plasat mai sus — subtitrările nu numără sau colorează la fel de des cum vorbesc despre alte teme. Exemplu concret: numerele de bază (`un`, `deux`, `trois`...) lipseau aproape complet din selecția inițială, pentru că extragerea automată exclude categoria gramaticală „numeral" alături de cifre/simboluri — corectat manual.
 - Traducerile în limba română sunt muncă originală.
 - Acest proiect e o resursă personală de studiu, nu revendică nicio afiliere cu hermitdave, Reverso, Anthropic sau alte instituții/persoane menționate.
 
 ## Confidențialitate
 
-Aplicația nu colectează, nu transmite și nu stochează nicio dată pe niciun server. Tot ce ține de progres (statistici, preferințe) rămâne local, în browser-ul dispozitivului tău. Singurele conexiuni externe sunt: Google Fonts (fonturi), Reverso (doar dacă apeși linkul respectiv) și motorul de sinteză vocală al telefonului.
+Aplicația nu colectează, nu transmite și nu stochează nicio dată pe niciun server propriu. Tot ce ține de progres (statistici, preferințe, „Cuvintele mele") rămâne local, în browser-ul dispozitivului tău. Conexiuni externe: Google Fonts (fonturi), Reverso (doar dacă apeși linkul respectiv), motorul de sinteză vocală al telefonului, motorul de recunoaștere vocală al browserului (dacă folosești căutarea/dictarea vocală — trimite sunetul către serverele browserului, ex. Google pentru Chrome, ca să fie transformat în text), și — doar dacă activezi opțional funcția AI (Claude) și adaugi propria cheie API — serverele Anthropic, pentru traducerile cerute explicit. Cheia API rămâne salvată doar local, nu trece niciodată prin noi.
 
 ## Licență
 
