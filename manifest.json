@@ -1,7 +1,7 @@
 {
   "name": "La Boîte de Fiches — Français ⇄ Română",
   "short_name": "Boîte de Fiches",
-  "description": "Flashcards pentru vocabular francez-român, niveluri A1-B2, cu liste proprii încărcabile.",
+  "description": "Flashcards pentru vocabular francez-român, niveluri A1-C2, cu liste proprii încărcabile.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -22,13 +22,13 @@
       "purpose": "any"
     },
     {
-      "src": "icon-192.png",
+      "src": "icon-192-maskable.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
