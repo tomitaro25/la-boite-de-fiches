@@ -18,7 +18,7 @@ Aplicație de exersat vocabular francez-român, sub formă de PWA (Progressive W
 - **Cuvintele mele** — listă personală, cu adăugare din căutare (lipire din clipboard, evidențiată vizual, cu curățare automată a textului copiat din Reverso), suprascriere cu păstrarea progresului acumulat
 - **Antonime & Sinonime** — 136 perechi antonime + 46 perechi sinonime, verificate manual, exclusiv în franceză
 - **Conjugare verbe** — 136 verbe, présent + passé composé, cu reguli être/avoir corecte (inclusiv verbe reflexive) și acord de număr la participiu
-- **🤖 AI (Claude)** — traducere liberă cu propria cheie API, dictare vocală, imagine cu text (galerie/clipboard), export text/PDF — opțional, experimental
+- **🤖 AI (Claude)** — două funcții comutabile dintr-un toggle: **Traducere** liberă (RO⇄FR, cu propria cheie API), acum într-un **pipeline în doi pași** — un agent alege traducerea optimă, apoi un al doilea, specializat strict pe gramatică/ortografie/punctuație/topică, o revizuiește tehnic înainte de afișare (fără să schimbe alegerea de traducere) — și **Corectură franceză** (agent separat, dedicat exclusiv identificării și corectării greșelilor dintr-un text scris de tine, cu explicații în română pentru fiecare greșeală găsită); ambele cu dictare vocală, imagine cu text (galerie/clipboard), export text/PDF — opțional, experimental
 - Selector de direcție: FR→RO, RO→FR, sau ambele amestecat
 - Pronunție audio a cuvintelor franceze (Web Speech API), cu alegere de voce
 - Link direct către Reverso (`dictionary.reverso.net/french-romanian`) pentru fiecare cuvânt francez, ca sursă suplimentară (dict.cc nu are pereche franceză-română directă)
