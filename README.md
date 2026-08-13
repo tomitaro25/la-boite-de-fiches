@@ -41,6 +41,8 @@ Pentru a publica o versiune nouă: încarcă fișierele modificate în acest rep
 
 ## Changelog
 
+**v19** — corecție de gramatică română: eticheta implicită de pe cardurile modului obișnuit de traducere era „Traduce" (fără sens gramatical clar ca instrucțiune) — corectată la „Tradu" (imperativ informal singular), consecvent cu tonul „tu" folosit peste tot în restul aplicației (texte de ajutor, mesaje). Etichetele proprii de la Antonime/Sinonime/Conjugare rămân neschimbate.
+
 **v18** — completare la fix-ul de la v17 (separarea `localStorage`): restaurarea unui backup **vechi** (exportat înainte de prefixare) nu mai afișează fals „Backup restaurat" fără să restaureze de fapt nimic (fiindcă niciuna dintre cheile vechi nu se mai potrivea cu `BACKUP_KEYS`, actualizat la cele prefixate) — acum verifică explicit dacă există cel puțin o cheie compatibilă în fișier înainte de a cere confirmare; dacă nu găsește niciuna, oprește procesul cu un mesaj clar, fără să reîncarce aplicația.
 
 **v17** — trei corecții găsite în timp ce lucram la aplicația soră de greacă (arhitectură identică):
