@@ -39,6 +39,13 @@ Aplicație de exersat vocabular francez-român, sub formă de PWA (Progressive W
 
 Pentru a publica o versiune nouă: încarcă fișierele modificate în acest repository (Add file → Upload files → Commit), GitHub Pages redeploy-ează automat în 1-2 minute. Aplicația instalată pe telefon preia schimbările la următoarea deschidere.
 
+## Changelog
+
+**v17** — trei corecții găsite în timp ce lucram la aplicația soră de greacă (arhitectură identică):
+1. **Amestec de date între aplicații** — toate cele 9 chei `localStorage` folosite (`wordStats`, `prefs`, `mistakeIds`, `myWords`, `voiceURI`, `installBannerDismissed`, `streak`, `fontZoom`, `claudeApiKey`) au fost prefixate cu `boitedefiches_`, inclusiv în `BACKUP_KEYS` — altfel, fiindcă toate aplicațiile-soră (germană, franceză, greacă) sunt găzduite pe același domeniu GitHub Pages, `localStorage` fiind izolat per domeniu (nu per aplicație), își suprascriau reciproc progresul. Notă: progresul salvat anterior rămâne sub cheile vechi, necitit după acest update — aplicația pornește curat.
+2. **Zoom-ul de bază (A−/A+) rămâne mereu vizibil** pe ecrane înguste — doar procentul și butonul de resetare se ascund sub ~420px lățime.
+3. **Layout topbar mobil** — numele aplicației se trunchiază cu „..." dacă nu încape, în loc să împingă butonul de Setări pe un rând nou; grupul din dreapta (căutare vocală/AI/setări) rămâne compact, pe același rând.
+
 ## Surse și atribuiri
 
 - **Selecția și nivelizarea cuvintelor** sunt construite **integral și independent** din rangul de frecvență reală de utilizare a limbii franceze, pe baza listei [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) (`content/2018/fr/fr_50k.txt`, derivată din corpus OpenSubtitles), licență **MIT**. Cuvintele sunt lematizate (formă de bază + tip gramatical) cu spaCy (`fr_core_news_sm`), verificate manual pentru a elimina nume proprii, forme flexionate duplicate și zgomot din subtitrări, apoi împărțite pe niveluri A1–C2 după poziția lor în clasamentul de frecvență. Nicio parte din selecție nu depinde de curriculumul vreunei instituții de examinare.
