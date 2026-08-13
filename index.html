@@ -1765,6 +1765,11 @@ document.getElementById('backupFileInput').addEventListener('change', (e)=>{
         status.textContent = 'Fișierul nu pare un backup valid La Boîte de Fiches.';
         return;
       }
+      const hasAnyCurrentKey = BACKUP_KEYS.some(key => parsed.data[key] !== undefined);
+      if(!hasAnyCurrentKey){
+        status.textContent = 'Acest backup e dintr-o versiune veche (dinainte de separarea datelor între aplicații) și nu mai e compatibil — ar putea conține date amestecate. Nu a fost restaurat nimic.';
+        return;
+      }
       const confirmMsg = `Restaurezi backup din ${parsed._exportedAt ? parsed._exportedAt.slice(0,10) : 'dată necunoscută'}? Progresul curent va fi suprascris.`;
       if(!confirm(confirmMsg)) return;
       BACKUP_KEYS.forEach(key=>{

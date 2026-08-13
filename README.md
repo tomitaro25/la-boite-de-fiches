@@ -41,6 +41,8 @@ Pentru a publica o versiune nouă: încarcă fișierele modificate în acest rep
 
 ## Changelog
 
+**v18** — completare la fix-ul de la v17 (separarea `localStorage`): restaurarea unui backup **vechi** (exportat înainte de prefixare) nu mai afișează fals „Backup restaurat" fără să restaureze de fapt nimic (fiindcă niciuna dintre cheile vechi nu se mai potrivea cu `BACKUP_KEYS`, actualizat la cele prefixate) — acum verifică explicit dacă există cel puțin o cheie compatibilă în fișier înainte de a cere confirmare; dacă nu găsește niciuna, oprește procesul cu un mesaj clar, fără să reîncarce aplicația.
+
 **v17** — trei corecții găsite în timp ce lucram la aplicația soră de greacă (arhitectură identică):
 1. **Amestec de date între aplicații** — toate cele 9 chei `localStorage` folosite (`wordStats`, `prefs`, `mistakeIds`, `myWords`, `voiceURI`, `installBannerDismissed`, `streak`, `fontZoom`, `claudeApiKey`) au fost prefixate cu `boitedefiches_`, inclusiv în `BACKUP_KEYS` — altfel, fiindcă toate aplicațiile-soră (germană, franceză, greacă) sunt găzduite pe același domeniu GitHub Pages, `localStorage` fiind izolat per domeniu (nu per aplicație), își suprascriau reciproc progresul. Notă: progresul salvat anterior rămâne sub cheile vechi, necitit după acest update — aplicația pornește curat.
 2. **Zoom-ul de bază (A−/A+) rămâne mereu vizibil** pe ecrane înguste — doar procentul și butonul de resetare se ascund sub ~420px lățime.
