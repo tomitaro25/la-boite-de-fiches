@@ -17,7 +17,7 @@ Aplicație de exersat vocabular francez-român, sub formă de PWA (Progressive W
 - Sistem de priorități pe bază de streak (răspunsuri corecte consecutive) și stelute vizuale (aurii/verzi/roșii cu „iertare" după 3 reușite) — la A1-B2, cuvintele noi apar în ordinea reală de frecvență, pe benzi de 200
 - **Cuvintele mele** — listă personală, cu adăugare din căutare (lipire din clipboard, evidențiată vizual, cu curățare automată a textului copiat din Reverso), suprascriere cu păstrarea progresului acumulat
 - **Antonime & Sinonime** — 136 perechi antonime + 46 perechi sinonime, verificate manual, exclusiv în franceză
-- **Conjugare verbe** — 136 verbe, présent + passé composé, cu reguli être/avoir corecte (inclusiv verbe reflexive) și acord de număr la participiu
+- **Conjugare verbe** — 100 dintre cele mai frecvente verbe franceze, la présent, imparfait, futur simple, passé composé și plus-que-parfait, cu reguli être/avoir corecte (inclusiv verbe reflexive) și acord de număr la participiu
 - **🤖 AI (Claude)** — panou organizat ca hub, cu 3 destinații (opțional, experimental):
   - **Traducere & Corectură** — Traducere liberă (RO⇄FR, cu propria cheie API) într-un **pipeline în doi pași** (un agent alege traducerea optimă, altul, specializat strict pe gramatică/ortografie/punctuație/topică, o revizuiește tehnic) și **Corectură franceză** (agent separat, dedicat identificării/corectării greșelilor dintr-un text scris de tine, cu explicații în română); ambele cu dictare vocală, imagine cu text (galerie/clipboard), export text/PDF
   - **📝 Exersează ce ai învățat** — text generat de Claude, STRICT din vocabularul deja exersat cu succes (prag: minim 2 răspunsuri corecte per cuvânt), pe o temă la alegere, cu traducere ascunsă până o ceri și loc pentru propria încercare înainte
@@ -43,6 +43,19 @@ Aplicație de exersat vocabular francez-român, sub formă de PWA (Progressive W
 Pentru a publica o versiune nouă: încarcă fișierele modificate în acest repository (Add file → Upload files → Commit), GitHub Pages redeploy-ează automat în 1-2 minute. Aplicația instalată pe telefon preia schimbările la următoarea deschidere.
 
 ## Changelog
+
+**v23** — corecție de calitate a traducerii, găsită prin testare pe text real (articol Le Monde): „une aide" era tradus greșit „o ajutoare" (formă de plural, articulată greșit la singular — corect: „un ajutor"). Nu era doar o greșeală izolată, ci un gol real în pipeline-ul de doi agenți:
+1. **Promptul de traducere** (agentul 1) — adăugată o regulă explicită despre acordul gen/număr al substantivelor românești alese, cu exemplul concret „o ajutoare"→„un ajutor" (regulile abstracte nu sunt suficiente pentru un model mic ca Haiku — are nevoie de exemplu concret, negativ+pozitiv, aceeași lecție aplicată deja la cratime).
+2. **Promptul de revizuire gramaticală** (agentul 2) — menționa doar acorduri adjectiv-substantiv/participiu-subiect, dar **omitea explicit acordul articol-substantiv** (exact cazul „o ajutoare"); plus, formularea „NU înlocuiești cuvinte" risca să fie interpretată prea larg, tratând o formă greșită ca pe o alegere deliberată de netins. Clarificat explicit: corectarea formei (gen/număr) unui cuvânt deja ales nu e „înlocuire de cuvânt".
+3. **Plasă de siguranță întărită** — verificarea că rezultatul revizuit e valid controla doar dacă mai are etichete `[FR]/[RO]`, nu și dacă numărul de perechi s-a păstrat; la texte lungi, multi-paragraf, o pierdere/contopire silențioasă de conținut la pasul 2 ar fi trecut neobservată. Acum se compară explicit numărul de perechi înainte/după revizuire — dacă nu se potrivește, se păstrează traducerea nerevizuită (mai sigură decât una scurtată).
+4. Notă onestă adăugată în textul de ajutor despre limitele reale ale modelului Haiku (cel mai ieftin) pe texte lungi/complexe.
+
+**v22** — 3 timpuri noi la modulul „Conjugare verbe": imparfait, plus-que-parfait, futur simple (pe lângă présent și passé composé, existente deja). Lista de verbe redusă de la 136 la **100, cele mai frecvente** (după rangul real din `fr_50k.txt`), ca extinderea la 5 timpuri să nu se piardă în cazuri rare.
+- **Imparfait** — derivat algoritmic (rădăcina de la „nous" prezent minus „-ons"), cu excepția reală unică din toată limba (être) și 3 excepții tehnice de ortografie (manger/changer/commencer, unde nous/vous pierd „e"/„ç"-ul suplimentar).
+- **Futur simple** — regulă generală (infinitiv, cu -re care pierde „e" final) + tabel de rădăcini neregulate pentru ~15 verbe frecvente (être→ser-, aller→ir-, faire→fer-, venir→viendr- etc.), inclusiv dublarea de consoană la appeler (appellerai) și mourir (mourrai).
+- **Plus-que-parfait** — auxiliarul la imperfect + același participiu/acord de la passé composé, fără date noi, doar reutilizare de cod.
+- **Bug real găsit la testare**: elidarea reflexivă (m'/t'/s' vs. me/te/se) era calculată static, presupunând doar formele de prezent ale lui être (unde doar „es"/„est" încep cu vocală) — la plus-que-parfait, auxiliarul e la imperfect, unde TOATE cele 6 forme (étais/était/étions...) încep cu vocală, deci toate persoanele reflexive au nevoie de elidare, nu doar 2. Corectat: elidarea se calculează acum dinamic, după prima literă a formei reale de auxiliar folosite, nu dintr-un tabel fix.
+- **Testat exhaustiv**: toate cele 3000 de întrebări posibile (100 verbe × 6 persoane × 5 timpuri) au exact 4 opțiuni unice; verificare suplimentară, automată, că nu mai există nicio formă reflexivă neelidată greșit, nicăieri.
 
 **v21** — verificare de audit după v20 (fără funcționalitate nouă, doar corecții de precizie):
 1. **0 reziduuri germane găsite** — scanare exhaustivă (text, cod, ID-uri HTML, clase CSS, funcții) — nimic rămas din Karteikarten.

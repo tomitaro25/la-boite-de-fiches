@@ -372,9 +372,10 @@
     </div>
     <div class="sheet-section help-text">
       <div class="sheet-label">Nivelul „Conjugare verbe"</div>
-      <p>Vezi infinitivul unui verb și persoana cerută (je, tu, il/elle/on, nous, vous, ils/elles) — alegi forma corect conjugată, la <b>présent</b> sau <b>passé composé</b>.</p>
-      <p>La passé composé, răspunsul corect include și auxiliarul potrivit (<i>avoir</i> sau <i>être</i>) — verbele de mișcare (ca „aller" sau „venir") și <b>toate</b> verbele reflexive (ca „se lever") folosesc <i>être</i>, restul <i>avoir</i>. Un distractor testează exact această alegere, cu auxiliarul greșit.</p>
+      <p>100 dintre cele mai frecvente verbe franceze — vezi infinitivul și persoana cerută (je, tu, il/elle/on, nous, vous, ils/elles) — alegi forma corect conjugată, la <b>présent</b>, <b>imparfait</b>, <b>futur simple</b>, <b>passé composé</b> sau <b>plus-que-parfait</b>.</p>
+      <p>La cele două timpuri compuse (passé composé și plus-que-parfait), răspunsul corect include și auxiliarul potrivit (<i>avoir</i> sau <i>être</i>) — verbele de mișcare (ca „aller" sau „venir") și <b>toate</b> verbele reflexive (ca „se coucher") folosesc <i>être</i>, restul <i>avoir</i>. Un distractor testează exact această alegere, cu auxiliarul greșit.</p>
       <p>Cu <i>être</i>, participiul se acordă în număr cu subiectul (ex. „nous sommes allés", „ils se sont levés") — pentru claritate, aplicația folosește forma masculină implicită și nu variază după gen (nu „allée"/"allées" pentru subiect feminin).</p>
+      <p><b>Plus-que-parfait</b> = auxiliarul la imperfect + același participiu (ex. „j'étais allé", „nous avions parlé") — folosit pentru o acțiune petrecută înaintea alteia din trecut.</p>
       <p>Distractorii sunt mereu alte forme ale <b>aceluiași verb</b> — testează exact terminația corectă, nu doar dacă recunoști verbul.</p>
     </div>
     <div class="sheet-section help-text">
@@ -389,6 +390,7 @@
       5. <b>Copiază cheia imediat</b> — se arată o singură dată; începe cu „sk-ant-"<br>
       6. În aplicație, mergi în ⚙ → „AI (Claude)" → lipește cheia → „Testează conexiunea"</p>
       <p><b>Cost aproximativ</b> (model Haiku, cel mai ieftin): o traducere sau corectură scurtă costă sub un cent — cu 5$ ajungi la mii de utilizări. O imagine costă considerabil mai mult (poate câteva sute de poze cu 5$) — decupează poza doar pe zona cu text, nu tot ecranul, ca să reduci costul.</p>
+      <p><b>Limită onestă:</b> fiind cel mai ieftin model Claude, Haiku poate ocazional greși pe texte lungi și complexe (articole întregi, mai ales) — cel mai frecvent, un acord greșit de gen/număr la un substantiv românesc. Pipeline-ul în doi pași (traducere + revizuire gramaticală separată) prinde majoritatea acestor cazuri, dar nu garantează perfecțiune 100% — verifică oricând ceva pare nefiresc, mai ales la texte lungi, dintr-o sursă reală.</p>
       <p><b>Ce face automat, la Traducere:</b> detectează singur dacă textul e în română sau franceză (corectând mental accente/greșeli mici, inclusiv cratime lipsă) și traduce natural, nu cuvânt-cu-cuvânt; pentru text cu mai multe propoziții, le aliniază original→traducere, una câte una (partea franceză apare bold, albastru, și poate fi ascultată separat cu 🔊); poți dicta vocal (cu un mic buton RO/FR, doar pentru ce ascultă microfonul); rezultatul se poate descărca ca text sau ca PDF (prin funcția de printare a telefonului).</p>
       <p><b>Traducere în doi pași, pentru acuratețe:</b> la Traducere, rezultatul trece prin <b>doi agenți separați</b> — întâi cel care alege traducerea optimă, apoi un al doilea, specializat strict pe gramatică/ortografie/punctuație/topică, care verifică și corectează tehnic rezultatul (acorduri, accente/diacritice, ordinea cuvintelor, cratime) fără să schimbe alegerea de traducere. Asta înseamnă un apel API în plus (cost puțin mai mare, tot sub un cent per traducere cu Haiku) și puțin mai mult timp de așteptare, în schimbul unei acurateți mai bune.</p>
       <p><b>Notă despre dictare și cratime:</b> tehnologia de recunoaștere vocală din browser nu poate reda niciodată cratime (ex. „mi-ar", „s-a", „peut-être") — nu au corespondent fonetic distinct, deci textul dictat, brut, le va afișa mereu lipsă. Se corectează automat abia la pasul de traducere/corectură (Claude reface cratimele gramatical corecte) — dacă vrei textul dictat corect și înainte de acest pas, editează-l manual în căsuța de text.</p>
@@ -1239,149 +1241,119 @@ const PERSONS = ['Je','Tu','Il/elle/on','Nous','Vous','Ils/elles'];
 // doar "-s" la persoanele plural (nous/vous/ils-elles), fara acord de gen (elle est allé, nu alleE) -
 // pastreaza claritatea exercitiului fara a complica formatul de raspuns cu variante de gen.
 const VERB_DATA = [
-  ["être", ["suis","es","est","sommes","êtes","sont"], "avoir", "été", false],
-  ["avoir", ["ai","as","a","avons","avez","ont"], "avoir", "eu", false],
-  ["aller", ["vais","vas","va","allons","allez","vont"], "etre", "allé", false],
-  ["faire", ["fais","fais","fait","faisons","faites","font"], "avoir", "fait", false],
-  ["pouvoir", ["peux","peux","peut","pouvons","pouvez","peuvent"], "avoir", "pu", false],
-  ["vouloir", ["veux","veux","veut","voulons","voulez","veulent"], "avoir", "voulu", false],
-  ["devoir", ["dois","dois","doit","devons","devez","doivent"], "avoir", "dû", false],
-  ["savoir", ["sais","sais","sait","savons","savez","savent"], "avoir", "su", false],
-  ["voir", ["vois","vois","voit","voyons","voyez","voient"], "avoir", "vu", false],
-  ["prendre", ["prends","prends","prend","prenons","prenez","prennent"], "avoir", "pris", false],
-  ["venir", ["viens","viens","vient","venons","venez","viennent"], "etre", "venu", false],
-  ["devenir", ["deviens","deviens","devient","devenons","devenez","deviennent"], "etre", "devenu", false],
-  ["revenir", ["reviens","reviens","revient","revenons","revenez","reviennent"], "etre", "revenu", false],
-  ["dire", ["dis","dis","dit","disons","dites","disent"], "avoir", "dit", false],
-  ["écrire", ["écris","écris","écrit","écrivons","écrivez","écrivent"], "avoir", "écrit", false],
-  ["lire", ["lis","lis","lit","lisons","lisez","lisent"], "avoir", "lu", false],
-  ["mettre", ["mets","mets","met","mettons","mettez","mettent"], "avoir", "mis", false],
-  ["connaître", ["connais","connais","connaît","connaissons","connaissez","connaissent"], "avoir", "connu", false],
-  ["naître", ["nais","nais","naît","naissons","naissez","naissent"], "etre", "né", false],
-  ["mourir", ["meurs","meurs","meurt","mourons","mourez","meurent"], "etre", "mort", false],
-  ["croire", ["crois","crois","croit","croyons","croyez","croient"], "avoir", "cru", false],
-  ["boire", ["bois","bois","boit","buvons","buvez","boivent"], "avoir", "bu", false],
-  ["courir", ["cours","cours","court","courons","courez","courent"], "avoir", "couru", false],
-  ["suivre", ["suis","suis","suit","suivons","suivez","suivent"], "avoir", "suivi", false],
-  ["vivre", ["vis","vis","vit","vivons","vivez","vivent"], "avoir", "vécu", false],
-  ["recevoir", ["reçois","reçois","reçoit","recevons","recevez","reçoivent"], "avoir", "reçu", false],
-  ["tenir", ["tiens","tiens","tient","tenons","tenez","tiennent"], "avoir", "tenu", false],
-  ["obtenir", ["obtiens","obtiens","obtient","obtenons","obtenez","obtiennent"], "avoir", "obtenu", false],
-  ["comprendre", ["comprends","comprends","comprend","comprenons","comprenez","comprennent"], "avoir", "compris", false],
-  ["apprendre", ["apprends","apprends","apprend","apprenons","apprenez","apprennent"], "avoir", "appris", false],
-  ["surprendre", ["surprends","surprends","surprend","surprenons","surprenez","surprennent"], "avoir", "surpris", false],
-  ["promettre", ["promets","promets","promet","promettons","promettez","promettent"], "avoir", "promis", false],
-  ["permettre", ["permets","permets","permet","permettons","permettez","permettent"], "avoir", "permis", false],
-  ["ouvrir", ["ouvre","ouvres","ouvre","ouvrons","ouvrez","ouvrent"], "avoir", "ouvert", false],
-  ["offrir", ["offre","offres","offre","offrons","offrez","offrent"], "avoir", "offert", false],
-  ["découvrir", ["découvre","découvres","découvre","découvrons","découvrez","découvrent"], "avoir", "découvert", false],
-  ["souffrir", ["souffre","souffres","souffre","souffrons","souffrez","souffrent"], "avoir", "souffert", false],
-  ["plaire", ["plais","plais","plaît","plaisons","plaisez","plaisent"], "avoir", "plu", false],
-  ["valoir", ["vaux","vaux","vaut","valons","valez","valent"], "avoir", "valu", false],
-  ["rire", ["ris","ris","rit","rions","riez","rient"], "avoir", "ri", false],
-  ["conduire", ["conduis","conduis","conduit","conduisons","conduisez","conduisent"], "avoir", "conduit", false],
-  ["construire", ["construis","construis","construit","construisons","construisez","construisent"], "avoir", "construit", false],
-  ["détruire", ["détruis","détruis","détruit","détruisons","détruisez","détruisent"], "avoir", "détruit", false],
-  ["peindre", ["peins","peins","peint","peignons","peignez","peignent"], "avoir", "peint", false],
-  ["craindre", ["crains","crains","craint","craignons","craignez","craignent"], "avoir", "craint", false],
-  ["battre", ["bats","bats","bat","battons","battez","battent"], "avoir", "battu", false],
-  ["parler", ["parle","parles","parle","parlons","parlez","parlent"], "avoir", "parlé", false],
-  ["aimer", ["aime","aimes","aime","aimons","aimez","aiment"], "avoir", "aimé", false],
-  ["donner", ["donne","donnes","donne","donnons","donnez","donnent"], "avoir", "donné", false],
-  ["regarder", ["regarde","regardes","regarde","regardons","regardez","regardent"], "avoir", "regardé", false],
-  ["écouter", ["écoute","écoutes","écoute","écoutons","écoutez","écoutent"], "avoir", "écouté", false],
-  ["travailler", ["travaille","travailles","travaille","travaillons","travaillez","travaillent"], "avoir", "travaillé", false],
-  ["chercher", ["cherche","cherches","cherche","cherchons","cherchez","cherchent"], "avoir", "cherché", false],
-  ["trouver", ["trouve","trouves","trouve","trouvons","trouvez","trouvent"], "avoir", "trouvé", false],
-  ["demander", ["demande","demandes","demande","demandons","demandez","demandent"], "avoir", "demandé", false],
-  ["penser", ["pense","penses","pense","pensons","pensez","pensent"], "avoir", "pensé", false],
-  ["arriver", ["arrive","arrives","arrive","arrivons","arrivez","arrivent"], "etre", "arrivé", false],
-  ["entrer", ["entre","entres","entre","entrons","entrez","entrent"], "etre", "entré", false],
-  ["rester", ["reste","restes","reste","restons","restez","restent"], "etre", "resté", false],
-  ["tomber", ["tombe","tombes","tombe","tombons","tombez","tombent"], "etre", "tombé", false],
-  ["retourner", ["retourne","retournes","retourne","retournons","retournez","retournent"], "etre", "retourné", false],
-  ["passer", ["passe","passes","passe","passons","passez","passent"], "avoir", "passé", false],
-  ["jouer", ["joue","joues","joue","jouons","jouez","jouent"], "avoir", "joué", false],
-  ["aider", ["aide","aides","aide","aidons","aidez","aident"], "avoir", "aidé", false],
-  ["montrer", ["montre","montres","montre","montrons","montrez","montrent"], "avoir", "montré", false],
-  ["laisser", ["laisse","laisses","laisse","laissons","laissez","laissent"], "avoir", "laissé", false],
-  ["continuer", ["continue","continues","continue","continuons","continuez","continuent"], "avoir", "continué", false],
-  ["utiliser", ["utilise","utilises","utilise","utilisons","utilisez","utilisent"], "avoir", "utilisé", false],
-  ["gagner", ["gagne","gagnes","gagne","gagnons","gagnez","gagnent"], "avoir", "gagné", false],
-  ["tourner", ["tourne","tournes","tourne","tournons","tournez","tournent"], "avoir", "tourné", false],
-  ["tirer", ["tire","tires","tire","tirons","tirez","tirent"], "avoir", "tiré", false],
-  ["présenter", ["présente","présentes","présente","présentons","présentez","présentent"], "avoir", "présenté", false],
-  ["expliquer", ["explique","expliques","explique","expliquons","expliquez","expliquent"], "avoir", "expliqué", false],
-  ["oublier", ["oublie","oublies","oublie","oublions","oubliez","oublient"], "avoir", "oublié", false],
-  ["sauver", ["sauve","sauves","sauve","sauvons","sauvez","sauvent"], "avoir", "sauvé", false],
-  ["adorer", ["adore","adores","adore","adorons","adorez","adorent"], "avoir", "adoré", false],
-  ["détester", ["déteste","détestes","déteste","détestons","détestez","détestent"], "avoir", "détesté", false],
-  ["préparer", ["prépare","prépares","prépare","préparons","préparez","préparent"], "avoir", "préparé", false],
-  ["fermer", ["ferme","fermes","ferme","fermons","fermez","ferment"], "avoir", "fermé", false],
-  ["casser", ["casse","casses","casse","cassons","cassez","cassent"], "avoir", "cassé", false],
-  ["marcher", ["marche","marches","marche","marchons","marchez","marchent"], "avoir", "marché", false],
-  ["danser", ["danse","danses","danse","dansons","dansez","dansent"], "avoir", "dansé", false],
-  ["chanter", ["chante","chantes","chante","chantons","chantez","chantent"], "avoir", "chanté", false],
-  ["pleurer", ["pleure","pleures","pleure","pleurons","pleurez","pleurent"], "avoir", "pleuré", false],
-  ["crier", ["crie","cries","crie","crions","criez","crient"], "avoir", "crié", false],
-  ["rentrer", ["rentre","rentres","rentre","rentrons","rentrez","rentrent"], "etre", "rentré", false],
-  ["retrouver", ["retrouve","retrouves","retrouve","retrouvons","retrouvez","retrouvent"], "avoir", "retrouvé", false],
-  ["rencontrer", ["rencontre","rencontres","rencontre","rencontrons","rencontrez","rencontrent"], "avoir", "rencontré", false],
-  ["habiter", ["habite","habites","habite","habitons","habitez","habitent"], "avoir", "habité", false],
-  ["porter", ["porte","portes","porte","portons","portez","portent"], "avoir", "porté", false],
-  ["couper", ["coupe","coupes","coupe","coupons","coupez","coupent"], "avoir", "coupé", false],
-  ["toucher", ["touche","touches","touche","touchons","touchez","touchent"], "avoir", "touché", false],
-  ["signer", ["signe","signes","signe","signons","signez","signent"], "avoir", "signé", false],
-  ["proposer", ["propose","proposes","propose","proposons","proposez","proposent"], "avoir", "proposé", false],
-  ["refuser", ["refuse","refuses","refuse","refusons","refusez","refusent"], "avoir", "refusé", false],
-  ["accepter", ["accepte","acceptes","accepte","acceptons","acceptez","acceptent"], "avoir", "accepté", false],
-  ["souhaiter", ["souhaite","souhaites","souhaite","souhaitons","souhaitez","souhaitent"], "avoir", "souhaité", false],
-  ["préférer", ["préfère","préfères","préfère","préférons","préférez","préfèrent"], "avoir", "préféré", false],
-  ["espérer", ["espère","espères","espère","espérons","espérez","espèrent"], "avoir", "espéré", false],
-  ["répéter", ["répète","répètes","répète","répétons","répétez","répètent"], "avoir", "répété", false],
-  ["appeler", ["appelle","appelles","appelle","appelons","appelez","appellent"], "avoir", "appelé", false],
-  ["essayer", ["essaie","essaies","essaie","essayons","essayez","essaient"], "avoir", "essayé", false],
-  ["payer", ["paie","paies","paie","payons","payez","paient"], "avoir", "payé", false],
-  ["commencer", ["commence","commences","commence","commençons","commencez","commencent"], "avoir", "commencé", false],
-  ["manger", ["mange","manges","mange","mangeons","mangez","mangent"], "avoir", "mangé", false],
-  ["changer", ["change","changes","change","changeons","changez","changent"], "avoir", "changé", false],
-  ["finir", ["finis","finis","finit","finissons","finissez","finissent"], "avoir", "fini", false],
-  ["choisir", ["choisis","choisis","choisit","choisissons","choisissez","choisissent"], "avoir", "choisi", false],
-  ["réussir", ["réussis","réussis","réussit","réussissons","réussissez","réussissent"], "avoir", "réussi", false],
-  ["réfléchir", ["réfléchis","réfléchis","réfléchit","réfléchissons","réfléchissez","réfléchissent"], "avoir", "réfléchi", false],
-  ["grandir", ["grandis","grandis","grandit","grandissons","grandissez","grandissent"], "avoir", "grandi", false],
-  ["remplir", ["remplis","remplis","remplit","remplissons","remplissez","remplissent"], "avoir", "rempli", false],
-  ["punir", ["punis","punis","punit","punissons","punissez","punissent"], "avoir", "puni", false],
-  ["partir", ["pars","pars","part","partons","partez","partent"], "etre", "parti", false],
-  ["sortir", ["sors","sors","sort","sortons","sortez","sortent"], "etre", "sorti", false],
-  ["dormir", ["dors","dors","dort","dormons","dormez","dorment"], "avoir", "dormi", false],
-  ["sentir", ["sens","sens","sent","sentons","sentez","sentent"], "avoir", "senti", false],
-  ["servir", ["sers","sers","sert","servons","servez","servent"], "avoir", "servi", false],
-  ["mentir", ["mens","mens","ment","mentons","mentez","mentent"], "avoir", "menti", false],
-  ["vendre", ["vends","vends","vend","vendons","vendez","vendent"], "avoir", "vendu", false],
-  ["attendre", ["attends","attends","attend","attendons","attendez","attendent"], "avoir", "attendu", false],
-  ["entendre", ["entends","entends","entend","entendons","entendez","entendent"], "avoir", "entendu", false],
-  ["perdre", ["perds","perds","perd","perdons","perdez","perdent"], "avoir", "perdu", false],
-  ["répondre", ["réponds","réponds","répond","répondons","répondez","répondent"], "avoir", "répondu", false],
-  ["rendre", ["rends","rends","rend","rendons","rendez","rendent"], "avoir", "rendu", false],
-  ["descendre", ["descends","descends","descend","descendons","descendez","descendent"], "etre", "descendu", false],
-  ["se lever", ["me lève","te lèves","se lève","nous levons","vous levez","se lèvent"], "etre", "levé", true],
-  ["se coucher", ["me couche","te couches","se couche","nous couchons","vous couchez","se couchent"], "etre", "couché", true],
-  ["se laver", ["me lave","te laves","se lave","nous lavons","vous lavez","se lavent"], "etre", "lavé", true],
-  ["s'appeler", ["m'appelle","t'appelles","s'appelle","nous appelons","vous appelez","s'appellent"], "etre", "appelé", true],
-  ["se reposer", ["me repose","te reposes","se repose","nous reposons","vous reposez","se reposent"], "etre", "reposé", true],
-  ["se promener", ["me promène","te promènes","se promène","nous promenons","vous promenez","se promènent"], "etre", "promené", true],
-  ["s'occuper", ["m'occupe","t'occupes","s'occupe","nous occupons","vous occupez","s'occupent"], "etre", "occupé", true],
-  ["se souvenir", ["me souviens","te souviens","se souvient","nous souvenons","vous souvenez","se souviennent"], "etre", "souvenu", true],
-  ["s'arrêter", ["m'arrête","t'arrêtes","s'arrête","nous arrêtons","vous arrêtez","s'arrêtent"], "etre", "arrêté", true],
-  ["se dépêcher", ["me dépêche","te dépêches","se dépêche","nous dépêchons","vous dépêchez","se dépêchent"], "etre", "dépêché", true],
+  ["être", ["suis","es","est","sommes","êtes","sont"], ["étais","étais","était","étions","étiez","étaient"], ["serai","seras","sera","serons","serez","seront"], "avoir", "été", false],
+  ["avoir", ["ai","as","a","avons","avez","ont"], ["avais","avais","avait","avions","aviez","avaient"], ["aurai","auras","aura","aurons","aurez","auront"], "avoir", "eu", false],
+  ["aller", ["vais","vas","va","allons","allez","vont"], ["allais","allais","allait","allions","alliez","allaient"], ["irai","iras","ira","irons","irez","iront"], "etre", "allé", false],
+  ["faire", ["fais","fais","fait","faisons","faites","font"], ["faisais","faisais","faisait","faisions","faisiez","faisaient"], ["ferai","feras","fera","ferons","ferez","feront"], "avoir", "fait", false],
+  ["pouvoir", ["peux","peux","peut","pouvons","pouvez","peuvent"], ["pouvais","pouvais","pouvait","pouvions","pouviez","pouvaient"], ["pourrai","pourras","pourra","pourrons","pourrez","pourront"], "avoir", "pu", false],
+  ["vouloir", ["veux","veux","veut","voulons","voulez","veulent"], ["voulais","voulais","voulait","voulions","vouliez","voulaient"], ["voudrai","voudras","voudra","voudrons","voudrez","voudront"], "avoir", "voulu", false],
+  ["devoir", ["dois","dois","doit","devons","devez","doivent"], ["devais","devais","devait","devions","deviez","devaient"], ["devrai","devras","devra","devrons","devrez","devront"], "avoir", "dû", false],
+  ["savoir", ["sais","sais","sait","savons","savez","savent"], ["savais","savais","savait","savions","saviez","savaient"], ["saurai","sauras","saura","saurons","saurez","sauront"], "avoir", "su", false],
+  ["voir", ["vois","vois","voit","voyons","voyez","voient"], ["voyais","voyais","voyait","voyions","voyiez","voyaient"], ["verrai","verras","verra","verrons","verrez","verront"], "avoir", "vu", false],
+  ["prendre", ["prends","prends","prend","prenons","prenez","prennent"], ["prenais","prenais","prenait","prenions","preniez","prenaient"], ["prendrai","prendras","prendra","prendrons","prendrez","prendront"], "avoir", "pris", false],
+  ["venir", ["viens","viens","vient","venons","venez","viennent"], ["venais","venais","venait","venions","veniez","venaient"], ["viendrai","viendras","viendra","viendrons","viendrez","viendront"], "etre", "venu", false],
+  ["devenir", ["deviens","deviens","devient","devenons","devenez","deviennent"], ["devenais","devenais","devenait","devenions","deveniez","devenaient"], ["deviendrai","deviendras","deviendra","deviendrons","deviendrez","deviendront"], "etre", "devenu", false],
+  ["revenir", ["reviens","reviens","revient","revenons","revenez","reviennent"], ["revenais","revenais","revenait","revenions","reveniez","revenaient"], ["reviendrai","reviendras","reviendra","reviendrons","reviendrez","reviendront"], "etre", "revenu", false],
+  ["dire", ["dis","dis","dit","disons","dites","disent"], ["disais","disais","disait","disions","disiez","disaient"], ["dirai","diras","dira","dirons","direz","diront"], "avoir", "dit", false],
+  ["écrire", ["écris","écris","écrit","écrivons","écrivez","écrivent"], ["écrivais","écrivais","écrivait","écrivions","écriviez","écrivaient"], ["écrirai","écriras","écrira","écrirons","écrirez","écriront"], "avoir", "écrit", false],
+  ["lire", ["lis","lis","lit","lisons","lisez","lisent"], ["lisais","lisais","lisait","lisions","lisiez","lisaient"], ["lirai","liras","lira","lirons","lirez","liront"], "avoir", "lu", false],
+  ["mettre", ["mets","mets","met","mettons","mettez","mettent"], ["mettais","mettais","mettait","mettions","mettiez","mettaient"], ["mettrai","mettras","mettra","mettrons","mettrez","mettront"], "avoir", "mis", false],
+  ["connaître", ["connais","connais","connaît","connaissons","connaissez","connaissent"], ["connaissais","connaissais","connaissait","connaissions","connaissiez","connaissaient"], ["connaîtrai","connaîtras","connaîtra","connaîtrons","connaîtrez","connaîtront"], "avoir", "connu", false],
+  ["mourir", ["meurs","meurs","meurt","mourons","mourez","meurent"], ["mourais","mourais","mourait","mourions","mouriez","mouraient"], ["mourrai","mourras","mourra","mourrons","mourrez","mourront"], "etre", "mort", false],
+  ["croire", ["crois","crois","croit","croyons","croyez","croient"], ["croyais","croyais","croyait","croyions","croyiez","croyaient"], ["croirai","croiras","croira","croirons","croirez","croiront"], "avoir", "cru", false],
+  ["boire", ["bois","bois","boit","buvons","buvez","boivent"], ["buvais","buvais","buvait","buvions","buviez","buvaient"], ["boirai","boiras","boira","boirons","boirez","boiront"], "avoir", "bu", false],
+  ["suivre", ["suis","suis","suit","suivons","suivez","suivent"], ["suivais","suivais","suivait","suivions","suiviez","suivaient"], ["suivrai","suivras","suivra","suivrons","suivrez","suivront"], "avoir", "suivi", false],
+  ["vivre", ["vis","vis","vit","vivons","vivez","vivent"], ["vivais","vivais","vivait","vivions","viviez","vivaient"], ["vivrai","vivras","vivra","vivrons","vivrez","vivront"], "avoir", "vécu", false],
+  ["tenir", ["tiens","tiens","tient","tenons","tenez","tiennent"], ["tenais","tenais","tenait","tenions","teniez","tenaient"], ["tiendrai","tiendras","tiendra","tiendrons","tiendrez","tiendront"], "avoir", "tenu", false],
+  ["obtenir", ["obtiens","obtiens","obtient","obtenons","obtenez","obtiennent"], ["obtenais","obtenais","obtenait","obtenions","obteniez","obtenaient"], ["obtiendrai","obtiendras","obtiendra","obtiendrons","obtiendrez","obtiendront"], "avoir", "obtenu", false],
+  ["comprendre", ["comprends","comprends","comprend","comprenons","comprenez","comprennent"], ["comprenais","comprenais","comprenait","comprenions","compreniez","comprenaient"], ["comprendrai","comprendras","comprendra","comprendrons","comprendrez","comprendront"], "avoir", "compris", false],
+  ["apprendre", ["apprends","apprends","apprend","apprenons","apprenez","apprennent"], ["apprenais","apprenais","apprenait","apprenions","appreniez","apprenaient"], ["apprendrai","apprendras","apprendra","apprendrons","apprendrez","apprendront"], "avoir", "appris", false],
+  ["ouvrir", ["ouvre","ouvres","ouvre","ouvrons","ouvrez","ouvrent"], ["ouvrais","ouvrais","ouvrait","ouvrions","ouvriez","ouvraient"], ["ouvrirai","ouvriras","ouvrira","ouvrirons","ouvrirez","ouvriront"], "avoir", "ouvert", false],
+  ["offrir", ["offre","offres","offre","offrons","offrez","offrent"], ["offrais","offrais","offrait","offrions","offriez","offraient"], ["offrirai","offriras","offrira","offrirons","offrirez","offriront"], "avoir", "offert", false],
+  ["découvrir", ["découvre","découvres","découvre","découvrons","découvrez","découvrent"], ["découvrais","découvrais","découvrait","découvrions","découvriez","découvraient"], ["découvrirai","découvriras","découvrira","découvrirons","découvrirez","découvriront"], "avoir", "découvert", false],
+  ["rire", ["ris","ris","rit","rions","riez","rient"], ["riais","riais","riait","riions","riiez","riaient"], ["rirai","riras","rira","rirons","rirez","riront"], "avoir", "ri", false],
+  ["conduire", ["conduis","conduis","conduit","conduisons","conduisez","conduisent"], ["conduisais","conduisais","conduisait","conduisions","conduisiez","conduisaient"], ["conduirai","conduiras","conduira","conduirons","conduirez","conduiront"], "avoir", "conduit", false],
+  ["détruire", ["détruis","détruis","détruit","détruisons","détruisez","détruisent"], ["détruisais","détruisais","détruisait","détruisions","détruisiez","détruisaient"], ["détruirai","détruiras","détruira","détruirons","détruirez","détruiront"], "avoir", "détruit", false],
+  ["battre", ["bats","bats","bat","battons","battez","battent"], ["battais","battais","battait","battions","battiez","battaient"], ["battrai","battras","battra","battrons","battrez","battront"], "avoir", "battu", false],
+  ["parler", ["parle","parles","parle","parlons","parlez","parlent"], ["parlais","parlais","parlait","parlions","parliez","parlaient"], ["parlerai","parleras","parlera","parlerons","parlerez","parleront"], "avoir", "parlé", false],
+  ["aimer", ["aime","aimes","aime","aimons","aimez","aiment"], ["aimais","aimais","aimait","aimions","aimiez","aimaient"], ["aimerai","aimeras","aimera","aimerons","aimerez","aimeront"], "avoir", "aimé", false],
+  ["donner", ["donne","donnes","donne","donnons","donnez","donnent"], ["donnais","donnais","donnait","donnions","donniez","donnaient"], ["donnerai","donneras","donnera","donnerons","donnerez","donneront"], "avoir", "donné", false],
+  ["regarder", ["regarde","regardes","regarde","regardons","regardez","regardent"], ["regardais","regardais","regardait","regardions","regardiez","regardaient"], ["regarderai","regarderas","regardera","regarderons","regarderez","regarderont"], "avoir", "regardé", false],
+  ["écouter", ["écoute","écoutes","écoute","écoutons","écoutez","écoutent"], ["écoutais","écoutais","écoutait","écoutions","écoutiez","écoutaient"], ["écouterai","écouteras","écoutera","écouterons","écouterez","écouteront"], "avoir", "écouté", false],
+  ["travailler", ["travaille","travailles","travaille","travaillons","travaillez","travaillent"], ["travaillais","travaillais","travaillait","travaillions","travailliez","travaillaient"], ["travaillerai","travailleras","travaillera","travaillerons","travaillerez","travailleront"], "avoir", "travaillé", false],
+  ["chercher", ["cherche","cherches","cherche","cherchons","cherchez","cherchent"], ["cherchais","cherchais","cherchait","cherchions","cherchiez","cherchaient"], ["chercherai","chercheras","cherchera","chercherons","chercherez","chercheront"], "avoir", "cherché", false],
+  ["trouver", ["trouve","trouves","trouve","trouvons","trouvez","trouvent"], ["trouvais","trouvais","trouvait","trouvions","trouviez","trouvaient"], ["trouverai","trouveras","trouvera","trouverons","trouverez","trouveront"], "avoir", "trouvé", false],
+  ["demander", ["demande","demandes","demande","demandons","demandez","demandent"], ["demandais","demandais","demandait","demandions","demandiez","demandaient"], ["demanderai","demanderas","demandera","demanderons","demanderez","demanderont"], "avoir", "demandé", false],
+  ["penser", ["pense","penses","pense","pensons","pensez","pensent"], ["pensais","pensais","pensait","pensions","pensiez","pensaient"], ["penserai","penseras","pensera","penserons","penserez","penseront"], "avoir", "pensé", false],
+  ["arriver", ["arrive","arrives","arrive","arrivons","arrivez","arrivent"], ["arrivais","arrivais","arrivait","arrivions","arriviez","arrivaient"], ["arriverai","arriveras","arrivera","arriverons","arriverez","arriveront"], "etre", "arrivé", false],
+  ["entrer", ["entre","entres","entre","entrons","entrez","entrent"], ["entrais","entrais","entrait","entrions","entriez","entraient"], ["entrerai","entreras","entrera","entrerons","entrerez","entreront"], "etre", "entré", false],
+  ["rester", ["reste","restes","reste","restons","restez","restent"], ["restais","restais","restait","restions","restiez","restaient"], ["resterai","resteras","restera","resterons","resterez","resteront"], "etre", "resté", false],
+  ["tomber", ["tombe","tombes","tombe","tombons","tombez","tombent"], ["tombais","tombais","tombait","tombions","tombiez","tombaient"], ["tomberai","tomberas","tombera","tomberons","tomberez","tomberont"], "etre", "tombé", false],
+  ["retourner", ["retourne","retournes","retourne","retournons","retournez","retournent"], ["retournais","retournais","retournait","retournions","retourniez","retournaient"], ["retournerai","retourneras","retournera","retournerons","retournerez","retourneront"], "etre", "retourné", false],
+  ["passer", ["passe","passes","passe","passons","passez","passent"], ["passais","passais","passait","passions","passiez","passaient"], ["passerai","passeras","passera","passerons","passerez","passeront"], "avoir", "passé", false],
+  ["jouer", ["joue","joues","joue","jouons","jouez","jouent"], ["jouais","jouais","jouait","jouions","jouiez","jouaient"], ["jouerai","joueras","jouera","jouerons","jouerez","joueront"], "avoir", "joué", false],
+  ["aider", ["aide","aides","aide","aidons","aidez","aident"], ["aidais","aidais","aidait","aidions","aidiez","aidaient"], ["aiderai","aideras","aidera","aiderons","aiderez","aideront"], "avoir", "aidé", false],
+  ["montrer", ["montre","montres","montre","montrons","montrez","montrent"], ["montrais","montrais","montrait","montrions","montriez","montraient"], ["montrerai","montreras","montrera","montrerons","montrerez","montreront"], "avoir", "montré", false],
+  ["laisser", ["laisse","laisses","laisse","laissons","laissez","laissent"], ["laissais","laissais","laissait","laissions","laissiez","laissaient"], ["laisserai","laisseras","laissera","laisserons","laisserez","laisseront"], "avoir", "laissé", false],
+  ["continuer", ["continue","continues","continue","continuons","continuez","continuent"], ["continuais","continuais","continuait","continuions","continuiez","continuaient"], ["continuerai","continueras","continuera","continuerons","continuerez","continueront"], "avoir", "continué", false],
+  ["utiliser", ["utilise","utilises","utilise","utilisons","utilisez","utilisent"], ["utilisais","utilisais","utilisait","utilisions","utilisiez","utilisaient"], ["utiliserai","utiliseras","utilisera","utiliserons","utiliserez","utiliseront"], "avoir", "utilisé", false],
+  ["gagner", ["gagne","gagnes","gagne","gagnons","gagnez","gagnent"], ["gagnais","gagnais","gagnait","gagnions","gagniez","gagnaient"], ["gagnerai","gagneras","gagnera","gagnerons","gagnerez","gagneront"], "avoir", "gagné", false],
+  ["tourner", ["tourne","tournes","tourne","tournons","tournez","tournent"], ["tournais","tournais","tournait","tournions","tourniez","tournaient"], ["tournerai","tourneras","tournera","tournerons","tournerez","tourneront"], "avoir", "tourné", false],
+  ["tirer", ["tire","tires","tire","tirons","tirez","tirent"], ["tirais","tirais","tirait","tirions","tiriez","tiraient"], ["tirerai","tireras","tirera","tirerons","tirerez","tireront"], "avoir", "tiré", false],
+  ["présenter", ["présente","présentes","présente","présentons","présentez","présentent"], ["présentais","présentais","présentait","présentions","présentiez","présentaient"], ["présenterai","présenteras","présentera","présenterons","présenterez","présenteront"], "avoir", "présenté", false],
+  ["expliquer", ["explique","expliques","explique","expliquons","expliquez","expliquent"], ["expliquais","expliquais","expliquait","expliquions","expliquiez","expliquaient"], ["expliquerai","expliqueras","expliquera","expliquerons","expliquerez","expliqueront"], "avoir", "expliqué", false],
+  ["oublier", ["oublie","oublies","oublie","oublions","oubliez","oublient"], ["oubliais","oubliais","oubliait","oubliions","oubliiez","oubliaient"], ["oublierai","oublieras","oubliera","oublierons","oublierez","oublieront"], "avoir", "oublié", false],
+  ["sauver", ["sauve","sauves","sauve","sauvons","sauvez","sauvent"], ["sauvais","sauvais","sauvait","sauvions","sauviez","sauvaient"], ["sauverai","sauveras","sauvera","sauverons","sauverez","sauveront"], "avoir", "sauvé", false],
+  ["préparer", ["prépare","prépares","prépare","préparons","préparez","préparent"], ["préparais","préparais","préparait","préparions","prépariez","préparaient"], ["préparerai","prépareras","préparera","préparerons","préparerez","prépareront"], "avoir", "préparé", false],
+  ["marcher", ["marche","marches","marche","marchons","marchez","marchent"], ["marchais","marchais","marchait","marchions","marchiez","marchaient"], ["marcherai","marcheras","marchera","marcherons","marcherez","marcheront"], "avoir", "marché", false],
+  ["danser", ["danse","danses","danse","dansons","dansez","dansent"], ["dansais","dansais","dansait","dansions","dansiez","dansaient"], ["danserai","danseras","dansera","danserons","danserez","danseront"], "avoir", "dansé", false],
+  ["chanter", ["chante","chantes","chante","chantons","chantez","chantent"], ["chantais","chantais","chantait","chantions","chantiez","chantaient"], ["chanterai","chanteras","chantera","chanterons","chanterez","chanteront"], "avoir", "chanté", false],
+  ["pleurer", ["pleure","pleures","pleure","pleurons","pleurez","pleurent"], ["pleurais","pleurais","pleurait","pleurions","pleuriez","pleuraient"], ["pleurerai","pleureras","pleurera","pleurerons","pleurerez","pleureront"], "avoir", "pleuré", false],
+  ["rentrer", ["rentre","rentres","rentre","rentrons","rentrez","rentrent"], ["rentrais","rentrais","rentrait","rentrions","rentriez","rentraient"], ["rentrerai","rentreras","rentrera","rentrerons","rentrerez","rentreront"], "etre", "rentré", false],
+  ["retrouver", ["retrouve","retrouves","retrouve","retrouvons","retrouvez","retrouvent"], ["retrouvais","retrouvais","retrouvait","retrouvions","retrouviez","retrouvaient"], ["retrouverai","retrouveras","retrouvera","retrouverons","retrouverez","retrouveront"], "avoir", "retrouvé", false],
+  ["rencontrer", ["rencontre","rencontres","rencontre","rencontrons","rencontrez","rencontrent"], ["rencontrais","rencontrais","rencontrait","rencontrions","rencontriez","rencontraient"], ["rencontrerai","rencontreras","rencontrera","rencontrerons","rencontrerez","rencontreront"], "avoir", "rencontré", false],
+  ["porter", ["porte","portes","porte","portons","portez","portent"], ["portais","portais","portait","portions","portiez","portaient"], ["porterai","porteras","portera","porterons","porterez","porteront"], "avoir", "porté", false],
+  ["toucher", ["touche","touches","touche","touchons","touchez","touchent"], ["touchais","touchais","touchait","touchions","touchiez","touchaient"], ["toucherai","toucheras","touchera","toucherons","toucherez","toucheront"], "avoir", "touché", false],
+  ["accepter", ["accepte","acceptes","accepte","acceptons","acceptez","acceptent"], ["acceptais","acceptais","acceptait","acceptions","acceptiez","acceptaient"], ["accepterai","accepteras","acceptera","accepterons","accepterez","accepteront"], "avoir", "accepté", false],
+  ["appeler", ["appelle","appelles","appelle","appelons","appelez","appellent"], ["appelais","appelais","appelait","appelions","appeliez","appelaient"], ["appellerai","appelleras","appellera","appellerons","appellerez","appelleront"], "avoir", "appelé", false],
+  ["essayer", ["essaie","essaies","essaie","essayons","essayez","essaient"], ["essayais","essayais","essayait","essayions","essayiez","essayaient"], ["essayerai","essayeras","essayera","essayerons","essayerez","essayeront"], "avoir", "essayé", false],
+  ["payer", ["paie","paies","paie","payons","payez","paient"], ["payais","payais","payait","payions","payiez","payaient"], ["payerai","payeras","payera","payerons","payerez","payeront"], "avoir", "payé", false],
+  ["commencer", ["commence","commences","commence","commençons","commencez","commencent"], ["commençais","commençais","commençait","commencions","commenciez","commençaient"], ["commencerai","commenceras","commencera","commencerons","commencerez","commenceront"], "avoir", "commencé", false],
+  ["manger", ["mange","manges","mange","mangeons","mangez","mangent"], ["mangeais","mangeais","mangeait","mangions","mangiez","mangeaient"], ["mangerai","mangeras","mangera","mangerons","mangerez","mangeront"], "avoir", "mangé", false],
+  ["changer", ["change","changes","change","changeons","changez","changent"], ["changeais","changeais","changeait","changions","changiez","changeaient"], ["changerai","changeras","changera","changerons","changerez","changeront"], "avoir", "changé", false],
+  ["finir", ["finis","finis","finit","finissons","finissez","finissent"], ["finissais","finissais","finissait","finissions","finissiez","finissaient"], ["finirai","finiras","finira","finirons","finirez","finiront"], "avoir", "fini", false],
+  ["choisir", ["choisis","choisis","choisit","choisissons","choisissez","choisissent"], ["choisissais","choisissais","choisissait","choisissions","choisissiez","choisissaient"], ["choisirai","choisiras","choisira","choisirons","choisirez","choisiront"], "avoir", "choisi", false],
+  ["réfléchir", ["réfléchis","réfléchis","réfléchit","réfléchissons","réfléchissez","réfléchissent"], ["réfléchissais","réfléchissais","réfléchissait","réfléchissions","réfléchissiez","réfléchissaient"], ["réfléchirai","réfléchiras","réfléchira","réfléchirons","réfléchirez","réfléchiront"], "avoir", "réfléchi", false],
+  ["partir", ["pars","pars","part","partons","partez","partent"], ["partais","partais","partait","partions","partiez","partaient"], ["partirai","partiras","partira","partirons","partirez","partiront"], "etre", "parti", false],
+  ["sortir", ["sors","sors","sort","sortons","sortez","sortent"], ["sortais","sortais","sortait","sortions","sortiez","sortaient"], ["sortirai","sortiras","sortira","sortirons","sortirez","sortiront"], "etre", "sorti", false],
+  ["dormir", ["dors","dors","dort","dormons","dormez","dorment"], ["dormais","dormais","dormait","dormions","dormiez","dormaient"], ["dormirai","dormiras","dormira","dormirons","dormirez","dormiront"], "avoir", "dormi", false],
+  ["sentir", ["sens","sens","sent","sentons","sentez","sentent"], ["sentais","sentais","sentait","sentions","sentiez","sentaient"], ["sentirai","sentiras","sentira","sentirons","sentirez","sentiront"], "avoir", "senti", false],
+  ["servir", ["sers","sers","sert","servons","servez","servent"], ["servais","servais","servait","servions","serviez","servaient"], ["servirai","serviras","servira","servirons","servirez","serviront"], "avoir", "servi", false],
+  ["vendre", ["vends","vends","vend","vendons","vendez","vendent"], ["vendais","vendais","vendait","vendions","vendiez","vendaient"], ["vendrai","vendras","vendra","vendrons","vendrez","vendront"], "avoir", "vendu", false],
+  ["attendre", ["attends","attends","attend","attendons","attendez","attendent"], ["attendais","attendais","attendait","attendions","attendiez","attendaient"], ["attendrai","attendras","attendra","attendrons","attendrez","attendront"], "avoir", "attendu", false],
+  ["entendre", ["entends","entends","entend","entendons","entendez","entendent"], ["entendais","entendais","entendait","entendions","entendiez","entendaient"], ["entendrai","entendras","entendra","entendrons","entendrez","entendront"], "avoir", "entendu", false],
+  ["perdre", ["perds","perds","perd","perdons","perdez","perdent"], ["perdais","perdais","perdait","perdions","perdiez","perdaient"], ["perdrai","perdras","perdra","perdrons","perdrez","perdront"], "avoir", "perdu", false],
+  ["répondre", ["réponds","réponds","répond","répondons","répondez","répondent"], ["répondais","répondais","répondait","répondions","répondiez","répondaient"], ["répondrai","répondras","répondra","répondrons","répondrez","répondront"], "avoir", "répondu", false],
+  ["rendre", ["rends","rends","rend","rendons","rendez","rendent"], ["rendais","rendais","rendait","rendions","rendiez","rendaient"], ["rendrai","rendras","rendra","rendrons","rendrez","rendront"], "avoir", "rendu", false],
+  ["descendre", ["descends","descends","descend","descendons","descendez","descendent"], ["descendais","descendais","descendait","descendions","descendiez","descendaient"], ["descendrai","descendras","descendra","descendrons","descendrez","descendront"], "etre", "descendu", false],
+  ["se coucher", ["me couche","te couches","se couche","nous couchons","vous couchez","se couchent"], ["me couchais","te couchais","se couchait","nous couchions","vous couchiez","se couchaient"], ["me coucherai","te coucheras","se couchera","nous coucherons","vous coucherez","se coucheront"], "etre", "couché", true],
+  ["s'appeler", ["m'appelle","t'appelles","s'appelle","nous appelons","vous appelez","s'appellent"], ["m'appelais","t'appelais","s'appelait","nous appelions","vous appeliez","s'appelaient"], ["m'appellerai","t'appelleras","s'appellera","nous appellerons","vous appellerez","s'appelleront"], "etre", "appelé", true],
+  ["s'occuper", ["m'occupe","t'occupes","s'occupe","nous occupons","vous occupez","s'occupent"], ["m'occupais","t'occupais","s'occupait","nous occupions","vous occupiez","s'occupaient"], ["m'occuperai","t'occuperas","s'occupera","nous occuperons","vous occuperez","s'occuperont"], "etre", "occupé", true],
+  ["se souvenir", ["me souviens","te souviens","se souvient","nous souvenons","vous souvenez","se souviennent"], ["me souvenais","te souvenais","se souvenait","nous souvenions","vous souveniez","se souvenaient"], ["me souviendrai","te souviendras","se souviendra","nous souviendrons","vous souviendrez","se souviendront"], "etre", "souvenu", true],
+  ["s'arrêter", ["m'arrête","t'arrêtes","s'arrête","nous arrêtons","vous arrêtez","s'arrêtent"], ["m'arrêtais","t'arrêtais","s'arrêtait","nous arrêtions","vous arrêtiez","s'arrêtaient"], ["m'arrêterai","t'arrêteras","s'arrêtera","nous arrêterons","vous arrêterez","s'arrêteront"], "etre", "arrêté", true],
 ];
 const AUX_FORMS = {
   avoir: ["ai","as","a","avons","avez","ont"],
   etre: ["suis","es","est","sommes","êtes","sont"]
 };
-// pronume reflexiv pt passe compose (cu elidare doar unde e necesar: te/se + es/est incepe cu vocala)
-const REFLEXIVE_PRONOUNS_PC = ["me","t'","s'","nous","vous","se"];
+// auxiliarul la imperfect, folosit pt mai-mult-ca-perfect (acelasi principiu ca AUX_FORMS,
+// dar la imperfect - avais/etais in loc de ai/suis)
+const AUX_IMPARFAIT = {
+  avoir: ["avais","avais","avait","avions","aviez","avaient"],
+  etre: ["étais","étais","était","étions","étiez","étaient"]
+};
+// pronumele reflexive de baza (fara elidare, decisa dinamic mai jos, dupa cum incepe forma auxiliarului)
+const REFLEXIVE_PRONOUN_BASES = ["me","te","se","nous","vous","se"];
 
 function pastParticipleAgreed(participle, aux, person, reflexive){
   if(aux !== 'etre' && !reflexive) return participle; // avoir: invariabil (simplificare uzuala)
@@ -1390,48 +1362,68 @@ function pastParticipleAgreed(participle, aux, person, reflexive){
 
 function buildVerbEntries(){
   const entries = [];
-  VERB_DATA.forEach(([inf, pr, aux, pp, refl], vi)=>{
+  const TENSES = ['present','imparfait','futur','passecompose','plusqueparfait'];
+  VERB_DATA.forEach((row, vi)=>{
     for(let p=0; p<6; p++){
-      entries.push({id:`VERB-PR-${vi}-${p}`, level:'VERBS', verbIdx:vi, tense:'present', person:p});
-      entries.push({id:`VERB-PC-${vi}-${p}`, level:'VERBS', verbIdx:vi, tense:'passecompose', person:p});
+      TENSES.forEach(tense=>{
+        entries.push({id:`VERB-${tense}-${vi}-${p}`, level:'VERBS', verbIdx:vi, tense, person:p});
+      });
     }
   });
   return entries;
 }
 const VERB_ENTRIES = buildVerbEntries();
 
-function passeComposeForm(aux, pp, refl, person){
-  const auxForm = AUX_FORMS.etre[person];
+// forma compusa (passe compose SAU plus-que-parfait) - functie unica, primeste tabelul de
+// forme al auxiliarului potrivit (AUX_FORMS pt passe compose, AUX_IMPARFAIT pt plus-que-parfait)
+function composedForm(auxTable, aux, pp, refl, person){
+  const auxForm = auxTable[aux][person];
   const agreedPp = pastParticipleAgreed(pp, aux, person, refl);
   if(refl){
-    const pron = REFLEXIVE_PRONOUNS_PC[person];
-    const sep = pron.endsWith("'") ? '' : ' '; // fara spatiu dupa elidare (t'es, nu t' es)
-    return `${pron}${sep}${auxForm} ${agreedPp}`;
+    const base = REFLEXIVE_PRONOUN_BASES[person];
+    // nous/vous nu elidiaza niciodata; me/te/se elidiaza doar daca forma auxiliarului incepe cu vocala/h
+    // (la prezent, "suis" nu elidiaza dar "es"/"est" da; la imperfect, TOATE incep cu vocala - "étais" etc.)
+    const needsElisionHere = (base === 'me' || base === 'te' || base === 'se') && /^[aeiouâàäéèêëïîôöùûüh]/i.test(auxForm);
+    if(needsElisionHere){
+      return `${base[0]}'${auxForm} ${agreedPp}`;
+    }
+    return `${base} ${auxForm} ${agreedPp}`;
   }
-  return `${AUX_FORMS[aux][person]} ${agreedPp}`;
+  return `${auxForm} ${agreedPp}`;
 }
 
+const TENSE_LABELS = {
+  present: 'Présent', imparfait: 'Imparfait', futur: 'Futur simple',
+  passecompose: 'Passé composé', plusqueparfait: 'Plus-que-parfait'
+};
+
 function buildVerbQuestion(entry){
-  const [inf, pr, aux, pp, refl] = VERB_DATA[entry.verbIdx];
+  const [inf, pr, im, fu, aux, pp, refl] = VERB_DATA[entry.verbIdx];
   const personLabel = PERSONS[entry.person];
   let correctVal, allFormsThisTense;
   if(entry.tense === 'present'){
-    correctVal = pr[entry.person];
     allFormsThisTense = pr;
-  } else {
-    allFormsThisTense = [0,1,2,3,4,5].map(p => passeComposeForm(aux, pp, refl, p));
-    correctVal = allFormsThisTense[entry.person];
+  } else if(entry.tense === 'imparfait'){
+    allFormsThisTense = im;
+  } else if(entry.tense === 'futur'){
+    allFormsThisTense = fu;
+  } else if(entry.tense === 'passecompose'){
+    allFormsThisTense = [0,1,2,3,4,5].map(p => composedForm(AUX_FORMS, aux, pp, refl, p));
+  } else { // plusqueparfait
+    allFormsThisTense = [0,1,2,3,4,5].map(p => composedForm(AUX_IMPARFAIT, aux, pp, refl, p));
   }
+  correctVal = allFormsThisTense[entry.person];
   // distractori: celelalte 5 persoane ale ACELUIASI verb, in ACELASI timp -
   // testeaza exact terminatia corecta, nu doar recunoasterea verbului
   const otherForms = allFormsThisTense.filter((f,i) => i !== entry.person && f !== correctVal);
   let distractorPool = shuffle([...new Set(otherForms)]);
-  // pt passe compose (verbe NEreflexive), adaugam un distractor cu auxiliarul GRESIT
-  // (testeaza exact alegerea etre/avoir) la persoana corecta - cea mai frecventa greseala reala
-  if(entry.tense === 'passecompose' && !refl){
+  // pt timpurile compuse (passe compose / plus-que-parfait), la verbe NEreflexive, adaugam
+  // un distractor cu auxiliarul GRESIT (testeaza exact alegerea etre/avoir) la persoana corecta
+  if((entry.tense === 'passecompose' || entry.tense === 'plusqueparfait') && !refl){
+    const auxTable = entry.tense === 'passecompose' ? AUX_FORMS : AUX_IMPARFAIT;
     const wrongAux = aux === 'avoir' ? 'etre' : 'avoir';
     const wrongAgreedPp = pastParticipleAgreed(pp, wrongAux, entry.person, false);
-    const wrongAuxForm = `${AUX_FORMS[wrongAux][entry.person]} ${wrongAgreedPp}`;
+    const wrongAuxForm = `${auxTable[wrongAux][entry.person]} ${wrongAgreedPp}`;
     if(wrongAuxForm !== correctVal) distractorPool.unshift(wrongAuxForm);
   }
   const distractors = [];
@@ -1446,14 +1438,19 @@ function buildVerbQuestion(entry){
     const otherVerbIdxs = shuffle(VERB_DATA.map((_,i)=>i).filter(i=>i!==entry.verbIdx));
     for(const vi2 of otherVerbIdxs){
       if(distractors.length === 3) break;
-      const [,pr2,aux2,pp2,refl2] = VERB_DATA[vi2];
-      const f = entry.tense === 'present' ? pr2[entry.person] : passeComposeForm(aux2, pp2, refl2, entry.person);
+      const [,pr2,im2,fu2,aux2,pp2,refl2] = VERB_DATA[vi2];
+      let f;
+      if(entry.tense === 'present') f = pr2[entry.person];
+      else if(entry.tense === 'imparfait') f = im2[entry.person];
+      else if(entry.tense === 'futur') f = fu2[entry.person];
+      else if(entry.tense === 'passecompose') f = composedForm(AUX_FORMS, aux2, pp2, refl2, entry.person);
+      else f = composedForm(AUX_IMPARFAIT, aux2, pp2, refl2, entry.person);
       if(f !== correctVal && !distractors.includes(f)) distractors.push(f);
     }
   }
   const correct = {value: correctVal, html: escapeHtml(correctVal)};
   const options = shuffle([correct, ...distractors.map(f=>({value:f, html:escapeHtml(f)}))]);
-  const tenseLabel = entry.tense === 'present' ? 'Présent' : 'Passé composé';
+  const tenseLabel = TENSE_LABELS[entry.tense];
   return {
     id: entry.id,
     prompt: {value: inf, html: escapeHtml(inf)},
@@ -1463,7 +1460,6 @@ function buildVerbQuestion(entry){
     questionLabel: `<span class="verb-person">${personLabel}</span>`
   };
 }
-
 function buildRound(){
   updateSummaryLine();
   savePreferences();
@@ -2487,6 +2483,7 @@ Reguli stricte, obligatorii:
 1. Textul dintre """ ... """ e ÎNTOTDEAUNA fie în română, fie în franceză — niciodată altă limbă. Detectează singur în care din cele două e scris (chiar dacă are diacritice lipsă sau greșeli mici de ortografie — corectează-le mental înainte să decizi) și tradu-l în CEALALTĂ limbă (română<->franceză). Nu întrebi niciodată utilizatorul care e limba sau direcția — decizi singur, mereu.
 1bis. ATENȚIE specială la CRATIME — textul poate proveni din dictare vocală, unde cratimele lipsesc mereu (tehnologia de recunoaștere vocală nu le poate reda, fiindcă nu au corespondent fonetic distinct). Corectează mental și adaugă cratimele corecte oriunde gramatica le cere, în AMBELE limbi din pereche — nu doar în textul sursă, ci și în traducere: română (ex. "mi ar plăcea"→"mi-ar plăcea", "s a dus"→"s-a dus", "ne am întâlnit"→"ne-am întâlnit", "dă mi"→"dă-mi"), franceză (ex. inversiune interogativă "as tu"→"as-tu", "est ce que"→"est-ce que", cuvinte compuse "peut être"→"peut-être", "au dessus"→"au-dessus", imperativ cu pronume atașat "dis moi"→"dis-moi"). Nu lăsa niciodată o cratimă gramatical obligatorie lipsă în răspunsul tău, indiferent dacă lipsea din textul original.
 2. Tradu NATURAL și IDIOMATIC — exact cum ar formula propoziția un vorbitor nativ, în conversație reală, nu o traducere literală rigidă. Dacă varianta cuvânt-cu-cuvânt ar suna nefiresc, alege formularea care sună natural și fluent, păstrând sensul exact și nivelul de formalitate/tonul originalului (informal rămâne informal, politicos rămâne politicos — inclusiv alegerea tu/vous potrivită).
+2bis. ATENȚIE la ACORDUL GRAMATICAL corect al substantivelor românești alese, mai ales genul (masculin/feminin/neutru) și numărul (singular/plural) — verifică mereu că articolul folosit (un/o/acest/această/niște etc.) se potrivește cu forma exactă a substantivului, ÎNAINTE să scrii propoziția finală. Exemplu concret de greșeală de evitat: "une aide" NU se traduce "o ajutoare" (greșit — "ajutoare" e forma de plural a lui "ajutor", nu poate fi articulată cu "o" la singular) — traducerea corectă e "un ajutor" (masculin, singular, la fel ca substantivul-sursă). Verifică mental genul corect al fiecărui substantiv românesc pe care-l alegi, nu presupune că genul din franceză (feminin/masculin) se transferă automat în română.
 3. Dacă textul are mai multe propoziții, tradu FIECARE propoziție separat, în ordine, câte o pereche pe rând. Formatul EXACT, obligatoriu, pentru fiecare pereche (aplicația citește aceste etichete programatic, ca să poată reda cu voce doar partea franceză — respectă-l STRICT, fără abateri):
 [FR] <propoziția în franceză>
 [RO] <propoziția în română>
@@ -2501,7 +2498,7 @@ Reguli stricte, obligatorii:
 // Nu alege cuvinte, nu retraduce - doar verifica FORMA rezultatului deja produs de traducator:
 // punctuatie, accente/diacritice, topica, acorduri. Ruleaza automat dupa fiecare traducere reusita.
 function buildGrammarReviewSystemPrompt(){
-  return `Ești un expert în gramatica și ortografia limbilor română și franceză, al doilea specialist dintr-un pipeline de traducere în doi pași. Primul specialist (traducătorul) a ales deja cuvintele și formularea — TU nu alegi cuvinte, NU retraduci, NU schimbi sensul, stilul sau nivelul de formalitate. Rolul tău e strict de verificare și corectare a FORMEI.
+  return `Ești un expert în gramatica și ortografia limbilor română și franceză, al doilea specialist dintr-un pipeline de traducere în doi pași. Primul specialist (traducătorul) a ales deja cuvintele și formularea — TU nu alegi cuvinte NOI, NU retraduci, NU schimbi sensul, stilul sau nivelul de formalitate. Rolul tău e strict de verificare și corectare a FORMEI — dar asta include corectarea formei GREȘITE a unui cuvânt deja ales (gen, număr, terminație), nu doar accente și punctuație.
 Vei primi un text delimitat prin """ ... """, care conține una sau mai multe perechi deja formatate astfel, produse de traducător:
 [FR] <propoziția în franceză>
 [RO] <propoziția în română>
@@ -2510,7 +2507,7 @@ Sarcina ta, pentru FIECARE pereche [FR]/[RO] primită, verifică și corectează
 1. Punctuație corectă și completă (virgule, puncte, semne de întrebare/exclamare, apostrof/cratimă unde gramatica le cere).
 2. Accente și diacritice complete și corecte — franceză (é/è/ê/ë/à/â/ù/û/ô/î/ï/ç), română (ă/â/î/ș/ț) — inclusiv cazuri unde traducătorul a omis din greșeală un accent.
 3. Topică/ordinea cuvintelor gramatical corectă — mai ales construcții franceze cu inversiune sau pronume atașate (ex. "as-tu", "peut-être", "dis-moi", plasarea corectă a pronumelor complement înaintea verbului).
-4. Acorduri de gen/număr (adjectiv-substantiv, participiu-subiect) care ar fi putut scăpa traducătorului.
+4. Acorduri de gen/număr — INCLUSIV articol-substantiv, nu doar adjectiv-substantiv sau participiu-subiect. Dacă articolul (un/o/acest/această etc.) nu se potrivește cu forma substantivului ales de traducător, corectezi FORMA substantivului (gen/număr/terminație) ca să se potrivească gramatical cu articolul, sau invers — asta e o corectare de FORMĂ, nu o înlocuire de cuvânt, chiar dacă rezultatul arată diferit ca literă. Exemplu concret, de reținut exact: dacă primești "o ajutoare" (GREȘIT — "ajutoare" e pluralul lui "ajutor", nu poate fi articulat cu "o" la singular), corectezi la "un ajutor" (CORECT) — nu la sinonime ca "un sprijin" sau "o susținere", doar corectezi acordul gramatical al cuvântului deja ales de traducător. Fii la fel de atent la orice alt substantiv românesc unde genul/numărul din context nu se potrivește cu articolul folosit — verifică activ, nu doar pasiv, fiecare pereche articol-substantiv din text.
 NU reformulezi, NU înlocuiești cuvinte cu sinonime, NU adaugi/elimini informație, NU schimbi ordinea propozițiilor. Dacă o pereche e deja perfectă din punct de vedere al formei, o lași identică, literă cu literă.
 Format de răspuns EXACT, identic ca structură cu ce ai primit (aceleași etichete [FR]/[RO], aceeași ordine, același număr de perechi, sau linia fără etichetă neatinsă dacă a fost cazul):
 [FR] <propoziția, cu forma corectată dacă a fost nevoie>
@@ -3185,9 +3182,13 @@ document.getElementById('aiTranslateBtn').addEventListener('click', async ()=>{
           const reviewBlocks = [{ type: 'text', text: `"""\n${result}\n"""` }];
           const reviewed = await callClaude(reviewPrompt, reviewBlocks, 8192);
           const reviewedParsed = parseTaggedAiResult(reviewed);
-          // folosim rezultatul revizuit doar daca pastreaza structura (acelasi nr de perechi cu etichete) -
-          // plasa de siguranta: daca ceva a mers prost (raspuns gol/malformat), pastram traducerea originala
-          if(reviewedParsed.hasTags){ parsed = reviewedParsed; result = reviewed; }
+          // plasa de siguranta: folosim rezultatul revizuit DOAR daca (a) inca are etichete SI
+          // (b) numarul de propozitii FR + RO a ramas identic - la texte lungi, multi-paragraf,
+          // modelul poate pierde/contopi cate o pereche la pasul 2; daca numarul nu se potriveste,
+          // e semn ca ceva s-a corupt tacut - pastram traducerea nerevizuita, mai sigura decat una scurtata
+          const originalCount = (result.match(/^\[(FR|RO)\]/gm) || []).length;
+          const reviewedCount = (reviewed.match(/^\[(FR|RO)\]/gm) || []).length;
+          if(reviewedParsed.hasTags && reviewedCount === originalCount){ parsed = reviewedParsed; result = reviewed; }
         }catch(reviewErr){
           // revizuirea a esuat (retea etc.) - continuam cu traducerea nerevizuita, nu blocam utilizatorul
         }
