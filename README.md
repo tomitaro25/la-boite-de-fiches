@@ -18,7 +18,10 @@ Aplicație de exersat vocabular francez-român, sub formă de PWA (Progressive W
 - **Cuvintele mele** — listă personală, cu adăugare din căutare (lipire din clipboard, evidențiată vizual, cu curățare automată a textului copiat din Reverso), suprascriere cu păstrarea progresului acumulat
 - **Antonime & Sinonime** — 136 perechi antonime + 46 perechi sinonime, verificate manual, exclusiv în franceză
 - **Conjugare verbe** — 136 verbe, présent + passé composé, cu reguli être/avoir corecte (inclusiv verbe reflexive) și acord de număr la participiu
-- **🤖 AI (Claude)** — două funcții comutabile dintr-un toggle: **Traducere** liberă (RO⇄FR, cu propria cheie API), acum într-un **pipeline în doi pași** — un agent alege traducerea optimă, apoi un al doilea, specializat strict pe gramatică/ortografie/punctuație/topică, o revizuiește tehnic înainte de afișare (fără să schimbe alegerea de traducere) — și **Corectură franceză** (agent separat, dedicat exclusiv identificării și corectării greșelilor dintr-un text scris de tine, cu explicații în română pentru fiecare greșeală găsită); ambele cu dictare vocală, imagine cu text (galerie/clipboard), export text/PDF — opțional, experimental
+- **🤖 AI (Claude)** — panou organizat ca hub, cu 3 destinații (opțional, experimental):
+  - **Traducere & Corectură** — Traducere liberă (RO⇄FR, cu propria cheie API) într-un **pipeline în doi pași** (un agent alege traducerea optimă, altul, specializat strict pe gramatică/ortografie/punctuație/topică, o revizuiește tehnic) și **Corectură franceză** (agent separat, dedicat identificării/corectării greșelilor dintr-un text scris de tine, cu explicații în română); ambele cu dictare vocală, imagine cu text (galerie/clipboard), export text/PDF
+  - **📝 Exersează ce ai învățat** — text generat de Claude, STRICT din vocabularul deja exersat cu succes (prag: minim 2 răspunsuri corecte per cuvânt), pe o temă la alegere, cu traducere ascunsă până o ceri și loc pentru propria încercare înainte
+  - **📜 Istoric** — toate traducerile/corecturile/exercițiile AI, cu filtrare, selecție/ștergere în masă, export JSON/CSV/PDF, import cu deduplicare, și analiză de cuvinte frecvente neadăugate încă în vocabular
 - Selector de direcție: FR→RO, RO→FR, sau ambele amestecat
 - Pronunție audio a cuvintelor franceze (Web Speech API), cu alegere de voce
 - Link direct către Reverso (`dictionary.reverso.net/french-romanian`) pentru fiecare cuvânt francez, ca sursă suplimentară (dict.cc nu are pereche franceză-română directă)
@@ -41,6 +44,19 @@ Pentru a publica o versiune nouă: încarcă fișierele modificate în acest rep
 
 ## Changelog
 
+**v21** — verificare de audit după v20 (fără funcționalitate nouă, doar corecții de precizie):
+1. **0 reziduuri germane găsite** — scanare exhaustivă (text, cod, ID-uri HTML, clase CSS, funcții) — nimic rămas din Karteikarten.
+2. **Paritate completă cu germana confirmată programatic** — comparație funcție-cu-funcție, ID-cu-ID, clasă-cu-clasă între cele două `index.html`; singurele diferențe sunt cele franceze specifice, așteptate (Corectură franceză, elidare, passé composé etc.) — nimic lipsă (în afara modulului „Îngrijire"/PFLEGE, exclus intenționat, nefiind relevant pentru franceză).
+3. **Corecții text de Ajutor** — descrierea modulului AI încă spunea „două funcții separate", frazare rămasă de dinainte de restructurarea în hub (v20); actualizată să reflecte cele 3 destinații. O altă frază („redirecționează spre exercițiu") era ambiguă după apariția modulului nou „Exersează ce ai învățat" cu acest nume exact — clarificată.
+4. Secțiunea de Confidențialitate menționează acum explicit istoricul AI ca dată stocată local.
+5. **15 teste funcționale suplimentare** (DOM real, jsdom) — navigare hub completă, prag „cunoscut", salvare/randare istoric cu tag-uri corecte, verificare de regresie pe Verbe/Antonime — toate trecute.
+
+**v20** — replicat din Karteikarten (aplicația-soră germană): două module noi mari, plus restructurare a panoului AI.
+- **🤖 Panoul AI restructurat ca hub** — 3 destinații: Traducere & Corectură (ce exista deja), 📝 Exersează ce ai învățat (nou), 📜 Istoric (nou).
+- **📝 Exersează ce ai învățat** — Claude generează un text scurt, pe o temă la alegere, folosind STRICT vocabularul deja exersat cu succes (prag exact: cel puțin 2 răspunsuri corecte, cumulat, per cuvânt) — nu tot vocabularul din aplicație. Grupare pe 2 niveluri (A1-A2 → max 60 cuvinte; B1-B2 → max 100, cu A1-A2 permis liber ca bază gramaticală). Plafon strict de 15% cuvinte din afara listei cunoscute. Direcție aleasă manual (FR sau RO). Traducerea rămâne ascunsă până apeși „Arată traducerea", cu loc pentru propria încercare înainte — comparație directă, salvată automat în Istoric.
+- **📜 Istoric** — toate traducerile/corecturile/exercițiile AI, cu filtrare an/lună, sortare, selecție și ștergere în masă, view de detaliu (inclusiv „Exersarea ta" vs. traducerea corectă, la exerciții), export JSON (pentru combinat între dispozitive)/CSV/PDF, import cu deduplicare automată, și analiză de „cuvinte frecvente, neadăugate" (scanează istoricul, sugerează cuvinte franceze repetate de 2+ ori, absente din vocabular — adăugare cu un tap).
+- **Bug real găsit pe drum**: fișierul avea două implementări duplicate ale pipeline-ului de revizuire gramaticală (de la o versiune anterioară), care rulau de două ori la fiecare traducere — consolidat la o singură trecere.
+
 **v19** — corecție de gramatică română: eticheta implicită de pe cardurile modului obișnuit de traducere era „Traduce" (fără sens gramatical clar ca instrucțiune) — corectată la „Tradu" (imperativ informal singular), consecvent cu tonul „tu" folosit peste tot în restul aplicației (texte de ajutor, mesaje). Etichetele proprii de la Antonime/Sinonime/Conjugare rămân neschimbate.
 
 **v18** — completare la fix-ul de la v17 (separarea `localStorage`): restaurarea unui backup **vechi** (exportat înainte de prefixare) nu mai afișează fals „Backup restaurat" fără să restaureze de fapt nimic (fiindcă niciuna dintre cheile vechi nu se mai potrivea cu `BACKUP_KEYS`, actualizat la cele prefixate) — acum verifică explicit dacă există cel puțin o cheie compatibilă în fișier înainte de a cere confirmare; dacă nu găsește niciuna, oprește procesul cu un mesaj clar, fără să reîncarce aplicația.
@@ -61,7 +77,7 @@ Pentru a publica o versiune nouă: încarcă fișierele modificate în acest rep
 
 ## Confidențialitate
 
-Aplicația nu colectează, nu transmite și nu stochează nicio dată pe niciun server propriu. Tot ce ține de progres (statistici, preferințe, „Cuvintele mele") rămâne local, în browser-ul dispozitivului tău. Conexiuni externe: Google Fonts (fonturi), Reverso (doar dacă apeși linkul respectiv), motorul de sinteză vocală al telefonului, motorul de recunoaștere vocală al browserului (dacă folosești căutarea/dictarea vocală — trimite sunetul către serverele browserului, ex. Google pentru Chrome, ca să fie transformat în text), și — doar dacă activezi opțional funcția AI (Claude) și adaugi propria cheie API — serverele Anthropic, pentru traducerile cerute explicit. Cheia API rămâne salvată doar local, nu trece niciodată prin noi.
+Aplicația nu colectează, nu transmite și nu stochează nicio dată pe niciun server propriu. Tot ce ține de progres (statistici, preferințe, „Cuvintele mele", istoricul AI) rămâne local, în browser-ul dispozitivului tău. Conexiuni externe: Google Fonts (fonturi), Reverso (doar dacă apeși linkul respectiv), motorul de sinteză vocală al telefonului, motorul de recunoaștere vocală al browserului (dacă folosești căutarea/dictarea vocală — trimite sunetul către serverele browserului, ex. Google pentru Chrome, ca să fie transformat în text), și — doar dacă activezi opțional funcția AI (Claude) și adaugi propria cheie API — serverele Anthropic, pentru traducerile/corecturile/exercițiile cerute explicit. Cheia API rămâne salvată doar local, nu trece niciodată prin noi.
 
 ## Licență
 
