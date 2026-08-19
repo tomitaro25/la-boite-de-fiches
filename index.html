@@ -1487,7 +1487,10 @@ function buildRound(){
     const answerSide = deToRo ? 'ro' : 'fr';
     const prompt = formatSide(word, promptSide);
     const correct = formatSide(word, answerSide);
-    const others = shuffle(words.filter(w => w.id !== word.id));
+    // distractorii unui cuvant normal (FR/RO) trebuie sa fie tot cuvinte normale - excludem
+    // intrarile ANTSYN/VERBS (au alta forma de date, .word/.answer sau .verbIdx, nu .fr) ca
+    // sa nu crape classifyWord() cand sunt selectate simultan mai multe niveluri
+    const others = shuffle(words.filter(w => w.id !== word.id && w.level !== 'ANTSYN' && w.level !== 'VERBS'));
     const wordCategory = classifyWord(word);
     const sameCategory = others.filter(o => classifyWord(o) === wordCategory);
     const candidatePools = [sameCategory, others]; // incercam mai intai aceeasi categorie, apoi relaxam
