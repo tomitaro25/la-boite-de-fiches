@@ -390,7 +390,7 @@
       5. <b>Copiază cheia imediat</b> — se arată o singură dată; începe cu „sk-ant-"<br>
       6. În aplicație, mergi în ⚙ → „AI (Claude)" → lipește cheia → „Testează conexiunea"</p>
       <p><b>Cost aproximativ</b> (model Haiku, cel mai ieftin): o traducere sau corectură scurtă costă sub un cent — cu 5$ ajungi la mii de utilizări. O imagine costă considerabil mai mult (poate câteva sute de poze cu 5$) — decupează poza doar pe zona cu text, nu tot ecranul, ca să reduci costul.</p>
-      <p><b>Limită onestă:</b> fiind cel mai ieftin model Claude, Haiku poate ocazional greși pe texte lungi și complexe (articole întregi, mai ales) — cel mai frecvent, un acord greșit de gen/număr la un substantiv românesc. Pipeline-ul în doi pași (traducere + revizuire gramaticală separată) prinde majoritatea acestor cazuri, dar nu garantează perfecțiune 100% — verifică oricând ceva pare nefiresc, mai ales la texte lungi, dintr-o sursă reală.</p>
+      <p><b>Limită onestă:</b> fiind cel mai ieftin model Claude, Haiku poate ocazional greși pe texte lungi și complexe (articole întregi, mai ales) — acorduri greșite de gen/număr, cuvinte inventate, expresii idiomatice traduse mecanic, sau chiar sens schimbat față de original. Traducerea trece printr-un pipeline în <b>trei pași</b>: (1) traducerea propriu-zisă, (2) o revizuire separată, strict pe corectitudine (formă, sens, expresii idiomatice, cuvinte inventate), și (3) — doar RAR, când al doilea pas chiar nu e sigur de o bucată anume — acea bucată exactă (nu tot textul) e trimisă către un model mai avansat, pentru o a doua opinie. Pasul 3 costă puțin mai mult și apare doar ocazional, nu la fiecare traducere — nu garantează perfecțiune 100%, dar reduce mult riscul de erori grave. Verifică oricând ceva pare nefiresc, mai ales la texte lungi, dintr-o sursă reală.</p>
       <p><b>Ce face automat, la Traducere:</b> detectează singur dacă textul e în română sau franceză (corectând mental accente/greșeli mici, inclusiv cratime lipsă) și traduce natural, nu cuvânt-cu-cuvânt; pentru text cu mai multe propoziții, le aliniază original→traducere, una câte una (partea franceză apare bold, albastru, și poate fi ascultată separat cu 🔊); poți dicta vocal (cu un mic buton RO/FR, doar pentru ce ascultă microfonul); rezultatul se poate descărca ca text sau ca PDF (prin funcția de printare a telefonului).</p>
       <p><b>Traducere în doi pași, pentru acuratețe:</b> la Traducere, rezultatul trece prin <b>doi agenți separați</b> — întâi cel care alege traducerea optimă, apoi un al doilea, specializat strict pe gramatică/ortografie/punctuație/topică, care verifică și corectează tehnic rezultatul (acorduri, accente/diacritice, ordinea cuvintelor, cratime) fără să schimbe alegerea de traducere. Asta înseamnă un apel API în plus (cost puțin mai mare, tot sub un cent per traducere cu Haiku) și puțin mai mult timp de așteptare, în schimbul unei acurateți mai bune.</p>
       <p><b>Notă despre dictare și cratime:</b> tehnologia de recunoaștere vocală din browser nu poate reda niciodată cratime (ex. „mi-ar", „s-a", „peut-être") — nu au corespondent fonetic distinct, deci textul dictat, brut, le va afișa mereu lipsă. Se corectează automat abia la pasul de traducere/corectură (Claude reface cratimele gramatical corecte) — dacă vrei textul dictat corect și înainte de acest pas, editează-l manual în căsuța de text.</p>
@@ -2501,21 +2501,26 @@ Reguli stricte, obligatorii:
 // Nu alege cuvinte, nu retraduce - doar verifica FORMA rezultatului deja produs de traducator:
 // punctuatie, accente/diacritice, topica, acorduri. Ruleaza automat dupa fiecare traducere reusita.
 function buildGrammarReviewSystemPrompt(){
-  return `Ești un expert în gramatica și ortografia limbilor română și franceză, al doilea specialist dintr-un pipeline de traducere în doi pași. Primul specialist (traducătorul) a ales deja cuvintele și formularea — TU nu alegi cuvinte NOI, NU retraduci, NU schimbi sensul, stilul sau nivelul de formalitate. Rolul tău e strict de verificare și corectare a FORMEI — dar asta include corectarea formei GREȘITE a unui cuvânt deja ales (gen, număr, terminație), nu doar accente și punctuație.
+  return `Ești un expert în gramatica și ortografia limbilor română și franceză, al doilea specialist dintr-un pipeline de traducere în doi pași. Primul specialist (traducătorul) a ales deja cuvintele și formularea — TU nu retraduci de la zero, NU schimbi stilul sau nivelul de formalitate. Rolul tău e de verificare și corectare, incluzând FORMA (gramatică, ortografie) DAR și corectitudinea reală a traducerii, acolo unde traducătorul a greșit vizibil — vezi regulile de mai jos, unele îți permit explicit să înlocuiești un cuvânt/expresie greșită.
 Vei primi un text delimitat prin """ ... """, care conține una sau mai multe perechi deja formatate astfel, produse de traducător:
 [FR] <propoziția în franceză>
 [RO] <propoziția în română>
 (posibil urmate de o linie fără etichetă, dacă traducătorul a redirecționat cererea în loc să traducă — în acest caz las-o exact așa cum e, neatinsă, fără nicio modificare).
-Sarcina ta, pentru FIECARE pereche [FR]/[RO] primită, verifică și corectează STRICT aspecte de formă, fără să atingi alegerea de cuvinte:
+Sarcina ta, pentru FIECARE pereche [FR]/[RO] primită, verifică următoarele categorii, în ordine:
 1. Punctuație corectă și completă (virgule, puncte, semne de întrebare/exclamare, apostrof/cratimă unde gramatica le cere).
 2. Accente și diacritice complete și corecte — franceză (é/è/ê/ë/à/â/ù/û/ô/î/ï/ç), română (ă/â/î/ș/ț) — inclusiv cazuri unde traducătorul a omis din greșeală un accent.
 3. Topică/ordinea cuvintelor gramatical corectă — mai ales construcții franceze cu inversiune sau pronume atașate (ex. "as-tu", "peut-être", "dis-moi", plasarea corectă a pronumelor complement înaintea verbului).
-4. Acorduri de gen/număr — INCLUSIV articol-substantiv, nu doar adjectiv-substantiv sau participiu-subiect. Dacă articolul (un/o/acest/această etc.) nu se potrivește cu forma substantivului ales de traducător, corectezi FORMA substantivului (gen/număr/terminație) ca să se potrivească gramatical cu articolul, sau invers — asta e o corectare de FORMĂ, nu o înlocuire de cuvânt, chiar dacă rezultatul arată diferit ca literă. Exemplu concret, de reținut exact: dacă primești "o ajutoare" (GREȘIT — "ajutoare" e pluralul lui "ajutor", nu poate fi articulat cu "o" la singular), corectezi la "un ajutor" (CORECT) — nu la sinonime ca "un sprijin" sau "o susținere", doar corectezi acordul gramatical al cuvântului deja ales de traducător. Fii la fel de atent la orice alt substantiv românesc unde genul/numărul din context nu se potrivește cu articolul folosit — verifică activ, nu doar pasiv, fiecare pereche articol-substantiv din text.
-NU reformulezi, NU înlocuiești cuvinte cu sinonime, NU adaugi/elimini informație, NU schimbi ordinea propozițiilor. Dacă o pereche e deja perfectă din punct de vedere al formei, o lași identică, literă cu literă.
+4. Acorduri de gen/număr — INCLUSIV articol-substantiv, nu doar adjectiv-substantiv. Dacă articolul (un/o/acest/această etc.) nu se potrivește cu forma substantivului ales de traducător, corectezi FORMA substantivului (gen/număr/terminație) ca să se potrivească gramatical cu articolul, sau invers — asta e o corectare de FORMĂ, nu o înlocuire de cuvânt, chiar dacă rezultatul arată diferit ca literă. Exemplu concret, de reținut exact: dacă primești "o ajutoare" (GREȘIT — "ajutoare" e pluralul lui "ajutor", nu poate fi articulat cu "o" la singular), corectezi la "un ajutor" (CORECT). Fii la fel de atent la orice alt substantiv românesc unde genul/numărul din context nu se potrivește cu articolul folosit.
+5. Acordul PARTICIPIILOR — separat de regula 4, verifică și acordul participiilor folosite cu auxiliarul "a fi"/în construcții pasive, în AMBELE limbi. Română: participiul se acordă în gen/număr cu subiectul (ex. "cartea a fost scris**ă**", nu "scris", dacă subiectul e feminin — "documentele au fost semnat**e**", nu "semnat", la plural). Franceză: la fel, cu être + participiu, mai ales la pasiv (ex. "la lettre a été écrit**e**", nu "écrit").
+6. FIDELITATE DE SENS — verifică SEPARAT de gramatică dacă traducerea transmite EXACT același sens ca originalul, în ambele direcții. O propoziție poate fi perfect corectă gramatical, dar să spună cu totul altceva. Exemplu concret: dacă franceza spune "Il a refusé de signer" (a refuzat să semneze) și traducerea română zice "El a acceptat să semneze" — gramatical perfectă, dar sensul e exact opus. Corectezi sensul greșit, nu doar forma corectă a unei propoziții cu sens greșit.
+7. EXPRESII IDIOMATICE — dacă sursa folosește o expresie fixă, verifică dacă traducerea transmite ACELAȘI SENS printr-o formulare naturală în limba țintă, nu tradusă mecanic, cuvânt-cu-cuvânt. Exemplu concret: expresia franceză "il pleut des cordes" NU se traduce literal "plouă cu funii" (fără sens în română) — echivalentul idiomatic corect e "plouă cu găleata". Verifică și invers: o expresie fixă românească tradusă literal, fără sens, în franceză, trebuie înlocuită cu echivalentul idiomatic francez potrivit.
+8. CUVINTE INVENTATE — interzise explicit. Dacă traducătorul a folosit un cuvânt care nu există cu adevărat în limba respectivă (un compus fabricat, care "sună plauzibil" dar nu e un cuvânt real), înlocuiește-l cu cuvântul real, corect, care exprimă sensul dorit — NU inventa TU altul, la fel de plauzibil dar tot fals, în locul lui. Exemplu concret: "un canulard-mensonge" NU e un cuvânt real francez (compus inventat, chiar dacă sună plauzibil) pentru "o farsă" — cuvântul real, existent, e "un canular". Dacă NU ești sigur care e cuvântul real corect, NU inventa unul plauzibil — vezi regula 9, de incertitudine, mai jos.
+9. REGULĂ CRITICĂ despre incertitudine — dacă, verificând categoriile de mai sus, întâlnești un cuvânt/expresie pentru care NU EȘTI SIGUR care-i forma sau traducerea corectă (nu o ezitare minoră de stil — incertitudine reală), NU ghici și NU inventa nimic. În loc, marchează STRICT DOAR acea bucată (nimic mai mult din propoziție, doar cuvântul/expresia exactă) cu etichetele [UNCERTAIN]...[/UNCERTAIN], lăsând-o exact așa cum era primită. Folosește aceste etichete DOAR când chiar nu știi, nu pentru orice ezitare minoră.
+Pentru regulile 1-5 (formă): NU reformulezi, NU înlocuiești cuvinte cu sinonime doar din preferință stilistică, NU adaugi/elimini informație, NU schimbi ordinea propozițiilor — corectezi strict greșeli reale de formă. Pentru regulile 6-8 (sens/idiom/cuvinte inventate): AI VOIE explicit să înlocuiești un cuvânt/o formulare greșită cu cea corectă, dacă e clar o eroare reală, nu o preferință de stil. Dacă o pereche e deja perfectă, o lași identică, literă cu literă.
 Format de răspuns EXACT, identic ca structură cu ce ai primit (aceleași etichete [FR]/[RO], aceeași ordine, același număr de perechi, sau linia fără etichetă neatinsă dacă a fost cazul):
-[FR] <propoziția, cu forma corectată dacă a fost nevoie>
-[RO] <propoziția, cu forma corectată dacă a fost nevoie>
-Fără linii goale între perechi, fără introduceri, fără explicații, fără comentarii despre ce ai corectat — doar perechile, în formatul exact primit.`;
+[FR] <propoziția, cu corectările de mai sus dacă a fost nevoie>
+[RO] <propoziția, cu corectările de mai sus dacă a fost nevoie>
+Fără linii goale între perechi, fără introduceri, fără explicații, fără comentarii despre ce ai corectat — doar perechile, în formatul exact primit (eventual cu [UNCERTAIN]...[/UNCERTAIN] pe alocuri, dacă a fost cazul).`;
 }
 
 /* ---------- AI - corector gramatical/ortografic francez (agent separat de traducator) ---------- */
@@ -2555,7 +2560,7 @@ function parseCorrectionResult(raw){
   return { corrected, explanations, redirected: false };
 }
 
-async function callClaude(systemPrompt, contentBlocks, maxTokens){
+async function callClaude(systemPrompt, contentBlocks, maxTokens, model){
   const key = loadClaudeKey();
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -2566,7 +2571,7 @@ async function callClaude(systemPrompt, contentBlocks, maxTokens){
       'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
+      model: model || 'claude-haiku-4-5-20251001',
       max_tokens: maxTokens,
       system: systemPrompt,
       messages: [{ role: 'user', content: contentBlocks }]
@@ -2579,6 +2584,44 @@ async function callClaude(systemPrompt, contentBlocks, maxTokens){
   }
   const data = await res.json();
   return data?.content?.[0]?.text || '';
+}
+
+/* ---------- AI: escaladare rara, tintita, catre un model mai capabil - doar pentru
+   bucatile marcate [UNCERTAIN] de agentul de revizuire (regula 9 din promptul lui),
+   acolo unde chiar nu e sigur, nu pentru orice traducere - cost suplimentar doar rar. ---------- */
+function extractUncertainSegments(text){
+  const regex = /\[UNCERTAIN\](.*?)\[\/UNCERTAIN\]/g;
+  const segments = [];
+  let match;
+  while((match = regex.exec(text)) !== null){
+    segments.push(match[1]);
+  }
+  return segments;
+}
+
+function buildEscalationPrompt(){
+  return `Ești un traducător expert, senior, chemat să rezolvi cazuri dificile pe care un traducător junior nu a fost sigur cum să le rezolve corect (perechea de limbi română-franceză).
+Primești o listă de fragmente scurte, fiecare extras dintr-o propoziție mai mare, pe care junior-ul nu a știut sigur cum să le traducă/formuleze corect.
+Pentru FIECARE fragment, oferă varianta corectă, naturală, care să se potrivească gramatical exact la locul din care a fost extras (nu o propoziție întreagă, doar înlocuitorul exact al fragmentului).
+Format STRICT: câte o linie per fragment, în ordinea primită, fără numerotare, fără explicații:
+[FIX] <fragmentul de înlocuire corect>`;
+}
+
+async function escalateUncertainSegments(reviewedText){
+  const segments = extractUncertainSegments(reviewedText);
+  if(!segments.length) return reviewedText;
+  try{
+    const listText = segments.map((s,i) => `${i+1}. ${s}`).join('\n');
+    const result = await callClaude(buildEscalationPrompt(), [{type:'text', text: listText}], 2048, 'claude-sonnet-5');
+    const fixes = (result.match(/^\[FIX\]\s*(.*)$/gm) || []).map(l => l.replace(/^\[FIX\]\s*/, ''));
+    if(fixes.length !== segments.length){
+      return reviewedText.replace(/\[UNCERTAIN\](.*?)\[\/UNCERTAIN\]/g, '$1'); // fallback sigur: pastram fragmentul original, doar scoatem etichetele
+    }
+    let i = 0;
+    return reviewedText.replace(/\[UNCERTAIN\](.*?)\[\/UNCERTAIN\]/g, () => fixes[i++]);
+  }catch(err){
+    return reviewedText.replace(/\[UNCERTAIN\](.*?)\[\/UNCERTAIN\]/g, '$1'); // fallback sigur, la fel, daca escaladarea esueaza (retea etc.)
+  }
 }
 
 /* ---------- AI: "Exersează ce ai învățat" ---------- */
@@ -3192,6 +3235,15 @@ document.getElementById('aiTranslateBtn').addEventListener('click', async ()=>{
           const originalCount = (result.match(/^\[(FR|RO)\]/gm) || []).length;
           const reviewedCount = (reviewed.match(/^\[(FR|RO)\]/gm) || []).length;
           if(reviewedParsed.hasTags && reviewedCount === originalCount){ parsed = reviewedParsed; result = reviewed; }
+          // pasul 3, rar: daca revizorul a marcat explicit bucati de care nu era sigur
+          // ([UNCERTAIN]...[/UNCERTAIN], regula 9 din promptul lui), le trimitem STRICT
+          // pe acelea (nu tot textul) catre un model mai capabil - cost suplimentar doar
+          // atunci cand chiar e nevoie, nu la fiecare traducere
+          if(result.includes('[UNCERTAIN]')){
+            statusEl.textContent = 'Se verifică o bucată incertă cu un model mai avansat...';
+            result = await escalateUncertainSegments(result);
+            parsed = parseTaggedAiResult(result);
+          }
         }catch(reviewErr){
           // revizuirea a esuat (retea etc.) - continuam cu traducerea nerevizuita, nu blocam utilizatorul
         }
