@@ -129,6 +129,7 @@
   .stage-star.gold{ color:var(--gold); }
   .stage-star.green{ color:var(--green); }
   .stage-star.wrong{ color:var(--red); }
+  .context-word-mark{ color:var(--red); font-weight:700; }
   .help-text p{ font-family:'Literata', serif; font-size:0.82rem; line-height:1.5; margin:0 0 10px; color:var(--ink); }
   .help-text p:last-child{ margin-bottom:0; }
   .tag{ border:1px solid var(--line); border-radius:20px; padding:3px 10px; }
@@ -407,8 +408,14 @@
       <p>Scrii propria încercare de traducere înainte să apeși „Arată traducerea" — traducerea corectă (AI) rămâne ascunsă până atunci, ca să nu poți „trișa", și butonul de ascultat se activează abia după dezvăluire, din același motiv. Fiecare exercițiu se salvează automat în Istoric la dezvăluire, împreună cu încercarea ta (dacă ai scris ceva), ca să le poți compara direct mai târziu.</p>
     </div>
     <div class="sheet-section help-text">
+      <div class="sheet-label">🆕 Cuvinte noi în context</div>
+      <p>Diferit de „Exersează ce ai învățat" — aici nu se testează ce știi deja, ci vezi cuvinte <b>abia întâlnite</b> (văzute o dată sau de două ori) folosite natural, de mai multe ori, în situații diferite. Traducerea română apare direct, vizibilă — scopul e să înțelegi cuvântul în context, nu să te autotestezi.</p>
+      <p>Claude generează <b>3 texte scurte, independente</b>, fiecare cu subiect propriu — nu 3 variații ale aceleiași idei — și fiecare folosește toate cuvintele țintă alese, măcar o dată. Cuvintele apar <b>evidențiate cu roșu</b>, la orice formă gramaticală cere contextul (conjugate, la plural etc.), nu forțat la forma de bază din dicționar.</p>
+      <p><b>Selecție automată</b> (implicit) — până la 5 cuvinte alese direct din progresul tău, fără niciun apel către AI (gratuit, instant). <b>Selecție manuală</b> — „✋ Choisir manuellement" deschide lista „Cuvintele mele exersate" (aceeași listă accesibilă și din ⚙ Setări, ca să răsfoiești oricând ce-ai exersat), alegi până la 5 cuvinte prin tap, apoi „Folosește aceste cuvinte" te aduce înapoi cu un buton separat de generare pentru alegerea ta.</p>
+    </div>
+    <div class="sheet-section help-text">
       <div class="sheet-label">📜 Istoric</div>
-      <p>Toate traducerile, corecturile și exercițiile generate cu AI rămân salvate local, cu dată și etichetă de sursă — <code>[txt]</code> scris, <code>[rec]</code> dictat, <code>[img]</code> din imagine, <code>[exc]</code> din „Exersează ce ai învățat", <code>[cor]</code> din Corectură. Poți filtra pe an/lună, sorta, selecta și șterge în masă, exporta (JSON pentru combinat între dispozitive, CSV/PDF pentru citit în afara aplicației) sau importa un JSON exportat de pe alt dispozitiv (se combină după dată, fără duplicate).</p>
+      <p>Toate traducerile, corecturile și exercițiile generate cu AI rămân salvate local, cu dată și etichetă de sursă — <code>[txt]</code> scris, <code>[rec]</code> dictat, <code>[img]</code> din imagine, <code>[exc]</code> din „Exersează ce ai învățat", <code>[cor]</code> din Corectură, <code>[nou]</code> din „Cuvinte noi în context" (cu evidențierea roșie păstrată la redeschidere). Poți filtra pe an/lună, sorta, selecta și șterge în masă, exporta (JSON pentru combinat între dispozitive, CSV/PDF pentru citit în afara aplicației) sau importa un JSON exportat de pe alt dispozitiv (se combină după dată, fără duplicate).</p>
       <p><b>Cuvinte frecvente, neadăugate</b> — scanează tot istoricul de traduceri/corecturi și îți arată cuvintele franceze care apar de cel puțin 2 ori și încă nu sunt nici în vocabularul de bază, nici în „Cuvintele mele" — utile de adăugat direct de-acolo, cu un tap.</p>
     </div>
     <div class="sheet-section help-text">
@@ -467,6 +474,10 @@
     <div class="sheet-section">
       <div class="sheet-label">Progres pe niveluri</div>
       <div id="levelProgress"></div>
+    </div>
+
+    <div class="sheet-section">
+      <button class="btn-block" id="browseWordListBtn" style="width:100%;"><span>📋 Cuvintele mele exersate</span><span>›</span></button>
     </div>
   </details>
 
@@ -586,6 +597,7 @@
     <div class="sheet-section">
       <button class="btn-block paste-highlight" id="aiHubTranslateBtn" style="width:100%;"><span>🌐 Traducere liberă & Corectură</span><span>›</span></button>
       <button class="btn-block" id="aiHubExerciseBtn" style="width:100%; margin-top:8px;"><span>📝 Exersează ce ai învățat</span><span>›</span></button>
+      <button class="btn-block" id="aiHubContextBtn" style="width:100%; margin-top:8px;"><span>🆕 Cuvinte noi în context</span><span>›</span></button>
       <button class="btn-block" id="aiHubHistoryBtn" style="width:100%; margin-top:8px;"><span>📜 Istoric</span><span>›</span></button>
     </div>
   </div>
@@ -702,6 +714,36 @@
     </div>
   </div>
 
+  <div id="aiContextView" style="display:none;">
+    <div class="sheet-section" style="padding-bottom:0;">
+      <button class="chip" id="aiContextBackBtn">← Înapoi</button>
+    </div>
+
+    <div class="sheet-section">
+      <div class="sheet-label">Cuvinte țintă (alese automat)</div>
+      <div id="aiContextAutoWordsBox" style="font-family:'Literata',serif; font-size:0.9rem; margin-bottom:8px; min-height:24px;"></div>
+
+      <div id="aiContextManualWordsBox" style="display:none; margin-top:6px;">
+        <div class="sheet-label">Cuvinte alese manual</div>
+        <div id="aiContextManualWordsList" style="font-family:'Literata',serif; font-size:0.9rem; margin-bottom:8px;"></div>
+      </div>
+
+      <button class="btn-block paste-highlight" id="aiContextGenAutoBtn" style="width:100%; margin-top:6px;"><span>Générer — mots choisis aléatoirement</span><span>→</span></button>
+      <button class="btn-block" id="aiContextManualBtn" style="width:100%; margin-top:8px;"><span>✋ Choisir manuellement</span><span>›</span></button>
+      <button class="btn-block paste-highlight" id="aiContextGenManualBtn" style="width:100%; margin-top:8px; display:none;"><span>Générer — mots choisis manuellement</span><span>→</span></button>
+      <div class="upload-status" id="aiContextStatus"></div>
+    </div>
+
+    <div class="sheet-section" id="aiContextResultSection" style="display:none;">
+      <div class="sheet-label">Text 1</div>
+      <div id="aiContextText1" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6; margin-bottom:16px;"></div>
+      <div class="sheet-label">Text 2</div>
+      <div id="aiContextText2" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6; margin-bottom:16px;"></div>
+      <div class="sheet-label">Text 3</div>
+      <div id="aiContextText3" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6;"></div>
+    </div>
+  </div>
+
   <div id="aiTranslateView" style="display:none;">
     <div class="sheet-section" style="padding-bottom:0;">
       <button class="chip" id="aiBackToHubBtn">← Înapoi</button>
@@ -760,6 +802,43 @@
 </div>
 
 <div id="aiPrintArea"></div>
+
+<div class="sheet" id="wordListSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title" id="wordListSheetTitle">📋 Cuvintele mele exersate</div>
+
+  <div class="sheet-section" id="wordListSelectModeNotice" style="display:none;">
+    <div class="upload-status">Alege până la 5 cuvinte, apoi apasă „Folosește aceste cuvinte".</div>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-label">Nivel</div>
+    <div class="chip-row">
+      <span class="chip word-list-level active" data-level="all">Toate</span>
+      <span class="chip word-list-level" data-level="a1a2">A1-A2</span>
+      <span class="chip word-list-level" data-level="b1b2">B1-B2</span>
+    </div>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-label">Sortare</div>
+    <div class="chip-row">
+      <span class="chip word-list-sort active" data-sort="stars">Stelute</span>
+      <span class="chip word-list-sort" data-sort="alpha">Alfabetic</span>
+      <span class="chip word-list-sort" data-sort="mistake">Doar cu greșeală activă</span>
+    </div>
+  </div>
+
+  <div class="sheet-section" id="wordListSection">
+    <div id="wordListBox"></div>
+  </div>
+
+  <div class="sheet-section" id="wordListSelectActions" style="display:none;">
+    <button class="btn-block paste-highlight" id="wordListUseBtn" style="width:100%;"><span id="wordListUseBtnLabel">Folosește aceste cuvinte (0/5)</span><span>✓</span></button>
+  </div>
+
+  <button class="sheet-close" id="closeWordListSheetBtn">Închide</button>
+</div>
 
 <script src="vocab-data.js"></script>
 <script>
@@ -1667,6 +1746,7 @@ function showEndScreen(){
 const sheet = document.getElementById('settingsSheet');
 const sheetOverlay = document.getElementById('sheetOverlay');
 const aiSheet = document.getElementById('aiSheet');
+const wordListSheet = document.getElementById('wordListSheet');
 function openSheet(){ sheet.classList.add('show'); sheetOverlay.classList.add('show'); renderLevelProgress(); }
 function closeSheet(){ sheet.classList.remove('show'); sheetOverlay.classList.remove('show'); }
 function showAiView(view){
@@ -1675,6 +1755,7 @@ function showAiView(view){
   document.getElementById('aiHistoryView').style.display = view === 'history' ? 'block' : 'none';
   document.getElementById('aiHistDetailView').style.display = view === 'histdetail' ? 'block' : 'none';
   document.getElementById('aiExerciseView').style.display = view === 'exercise' ? 'block' : 'none';
+  document.getElementById('aiContextView').style.display = view === 'context' ? 'block' : 'none';
   if(view === 'history'){ populateAiHistFilters(); renderAiHistList(); }
 }
 // activeaza/dezactiveaza butoanele de actiune din hub, dupa daca exista o cheie salvata -
@@ -1684,6 +1765,7 @@ function refreshAiHubButtons(){
   document.getElementById('aiHubTranslateBtn').disabled = !hasKey;
   document.getElementById('aiHubHistoryBtn').disabled = !hasKey;
   document.getElementById('aiHubExerciseBtn').disabled = !hasKey;
+  document.getElementById('aiHubContextBtn').disabled = !hasKey;
   document.getElementById('aiNoKeyNotice').style.display = hasKey ? 'none' : 'block';
   return hasKey;
 }
@@ -1703,6 +1785,16 @@ document.getElementById('aiHubHistoryBtn').addEventListener('click', ()=> showAi
 document.getElementById('aiHistoryBackBtn').addEventListener('click', ()=> showAiView('hub'));
 document.getElementById('aiHubExerciseBtn').addEventListener('click', ()=> showAiView('exercise'));
 document.getElementById('aiExerciseBackBtn').addEventListener('click', ()=> showAiView('hub'));
+document.getElementById('aiHubContextBtn').addEventListener('click', ()=>{
+  showAiView('context');
+  aiContextAutoWords = [];
+  aiContextManualWords = [];
+  document.getElementById('aiContextResultSection').style.display = 'none';
+  document.getElementById('aiContextGenManualBtn').style.display = 'none';
+  document.getElementById('aiContextManualWordsBox').style.display = 'none';
+  renderAiContextAutoWords();
+});
+document.getElementById('aiContextBackBtn').addEventListener('click', ()=> showAiView('hub'));
 sheetOverlay.addEventListener('click', ()=>{ closeSheet(); closeAiSheet(); });
 
 /* ---------- level chips ---------- */
@@ -2642,6 +2734,63 @@ document.querySelectorAll('.ai-ex-lang').forEach(chip=>{
   });
 });
 
+/* ---------- AI: "Cuvinte noi în context" - functii de baza ---------- */
+
+// selectie DIRECT IN COD, fara AI - cuvinte vazute abia 1 sau 2 ori, indiferent de corectitudine
+function pickFreshWords(){
+  const eligible = BUILTIN.concat(myWords).filter(w=>{
+    const s = wordStats[w.id];
+    return s && (s.attempts === 1 || s.attempts === 2);
+  });
+  return shuffle(eligible).slice(0, 5);
+}
+
+// pt cuvinte compuse/expresii (ex. "pomme de terre") sau eventuale perechi cu "/" - extragem
+// forma utilizabila pt prompt (primul cuvant), dar afisarea catre utilizator ramane completa
+function extractCoreWord(frField){
+  const m = frField.match(/^[^\s\/]+/);
+  let core = m ? m[0] : frField;
+  return core.replace(/[,.;:]+$/, '');
+}
+
+// nivel dedus din cuvintele alese (majoritate) - la generare automata; la manual, alegerea
+// utilizatorului e directa, nu se deduce
+function deriveLevelGroupFromWords(words){
+  let a1a2Count = 0, b1b2Count = 0;
+  words.forEach(w=>{
+    if(w.level === 'A1' || w.level === 'A2') a1a2Count++;
+    else if(w.level === 'B1' || w.level === 'B2') b1b2Count++;
+  });
+  return b1b2Count > a1a2Count ? 'b1b2' : 'a1a2'; // egalitate sau fara nivel clar -> implicit a1a2
+}
+
+// plasa de siguranta: daca [TEXT1]/[TEXT2]/[TEXT3] lipsesc complet din raspuns, recuperam
+// liniile [FR]/[RO] existente si le impartim aproximativ egal in 3, in loc de 3 casete goale
+function splitIntoThreeTexts(raw){
+  const blocks = [];
+  for(let i=1; i<=3; i++){
+    const re = new RegExp(`\\[TEXT${i}\\]([\\s\\S]*?)\\[\\/TEXT${i}\\]`, 'i');
+    const m = raw.match(re);
+    blocks.push(m ? m[1].trim() : '');
+  }
+  if(blocks.every(b => !b)){
+    const flatLines = raw.split('\n').map(l=>l.trim()).filter(l => l.startsWith('[FR]') || l.startsWith('[RO]'));
+    const pairs = [];
+    for(let i=0; i<flatLines.length-1; i+=2){
+      if(flatLines[i].startsWith('[FR]') && flatLines[i+1] && flatLines[i+1].startsWith('[RO]')){
+        pairs.push([flatLines[i], flatLines[i+1]]);
+      }
+    }
+    if(pairs.length >= 3){
+      const perText = Math.ceil(pairs.length / 3);
+      for(let i=0; i<3; i++){
+        blocks[i] = pairs.slice(i*perText, (i+1)*perText).map(p=>p.join('\n')).join('\n');
+      }
+    }
+  }
+  return blocks;
+}
+
 function getKnownWordsForLevelGroup(levelGroup){
   const coreLevels = levelGroup === 'a1a2' ? ['A1','A2'] : ['B1','B2'];
   const helperLevels = levelGroup === 'a1a2' ? [] : ['A1','A2']; // conectori de baza, mereu permisi la B1-B2
@@ -2651,6 +2800,50 @@ function getKnownWordsForLevelGroup(levelGroup){
   const core = BUILTIN.filter(w => coreLevels.includes(w.level) && isKnown(w)).map(w=>w.fr);
   const helpers = BUILTIN.filter(w => helperLevels.includes(w.level) && isKnown(w)).map(w=>w.fr);
   return { core: [...new Set(core)], helpers: [...new Set(helpers)] };
+}
+
+/* ---------- AI: "Cuvinte noi în context" - Agentul 1 (generare 3 texte independente) ---------- */
+function buildContextTextPrompt(levelGroup, targetWords, knownWords){
+  const levelTxt = levelGroup === 'a1a2' ? 'A1-A2' : 'B1-B2';
+  const targetList = targetWords.join(', ');
+  const knownListTxt = knownWords.core.join(', ') + (knownWords.helpers.length ? ' | (conectori de bază, mereu permiși): ' + knownWords.helpers.join(', ') : '');
+  return `Ești un profesor de franceză care ajută un elev, de nivel ${levelTxt} (CEFR), să vadă cuvinte noi, abia întâlnite, în context real, de mai multe ori, în situații diferite, exact cum apar în vorbirea/scrierea franceză curentă.
+
+Cuvintele ȚINTĂ (elevul le-a văzut abia o dată sau de două ori, nu le știe încă bine — sunt date la forma de bază/dicționar, DOAR ca referință de sens): ${targetList}
+Restul vocabularului pe care elevul îl cunoaște deja bine, de folosit pentru restul textului (păstrează totul ușor de înțeles, nu doar cuvintele țintă): ${knownListTxt || '(fără altele — folosește doar conectori de bază)'}
+
+1. Generează EXACT 3 texte scurte, INDEPENDENTE, fiecare cu subiect propriu, diferit clar de celelalte două (nu 3 variații ale aceleiași idei).
+2. FIECARE din cele 3 texte trebuie să folosească TOATE cuvintele țintă, cel puțin o dată fiecare — nu doar unele dintre ele, nu doar în unele texte. Exemplu concret de evitat: dacă ai 5 cuvinte țintă, NU e acceptabil ca primul text să folosească doar 1, al doilea toate 5, al treilea doar 3 — FIECARE text trebuie să conțină, separat, TOATE. Verifică intern, înainte de a preda răspunsul, că fiecare text le conține pe toate — dacă lipsește vreunul, rescrie doar acel text. IMPORTANT: nu include în răspuns nicio verificare, numărătoare, explicație sau comentariu vizibil — doar cele 3 texte, exact în formatul cerut, nimic altceva.
+3. IMPORTANT — cuvintele țintă sunt date la forma de bază DOAR ca referință de sens, NU ca formă obligatorie. Folosește-le NATURAL, la orice formă gramaticală corectă cere contextul (conjugate, la plural, la alt gen/acord) — naturalețea și corectitudinea au prioritate absolută asupra păstrării formei exacte din listă.
+4. Restul cuvintelor vine din lista de cuvinte cunoscute, pe cât posibil — conectori de bază (articole, pronume, prepoziții comune) mereu permiși.
+5. Fiecare text: 3-5 propoziții, cu fir logic clar (fiecare propoziție continuă logic din precedenta) — nu propoziții disparate.
+6. Nivel de complexitate — pe lângă vocabular, ȘI structura gramaticală/lungimea propozițiilor trebuie să corespundă nivelului ${levelTxt}: la A1-A2, propoziții scurte, structuri simple; la B1-B2, propoziții ceva mai complexe sunt acceptabile, dar tot clare.
+7. Niciodată cuvinte netraduse, strecurate dintr-o limbă în cealaltă.
+8. La partea română, verifică acordul de gen/număr (ex. NU „o ajutoare" — corect „un ajutor").
+9. Scrie fiecare text STRICT în franceză, apoi tradu-l propoziție cu propoziție în română.
+
+Format EXACT:
+[TEXT1]
+[FR] <propoziția 1>
+[RO] <propoziția 1>
+[/TEXT1]
+[TEXT2] ... [/TEXT2]
+[TEXT3] ... [/TEXT3]
+Fără nimic în afara acestor 3 blocuri.`;
+}
+
+/* ---------- AI: "Cuvinte noi în context" - Agentul 3 (marcare {{...}} pe liniile FR finale) ---------- */
+function buildMarkingPrompt(targetWords){
+  const targetList = targetWords.join(', ');
+  return `Primești linii de text în franceză (eticheta [FR] la început). Ai și o listă de cuvinte țintă, la forma de bază.
+
+Cuvinte țintă: ${targetList}
+
+Pentru fiecare linie, identifică ORICE apariție a unui cuvânt din lista țintă — indiferent de forma gramaticală exactă (conjugat, la plural, la alt gen) — și încadreaz-o, EXACT AȘA CUM APARE, cu marcajul {{...}}. Marchează FIECARE apariție.
+
+REGULĂ ABSOLUTĂ: nu schimbi NIMIC din text în afară de adăugarea marcajelor — nu corectezi, nu reformulezi. Textul, în afara marcajelor, trebuie identic, caracter cu caracter.
+
+Aceleași linii primite, în aceeași ordine, cu [FR] păstrat, doar cu marcajele adăugate.`;
 }
 
 function buildExercisePrompt(levelGroup, targetLang, theme, knownWords, maxWords){
@@ -2739,6 +2932,231 @@ document.getElementById('aiExerciseRevealBtn').addEventListener('click', ()=>{
 document.getElementById('aiExerciseSpeakBtn').addEventListener('click', ()=>{
   const parsed = parseTaggedAiResult(lastAiExerciseRaw);
   speakFrench(parsed.frenchOnly);
+});
+
+/* ---------- Lista "Cuvintele mele exersate" - reutilizabila (browse din Setari + selectie din AI) ---------- */
+let wordListMode = 'browse'; // 'browse' | 'select'
+let wordListSelected = new Set(); // id-uri
+let wordListLevelFilter = 'all';
+let wordListSort = 'stars';
+let aiContextManualWords = []; // cuvintele alese manual, populate la "Foloseste aceste cuvinte"
+
+function getWordListEntries(){
+  let entries = BUILTIN.concat(myWords).filter(w => wordStats[w.id]); // doar cele exersate macar o data
+  if(wordListLevelFilter === 'a1a2') entries = entries.filter(w => w.level==='A1' || w.level==='A2');
+  else if(wordListLevelFilter === 'b1b2') entries = entries.filter(w => w.level==='B1' || w.level==='B2');
+  if(wordListSort === 'mistake') entries = entries.filter(w => mistakeIds.includes(w.id));
+  entries = entries.slice();
+  if(wordListSort === 'alpha') entries.sort((a,b)=>a.fr.localeCompare(b.fr));
+  else entries.sort((a,b)=>{
+    const sa = wordStats[a.id], sb = wordStats[b.id];
+    return (sb ? sb.correct : 0) - (sa ? sa.correct : 0);
+  });
+  return entries;
+}
+
+function renderWordList(){
+  const box = document.getElementById('wordListBox');
+  const entries = getWordListEntries();
+  if(!entries.length){
+    box.innerHTML = '<div class="upload-status">Niciun cuvânt exersat încă la acest filtru.</div>';
+    return;
+  }
+  box.innerHTML = entries.map(w=>{
+    const s = wordStats[w.id];
+    const selected = wordListSelected.has(w.id);
+    return `<span class="chip word-list-item ${selected?'active':''}" data-id="${w.id}" style="margin:0 6px 8px 0; display:inline-block;">${escapeHtml(w.fr)} <span style="opacity:0.6; font-size:11px;">(${s?s.correct:0}★)</span></span>`;
+  }).join('');
+  if(wordListMode === 'select'){
+    box.querySelectorAll('.word-list-item').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        const id = chip.dataset.id;
+        if(wordListSelected.has(id)) wordListSelected.delete(id);
+        else {
+          if(wordListSelected.size >= 5) return; // plafon 5
+          wordListSelected.add(id);
+        }
+        renderWordList();
+        updateWordListUseBtn();
+      });
+    });
+  }
+}
+function updateWordListUseBtn(){
+  const label = document.getElementById('wordListUseBtnLabel');
+  if(label) label.textContent = `Folosește aceste cuvinte (${wordListSelected.size}/5)`;
+}
+document.querySelectorAll('.word-list-level').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('.word-list-level').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    wordListLevelFilter = chip.dataset.level;
+    renderWordList();
+  });
+});
+document.querySelectorAll('.word-list-sort').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('.word-list-sort').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    wordListSort = chip.dataset.sort;
+    renderWordList();
+  });
+});
+
+function openWordListSheet(mode){
+  wordListMode = mode || 'browse';
+  wordListSelected.clear();
+  document.getElementById('wordListSheetTitle').textContent = wordListMode === 'select' ? '✋ Alege cuvinte (max 5)' : '📋 Cuvintele mele exersate';
+  document.getElementById('wordListSelectModeNotice').style.display = wordListMode === 'select' ? 'block' : 'none';
+  document.getElementById('wordListSelectActions').style.display = wordListMode === 'select' ? 'block' : 'none';
+  updateWordListUseBtn();
+  renderWordList();
+  wordListSheet.classList.add('show'); sheetOverlay.classList.add('show');
+}
+function closeWordListSheet(){ wordListSheet.classList.remove('show'); sheetOverlay.classList.remove('show'); }
+document.getElementById('closeWordListSheetBtn').addEventListener('click', closeWordListSheet);
+document.getElementById('browseWordListBtn').addEventListener('click', ()=>{
+  closeSheet();
+  setTimeout(()=>{ openWordListSheet('browse'); }, 250);
+});
+
+document.getElementById('wordListUseBtn').addEventListener('click', ()=>{
+  if(!wordListSelected.size) return;
+  const chosen = BUILTIN.concat(myWords).filter(w => wordListSelected.has(w.id));
+  aiContextManualWords = chosen;
+  // tranzitie FARA suprapunere: eliminam .show doar de pe wordListSheet (fundalul intunecat ramane,
+  // nu atingem sheetOverlay), asteptam durata reala a tranzitiei CSS (0.25s, verificata in .sheet{}),
+  // apoi redeschidem aiSheet pe view-ul context - niciodata ambele .show simultan
+  wordListSheet.classList.remove('show');
+  setTimeout(()=>{
+    aiSheet.classList.add('show');
+    showAiView('context');
+    renderAiContextManualWords();
+  }, 250);
+});
+
+/* ---------- AI: "Cuvinte noi in context" - UI si pipeline complet (3 agenti) ---------- */
+let aiContextAutoWords = [];
+
+function renderAiContextAutoWords(){
+  const box = document.getElementById('aiContextAutoWordsBox');
+  if(!aiContextAutoWords.length){
+    aiContextAutoWords = pickFreshWords();
+  }
+  if(!aiContextAutoWords.length){
+    box.innerHTML = '<div class="upload-status">Nu ai încă niciun cuvânt văzut doar 1-2 ori — exersează puțin mai întâi.</div>';
+    return;
+  }
+  box.innerHTML = aiContextAutoWords.map(w=>`<span class="chip active" style="margin:0 6px 6px 0; display:inline-block;">${escapeHtml(w.fr)}</span>`).join('');
+}
+function renderAiContextManualWords(){
+  const wrap = document.getElementById('aiContextManualWordsBox');
+  const box = document.getElementById('aiContextManualWordsList');
+  if(!aiContextManualWords.length){ wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  box.innerHTML = aiContextManualWords.map(w=>`<span class="chip active" style="margin:0 6px 6px 0; display:inline-block;">${escapeHtml(w.fr)}</span>`).join('');
+  document.getElementById('aiContextGenManualBtn').style.display = 'block';
+}
+document.getElementById('aiContextManualBtn').addEventListener('click', ()=>{
+  aiSheet.classList.remove('show');
+  setTimeout(()=>{ openWordListSheet('select'); }, 250);
+});
+
+async function runContextGeneration(words, levelGroup){
+  const statusEl = document.getElementById('aiContextStatus');
+  const resultSection = document.getElementById('aiContextResultSection');
+  const key = loadClaudeKey();
+  if(!key || !key.startsWith('sk-ant-')){ statusEl.textContent = 'Nu ai o cheie Claude salvată.'; return; }
+  if(!words.length){ statusEl.textContent = 'Nu am cuvinte de folosit.'; return; }
+
+  const targetWords = words.map(w => extractCoreWord(w.fr));
+  const knownWords = getKnownWordsForLevelGroup(levelGroup);
+
+  statusEl.textContent = 'Se generează 3 texte...';
+  resultSection.style.display = 'none';
+  try{
+    const genPrompt = buildContextTextPrompt(levelGroup, targetWords, knownWords);
+    const raw = await callClaude(genPrompt, [{type:'text', text: 'Generează cele 3 texte, în formatul cerut.'}], 8192);
+
+    // extragem cele 3 blocuri (cu plasa de siguranta daca [TEXT1..3] lipsesc), retinem CATE
+    // linii [FR]/[RO] are fiecare bloc INAINTE de revizuire, ca sa putem re-desparti corect dupa
+    let blocks = splitIntoThreeTexts(raw);
+    const lineCounts = blocks.map(b => (b.match(/^\[(FR|RO)\]/gm) || []).length);
+    const allLines = blocks.join('\n');
+
+    statusEl.textContent = 'Se verifică gramatical...';
+    let reviewed = allLines;
+    try{
+      const reviewPrompt = buildGrammarReviewSystemPrompt();
+      const reviewResult = await callClaude(reviewPrompt, [{type:'text', text: `"""\n${allLines}\n"""`}], 8192);
+      const origCount = (allLines.match(/^\[(FR|RO)\]/gm) || []).length;
+      const revCount = (reviewResult.match(/^\[(FR|RO)\]/gm) || []).length;
+      if(revCount === origCount) reviewed = reviewResult; // altfel pastram allLines, nerevizuit (mai sigur)
+      if(reviewed.includes('[UNCERTAIN]')){
+        statusEl.textContent = 'Se verifică o bucată incertă cu un model mai avansat...';
+        reviewed = await escalateUncertainSegments(reviewed);
+      }
+    }catch(e){ reviewed = allLines; }
+
+    // re-despartim inapoi in cele 3 texte, pe baza numarului de linii retinut INAINTE de revizuire
+    const reviewedLines = reviewed.split('\n').map(l=>l.trim()).filter(Boolean);
+    const rebuiltBlocks = [];
+    let idx = 0;
+    for(let i=0;i<3;i++){
+      rebuiltBlocks.push(reviewedLines.slice(idx, idx+lineCounts[i]).join('\n'));
+      idx += lineCounts[i];
+    }
+
+    // Agentul 3: marcam DOAR liniile [FR] finale, cu plasa de siguranta PE LINIE
+    statusEl.textContent = 'Se marchează cuvintele...';
+    const allFrLines = rebuiltBlocks.map(b => b.split('\n').filter(l=>l.startsWith('[FR]'))).flat();
+    let markedFrLines = allFrLines.slice();
+    if(allFrLines.length){
+      try{
+        const markPrompt = buildMarkingPrompt(targetWords);
+        const markResult = await callClaude(markPrompt, [{type:'text', text: allFrLines.join('\n')}], 4096);
+        const candidateLines = markResult.split('\n').map(l=>l.trim()).filter(l=>l.startsWith('[FR]'));
+        if(candidateLines.length === allFrLines.length){
+          markedFrLines = candidateLines.map((markedLine, i)=>{
+            const stripped = markedLine.replace(/\{\{(.*?)\}\}/g, '$1');
+            return stripped === allFrLines[i] ? markedLine : allFrLines[i]; // pe linie: daca nu se reproduce exact, ramane simpla
+          });
+        }
+      }catch(e){ /* pastram liniile nemarcate, nu blocam fluxul */ }
+    }
+
+    // reasamblam textele finale, inlocuind liniile [FR] cu cele marcate, in ordine
+    let frIdx = 0;
+    const finalBlocks = rebuiltBlocks.map(b=>{
+      return b.split('\n').map(line=> line.startsWith('[FR]') ? markedFrLines[frIdx++] : line).join('\n');
+    });
+
+    [1,2,3].forEach((n,i)=>{
+      const parsed = parseTaggedAiResult(finalBlocks[i] || '');
+      document.getElementById(`aiContextText${n}`).innerHTML = parsed.html || '<div class="upload-status">Text lipsă.</div>';
+    });
+    resultSection.style.display = 'block';
+    statusEl.textContent = '';
+
+    // salvam in istoric TEXTUL FINAL (marcat + revizuit), nu ciorna dinaintea marcarii
+    saveAiHistoryEntry(`Cuvinte: ${targetWords.join(', ')}`, finalBlocks.join('\n'), 'context');
+  }catch(err){
+    statusEl.textContent = `✗ ${err.message}`;
+  }
+}
+
+document.getElementById('aiContextGenAutoBtn').addEventListener('click', ()=>{
+  aiContextAutoWords = pickFreshWords();
+  renderAiContextAutoWords();
+  const levelGroup = deriveLevelGroupFromWords(aiContextAutoWords);
+  runContextGeneration(aiContextAutoWords, levelGroup);
+});
+document.getElementById('aiContextGenManualBtn').addEventListener('click', ()=>{
+  // la manual, nivelul il alege utilizatorul explicit prin filtrul de nivel din lista - folosim
+  // filtrul curent daca era a1a2/b1b2; daca era "toate", deducem din cuvintele alese (fallback rezonabil)
+  const levelGroup = (wordListLevelFilter === 'a1a2' || wordListLevelFilter === 'b1b2')
+    ? wordListLevelFilter : deriveLevelGroupFromWords(aiContextManualWords);
+  runContextGeneration(aiContextManualWords, levelGroup);
 });
 
 /* ---------- AI: dictare vocala (refoloseste acelasi API ca la cautarea de cuvinte) ---------- */
@@ -2857,6 +3275,18 @@ document.getElementById('aiImagePasteBtn').addEventListener('click', async ()=>{
 
 /* ---------- AI: parsare etichete [FR]/[RO] din raspuns ---------- */
 // intoarce { html: '...', cleanText: '...', frenchOnly: '...', hasTags: bool }
+// randare marker-aware: {{cuvant}} -> span rosu evidentiat; restul textului, escapat normal.
+// folosita de parseTaggedAiResult pt orice linie care contine marcaje (din modulul "Cuvinte noi
+// in context") - centralizata aici ca orice consumator (istoric, printare) sa beneficieze automat
+function renderWithMarkers(text){
+  const parts = text.split(/(\{\{.*?\}\})/g);
+  return parts.map(part=>{
+    const m = part.match(/^\{\{(.*)\}\}$/);
+    if(m) return `<span class="context-word-mark">${escapeHtml(m[1])}</span>`;
+    return escapeHtml(part);
+  }).join('');
+}
+
 function parseTaggedAiResult(raw){
   const lines = raw.split('\n').map(l=>l.trim()).filter(Boolean);
   let hasTags = false;
@@ -2868,16 +3298,18 @@ function parseTaggedAiResult(raw){
     return { lang:null, text:line }; // linie fara eticheta (ex. mesajul de redirectionare)
   });
   const htmlParts = parsed.map(p=>{
-    const esc = escapeHtml(p.text);
+    const esc = p.text.includes('{{') ? renderWithMarkers(p.text) : escapeHtml(p.text);
     return p.lang === 'fr' ? `<div style="color:var(--le); font-weight:600;">${esc}</div>` : `<div>${esc}</div>`;
   });
-  const cleanText = parsed.map(p=>p.text).join('\n');
+  const cleanText = parsed.map(p=>p.text.replace(/\{\{(.*?)\}\}/g,'$1')).join('\n');
   const frenchLines = parsed.filter(p=>p.lang === 'fr').map(p=>p.text);
   // daca nu exista deloc etichete (ex. mesajul de redirectionare, intreg in franceza), citim tot textul curat
   const frenchOnly = frenchLines.length
     ? frenchLines.map(l => /[.!?]$/.test(l) ? l : l + '.').join(' ') // evitam punct dublu la unire
     : cleanText;
-  return { html: htmlParts.join(''), cleanText, frenchOnly, hasTags };
+  // pt speak: eliminam marcajele {{...}} -> ramane doar cuvantul, altfel Web Speech API ar citi acoladele
+  const frenchOnlyClean = frenchOnly.replace(/\{\{(.*?)\}\}/g, '$1');
+  return { html: htmlParts.join(''), cleanText, frenchOnly: frenchOnlyClean, hasTags };
 }
 
 /* ---------- AI: istoric traduceri ---------- */
@@ -2949,7 +3381,7 @@ function renderAiHistList(){
     updateAiHistSelectedCount();
     return;
   }
-  const AI_SRC_TAGS = { text:'[txt]', voice:'[rec]', image:'[img]', exercitiu:'[exc]', corectura:'[cor]' };
+  const AI_SRC_TAGS = { text:'[txt]', voice:'[rec]', image:'[img]', exercitiu:'[exc]', corectura:'[cor]', context:'[nou]' };
   listEl.innerHTML = hist.map(e=>{
     const d = new Date(e.id);
     const dateStr = d.toLocaleDateString('ro-RO', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
