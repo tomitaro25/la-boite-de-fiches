@@ -397,7 +397,7 @@
       5. <b>Copiază cheia imediat</b> — se arată o singură dată; începe cu „sk-ant-"<br>
       6. În aplicație, mergi în ⚙ → „AI (Claude)" → lipește cheia → „Testează conexiunea"</p>
       <p><b>Cost aproximativ</b> (model Haiku, cel mai ieftin): o traducere sau corectură scurtă costă sub un cent — cu 5$ ajungi la mii de utilizări. O imagine costă considerabil mai mult (poate câteva sute de poze cu 5$) — decupează poza doar pe zona cu text, nu tot ecranul, ca să reduci costul.</p>
-      <p><b>Limită onestă:</b> fiind cel mai ieftin model Claude, Haiku poate ocazional greși pe texte lungi și complexe (articole întregi, mai ales) — acorduri greșite de gen/număr, cuvinte inventate, expresii idiomatice traduse mecanic, sau chiar sens schimbat față de original. Traducerea și Simplificarea trec printr-un pipeline în <b>trei pași</b>: (1) generarea propriu-zisă, (2) o revizuire separată, strict pe corectitudine (formă, sens, expresii idiomatice, cuvinte inventate), și (3) — doar RAR, când al doilea pas chiar nu e sigur de o bucată anume — acea bucată exactă (nu tot textul) e trimisă către un model mai avansat, pentru o a doua opinie. Pasul 3 costă puțin mai mult și apare doar ocazional, nu la fiecare cerere — nu garantează perfecțiune 100%, dar reduce mult riscul de erori grave. Verifică oricând ceva pare nefiresc, mai ales la texte lungi, dintr-o sursă reală.</p>
+      <p><b>Limită onestă:</b> fiind cel mai ieftin model Claude, Haiku poate ocazional greși pe texte lungi și complexe (articole întregi, mai ales) — acorduri greșite, cuvinte inventate, sau chiar sens schimbat față de original, uneori într-un fel care sună convingător, nu evident greșit. Traducerea și Simplificarea trec printr-un pipeline în <b>mai mulți pași</b>: (1) generarea propriu-zisă, (2) o revizuire de formă (gramatică, ortografie, acorduri), și (3) o verificare de fidelitate prin <b>retraducere independentă</b> — textul românesc e retradus înapoi în franceză, „orb" (fără să vadă franceza originală), iar cele două variante franceze sunt comparate obiectiv; o divergență de sens confirmată astfel — nu doar „bănuită" — e trimisă STRICT pe acea bucată către un model mai avansat, pentru corectare. Costul suplimentar apare doar la divergențe reale, confirmate, nu la fiecare traducere — nu garantează perfecțiune 100%, dar reduce mult riscul de erori grave, mai ales cele care „sună" corect. Verifică oricând ceva pare nefiresc, mai ales la texte lungi, dintr-o sursă reală.</p>
       <p><b>Confidențialitate:</b> cheia ta rămâne salvată doar pe acest dispozitiv (nu trece niciodată prin noi) — costul folosirii se plătește direct către Anthropic, separat de acest proiect.</p>
     </div>
     <div class="sheet-section help-text">
@@ -422,7 +422,7 @@
     <div class="sheet-section help-text">
       <div class="sheet-label">🆕 Cuvinte noi în context</div>
       <p>Diferit de „Exersează ce ai învățat" — aici nu se testează ce știi deja, ci vezi cuvinte <b>abia întâlnite</b> (văzute o dată sau de două ori) folosite natural, de mai multe ori, în situații diferite. Traducerea română apare direct, vizibilă — scopul e să înțelegi cuvântul în context, nu să te autotestezi.</p>
-      <p>Claude generează <b>3 texte scurte, independente</b>, fiecare cu subiect propriu — nu 3 variații ale aceleiași idei — și fiecare folosește toate cuvintele țintă alese, măcar o dată. Cuvintele apar <b>evidențiate cu roșu</b>, la orice formă gramaticală cere contextul (conjugate, la plural etc.), nu forțat la forma de bază din dicționar.</p>
+      <p>Claude generează <b>2 texte scurte, independente</b>, fiecare cu subiect propriu — nu 2 variații ale aceleiași idei — și fiecare folosește toate cuvintele țintă alese, măcar o dată. Cuvintele apar <b>evidențiate cu roșu</b>, la orice formă gramaticală cere contextul (conjugate, la plural etc.), nu forțat la forma de bază din dicționar.</p>
       <p><b>Selecție automată</b> (implicit) — până la 5 cuvinte alese direct din progresul tău, fără niciun apel către AI (gratuit, instant). <b>Selecție manuală</b> — „✋ Choisir manuellement" deschide lista „Cuvintele mele exersate" (vezi Partea 4) în mod selecție — alegi până la 5 cuvinte, un nivel pentru text, apoi „Folosește aceste cuvinte" te aduce înapoi cu un buton separat de generare pentru alegerea ta.</p>
     </div>
     <div class="sheet-section help-text">
@@ -766,9 +766,7 @@
       <div class="sheet-label">Text 1</div>
       <div id="aiContextText1" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6; margin-bottom:16px;"></div>
       <div class="sheet-label">Text 2</div>
-      <div id="aiContextText2" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6; margin-bottom:16px;"></div>
-      <div class="sheet-label">Text 3</div>
-      <div id="aiContextText3" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6;"></div>
+      <div id="aiContextText2" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6;"></div>
     </div>
   </div>
 
@@ -908,10 +906,6 @@
   <div class="sheet-section" style="padding-bottom:90px;">
     <div id="wordListRows"></div>
   </div>
-
-  <button class="btn-block paste-highlight" id="wordListFloatingConfirmBtn" style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%); width:calc(100% - 48px); max-width:420px; display:none; z-index:60; box-shadow:0 4px 18px rgba(0,0,0,0.35);">
-    <span>✓ Validează selecția (<span id="wordListFloatingCount">0</span>/5)</span><span>→</span>
-  </button>
 
   <button class="sheet-close" id="closeWordListSheetBtn">Închide</button>
 </div>
@@ -2694,6 +2688,7 @@ Reguli stricte, obligatorii:
 1bis. ATENȚIE specială la CRATIME — textul poate proveni din dictare vocală, unde cratimele lipsesc mereu (tehnologia de recunoaștere vocală nu le poate reda, fiindcă nu au corespondent fonetic distinct). Corectează mental și adaugă cratimele corecte oriunde gramatica le cere, în AMBELE limbi din pereche — nu doar în textul sursă, ci și în traducere: română (ex. "mi ar plăcea"→"mi-ar plăcea", "s a dus"→"s-a dus", "ne am întâlnit"→"ne-am întâlnit", "dă mi"→"dă-mi"), franceză (ex. inversiune interogativă "as tu"→"as-tu", "est ce que"→"est-ce que", cuvinte compuse "peut être"→"peut-être", "au dessus"→"au-dessus", imperativ cu pronume atașat "dis moi"→"dis-moi"). Nu lăsa niciodată o cratimă gramatical obligatorie lipsă în răspunsul tău, indiferent dacă lipsea din textul original.
 2. Tradu NATURAL și IDIOMATIC — exact cum ar formula propoziția un vorbitor nativ, în conversație reală, nu o traducere literală rigidă. Dacă varianta cuvânt-cu-cuvânt ar suna nefiresc, alege formularea care sună natural și fluent, păstrând sensul exact și nivelul de formalitate/tonul originalului (informal rămâne informal, politicos rămâne politicos — inclusiv alegerea tu/vous potrivită).
 2bis. ATENȚIE la ACORDUL GRAMATICAL corect al substantivelor românești alese, mai ales genul (masculin/feminin/neutru) și numărul (singular/plural) — verifică mereu că articolul folosit (un/o/acest/această/niște etc.) se potrivește cu forma exactă a substantivului, ÎNAINTE să scrii propoziția finală. Exemplu concret de greșeală de evitat: "une aide" NU se traduce "o ajutoare" (greșit — "ajutoare" e forma de plural a lui "ajutor", nu poate fi articulată cu "o" la singular) — traducerea corectă e "un ajutor" (masculin, singular, la fel ca substantivul-sursă). Verifică mental genul corect al fiecărui substantiv românesc pe care-l alegi, nu presupune că genul din franceză (feminin/masculin) se transferă automat în română.
+2ter. ATENȚIE la FIDELITATEA DE SENS exactă, dincolo de alegerea cuvintelor — trei capcane frecvente, ușor de ratat fiindcă rezultatul rămâne fluent și corect gramatical: (a) timp verbal — dacă originalul e la prezent, traducerea rămâne la prezent, nu trece la trecut/imperfect fără motiv gramatical real; (b) conectori cauzali — "c'est pour cela que X" înseamnă "de-aceea X" (X e CONSECINȚA), nu "asta pentru că X" (care ar transforma X în CAUZĂ, inversând logica frazei) — verifică mereu direcția cauzală (cauză vs. consecință vs. concesie); (c) expresii idiomatice fixe — alege echivalentul cu ACELAȘI SENTIMENT, nu doar un idiom „înrudit ca temă". Exemplu concret: "Dieu merci" înseamnă „slavă Domnului" (ușurare, ceva bun) — NU „Dumnezeu ferește" (care exprimă speranța ca ceva rău să NU se întâmple, sentiment aproape opus, deși ambele conțin „Dumnezeu").
 3. Dacă textul are mai multe propoziții, tradu FIECARE propoziție separat, în ordine, câte o pereche pe rând. Formatul EXACT, obligatoriu, pentru fiecare pereche (aplicația citește aceste etichete programatic, ca să poată reda cu voce doar partea franceză — respectă-l STRICT, fără abateri):
 [FR] <propoziția în franceză>
 [RO] <propoziția în română>
@@ -2708,7 +2703,7 @@ Reguli stricte, obligatorii:
 // Nu alege cuvinte, nu retraduce - doar verifica FORMA rezultatului deja produs de traducator:
 // punctuatie, accente/diacritice, topica, acorduri. Ruleaza automat dupa fiecare traducere reusita.
 function buildGrammarReviewSystemPrompt(){
-  return `Ești un expert în gramatica și ortografia limbilor română și franceză, al doilea specialist dintr-un pipeline de traducere în doi pași. Primul specialist (traducătorul) a ales deja cuvintele și formularea — TU nu retraduci de la zero, NU schimbi stilul sau nivelul de formalitate. Rolul tău e de verificare și corectare, incluzând FORMA (gramatică, ortografie) DAR și corectitudinea reală a traducerii, acolo unde traducătorul a greșit vizibil — vezi regulile de mai jos, unele îți permit explicit să înlocuiești un cuvânt/expresie greșită.
+  return `Ești un expert în gramatica și ortografia limbilor română și franceză, al doilea specialist dintr-un pipeline de traducere. Primul specialist (traducătorul) a ales deja cuvintele și formularea — TU nu retraduci de la zero, NU schimbi stilul sau nivelul de formalitate, NU restructurezi propoziții altfel corecte. Rolul tău e STRICT de verificare a FORMEI (gramatică, ortografie, acorduri) — corectitudinea SENSULUI (fidelitate, idiomuri, cauzalitate) e verificată separat, de un alt specialist, după tine — tu nu te ocupi de asta aici.
 Vei primi un text delimitat prin """ ... """, care conține una sau mai multe perechi deja formatate astfel, produse de traducător:
 [FR] <propoziția în franceză>
 [RO] <propoziția în română>
@@ -2719,11 +2714,10 @@ Sarcina ta, pentru FIECARE pereche [FR]/[RO] primită, verifică următoarele ca
 3. Topică/ordinea cuvintelor gramatical corectă — mai ales construcții franceze cu inversiune sau pronume atașate (ex. "as-tu", "peut-être", "dis-moi", plasarea corectă a pronumelor complement înaintea verbului).
 4. Acorduri de gen/număr — INCLUSIV articol-substantiv, nu doar adjectiv-substantiv. Dacă articolul (un/o/acest/această etc.) nu se potrivește cu forma substantivului ales de traducător, corectezi FORMA substantivului (gen/număr/terminație) ca să se potrivească gramatical cu articolul, sau invers — asta e o corectare de FORMĂ, nu o înlocuire de cuvânt, chiar dacă rezultatul arată diferit ca literă. Exemplu concret, de reținut exact: dacă primești "o ajutoare" (GREȘIT — "ajutoare" e pluralul lui "ajutor", nu poate fi articulat cu "o" la singular), corectezi la "un ajutor" (CORECT). Fii la fel de atent la orice alt substantiv românesc unde genul/numărul din context nu se potrivește cu articolul folosit.
 5. Acordul PARTICIPIILOR — separat de regula 4, verifică și acordul participiilor folosite cu auxiliarul "a fi"/în construcții pasive, în AMBELE limbi. Română: participiul se acordă în gen/număr cu subiectul (ex. "cartea a fost scris**ă**", nu "scris", dacă subiectul e feminin — "documentele au fost semnat**e**", nu "semnat", la plural). Franceză: la fel, cu être + participiu, mai ales la pasiv (ex. "la lettre a été écrit**e**", nu "écrit").
-6. FIDELITATE DE SENS — verifică SEPARAT de gramatică dacă traducerea transmite EXACT același sens ca originalul, în ambele direcții. O propoziție poate fi perfect corectă gramatical, dar să spună cu totul altceva. Exemplu concret: dacă franceza spune "Il a refusé de signer" (a refuzat să semneze) și traducerea română zice "El a acceptat să semneze" — gramatical perfectă, dar sensul e exact opus. Corectezi sensul greșit, nu doar forma corectă a unei propoziții cu sens greșit.
-7. EXPRESII IDIOMATICE — dacă sursa folosește o expresie fixă, verifică dacă traducerea transmite ACELAȘI SENS printr-o formulare naturală în limba țintă, nu tradusă mecanic, cuvânt-cu-cuvânt. Exemplu concret: expresia franceză "il pleut des cordes" NU se traduce literal "plouă cu funii" (fără sens în română) — echivalentul idiomatic corect e "plouă cu găleata". Verifică și invers: o expresie fixă românească tradusă literal, fără sens, în franceză, trebuie înlocuită cu echivalentul idiomatic francez potrivit.
-8. CUVINTE INVENTATE — interzise explicit. Dacă traducătorul a folosit un cuvânt care nu există cu adevărat în limba respectivă (un compus fabricat, care "sună plauzibil" dar nu e un cuvânt real), înlocuiește-l cu cuvântul real, corect, care exprimă sensul dorit — NU inventa TU altul, la fel de plauzibil dar tot fals, în locul lui. Exemplu concret: "un canulard-mensonge" NU e un cuvânt real francez (compus inventat, chiar dacă sună plauzibil) pentru "o farsă" — cuvântul real, existent, e "un canular". Dacă NU ești sigur care e cuvântul real corect, NU inventa unul plauzibil — vezi regula 9, de incertitudine, mai jos.
-9. REGULĂ CRITICĂ despre incertitudine — dacă, verificând categoriile de mai sus, întâlnești un cuvânt/expresie pentru care NU EȘTI SIGUR care-i forma sau traducerea corectă (nu o ezitare minoră de stil — incertitudine reală), NU ghici și NU inventa nimic. În loc, marchează STRICT DOAR acea bucată (nimic mai mult din propoziție, doar cuvântul/expresia exactă) cu etichetele [UNCERTAIN]...[/UNCERTAIN], lăsând-o exact așa cum era primită. Folosește aceste etichete DOAR când chiar nu știi, nu pentru orice ezitare minoră.
-Pentru regulile 1-5 (formă): NU reformulezi, NU înlocuiești cuvinte cu sinonime doar din preferință stilistică, NU adaugi/elimini informație, NU schimbi ordinea propozițiilor — corectezi strict greșeli reale de formă. Pentru regulile 6-8 (sens/idiom/cuvinte inventate): AI VOIE explicit să înlocuiești un cuvânt/o formulare greșită cu cea corectă, dacă e clar o eroare reală, nu o preferință de stil. Dacă o pereche e deja perfectă, o lași identică, literă cu literă.
+6. TRADUCEREA lui "dont" (relativ francez) — sursă frecventă de inconsecvență, verifică-l mereu explicit, nu presupune că o traducere anterioară corectă în același text garantează consecvență. "Dont" înlocuiește "de + ceva", dar echivalentul românesc depinde de verbul/adjectivul care-l guvernează: "une question dont dépend mon travail" (a depinde DE ceva) → "o chestiune DE CARE depinde munca mea"; "ce dont il est fier" (a fi mândru DE ceva) → "ceea DE CARE e mândru" — NU "din care" (greșit, altă prepoziție, chiar dacă "dont" arată la fel în ambele cazuri). Verifică, pentru fiecare "dont", ce prepoziție cere verbul/adjectivul din propoziția română, nu presupune automat aceeași traducere peste tot.
+7. NATURALEȚEA construcțiilor verbale fixe și a posesivelor românești — traducătorul poate reda corect sensul de bază, dar greșit construcția firească în română. Verifică: (a) prepoziții obligatorii în expresii verbale fixe, nu doar cuvântul principal — "prendre au sérieux" înseamnă "a lua ÎN serios", nu "a lua serios" (fără "în", greșit); (b) posesiv reflexiv vs. neresflexiv — când subiectul posedă obiectul despre care vorbește, română preferă natural reflexivul "își" ("își ia munca în serios"), nu construcția calchiată cu pronume neresflexiv ("ia munca LUI în serios", care sună străin/tradus, nu românește).
+8. REGULĂ despre incertitudine — dacă, verificând categoriile de mai sus, întâlnești un caz de FORMĂ (acord, construcție, prepoziție) pentru care NU EȘTI SIGUR care-i varianta corectă (nu o ezitare minoră de stil — incertitudine reală), NU ghici. Marchează STRICT DOAR acea bucată cu etichetele [UNCERTAIN]...[/UNCERTAIN], lăsând-o exact așa cum era primită.
+NU reformulezi, NU înlocuiești cuvinte cu sinonime doar din preferință stilistică, NU adaugi/elimini informație, NU schimbi ordinea propozițiilor — corectezi strict greșeli reale de formă (regulile 4, 6, 7 îți permit să schimbi forma exactă a unui cuvânt/construcții deja alese, dacă gramatical era greșită, dar nu să alegi alt cuvânt din preferință). Dacă o pereche e deja perfectă, o lași identică, literă cu literă.
 Format de răspuns EXACT, identic ca structură cu ce ai primit (aceleași etichete [FR]/[RO], aceeași ordine, același număr de perechi, sau linia fără etichetă neatinsă dacă a fost cazul):
 [FR] <propoziția, cu corectările de mai sus dacă a fost nevoie>
 [RO] <propoziția, cu corectările de mai sus dacă a fost nevoie>
@@ -2897,9 +2891,9 @@ function deriveLevelGroupFromWords(words){
 
 // plasa de siguranta: daca [TEXT1]/[TEXT2]/[TEXT3] lipsesc complet din raspuns, recuperam
 // liniile [FR]/[RO] existente si le impartim aproximativ egal in 3, in loc de 3 casete goale
-function splitIntoThreeTexts(raw){
+function splitIntoTexts(raw, n){
   const blocks = [];
-  for(let i=1; i<=3; i++){
+  for(let i=1; i<=n; i++){
     const re = new RegExp(`\\[TEXT${i}\\]([\\s\\S]*?)\\[\\/TEXT${i}\\]`, 'i');
     const m = raw.match(re);
     blocks.push(m ? m[1].trim() : '');
@@ -2912,9 +2906,9 @@ function splitIntoThreeTexts(raw){
         pairs.push([flatLines[i], flatLines[i+1]]);
       }
     }
-    if(pairs.length >= 3){
-      const perText = Math.ceil(pairs.length / 3);
-      for(let i=0; i<3; i++){
+    if(pairs.length >= n){
+      const perText = Math.ceil(pairs.length / n);
+      for(let i=0; i<n; i++){
         blocks[i] = pairs.slice(i*perText, (i+1)*perText).map(p=>p.join('\n')).join('\n');
       }
     }
@@ -2943,8 +2937,9 @@ function buildContextTextPrompt(levelGroup, targetWords, knownWords){
 Cuvintele ȚINTĂ (elevul le-a văzut abia o dată sau de două ori, nu le știe încă bine — sunt date la forma de bază/dicționar, DOAR ca referință de sens): ${targetList}
 Restul vocabularului pe care elevul îl cunoaște deja bine, de folosit pentru restul textului (păstrează totul ușor de înțeles, nu doar cuvintele țintă): ${knownListTxt || '(fără altele — folosește doar conectori de bază)'}
 
-1. Generează EXACT 3 texte scurte, INDEPENDENTE, fiecare cu subiect propriu, diferit clar de celelalte două (nu 3 variații ale aceleiași idei).
-2. FIECARE din cele 3 texte trebuie să folosească TOATE cuvintele țintă, cel puțin o dată fiecare — nu doar unele dintre ele, nu doar în unele texte. Exemplu concret de evitat: dacă ai 5 cuvinte țintă, NU e acceptabil ca primul text să folosească doar 1, al doilea toate 5, al treilea doar 3 — FIECARE text trebuie să conțină, separat, TOATE. Verifică intern, înainte de a preda răspunsul, că fiecare text le conține pe toate — dacă lipsește vreunul, rescrie doar acel text. IMPORTANT: nu include în răspuns nicio verificare, numărătoare, explicație sau comentariu vizibil — doar cele 3 texte, exact în formatul cerut, nimic altceva.
+1. Generează EXACT 2 texte scurte, INDEPENDENTE, fiecare cu subiect propriu, diferit clar de celălalt (nu 2 variații ale aceleiași idei).
+2. FIECARE din cele 2 texte trebuie să folosească TOATE cuvintele țintă, cel puțin o dată fiecare — nu doar unele dintre ele, nu doar în unul dintre texte. Exemplu concret de evitat: dacă ai 5 cuvinte țintă, NU e acceptabil ca primul text să folosească doar 1, al doilea toate 5 — FIECARE text trebuie să conțină, separat, TOATE. Verifică intern, înainte de a preda răspunsul, că fiecare text le conține pe toate — dacă lipsește vreunul, rescrie doar acel text. IMPORTANT: nu include în răspuns nicio verificare, numărătoare, explicație sau comentariu vizibil — doar cele 2 texte, exact în formatul cerut, nimic altceva.
+2bis. ATENȚIE — „folosește toate cuvintele" NU înseamnă să le înghesui pe mai multe într-o singură sintagmă/propoziție doar ca să bifezi cerința mai repede. Distribuie cuvintele țintă NATURAL, în propoziții diferite ale textului, exact cum ar apărea firesc într-o poveste reală — niciodată forțat, unul lângă altul, dacă asta sună nenatural. Exemplu concret de greșeală GRAVĂ, de evitat: dacă ai cuvintele țintă "ami" (prieten) și "gars" (tip/băiat), NU scrii "Mon ami gars travaille..." (GREȘIT — nu e o construcție franceză reală, doar o înghesuire artificială a două cuvinte apropiate ca sens) — foloseste-le separat, în propoziții diferite: "Mon ami travaille dans un restaurant... Ce gars parle avec attention..." (fiecare cuvânt în propria lui propoziție, natural). Dacă două cuvinte țintă sunt apropiate ca sens, tratează-le ca subiecte/referiri DIFERITE în text (ex. un prieten ȘI o altă persoană, un "gars"), nu ca sinonime forțate una lângă alta.
 3. IMPORTANT — cuvintele țintă sunt date la forma de bază DOAR ca referință de sens, NU ca formă obligatorie. Dacă cuvântul e VARIABIL (verb, substantiv, adjectiv), folosește-l NATURAL, la orice formă gramaticală corectă cere contextul (conjugat, la plural, la alt gen/acord). Dacă cuvântul e INVARIABIL (prepoziție, conjuncție, adverb, pronume) — NU are nicio formă flexionată, folosește-l EXACT așa cum e dat, neschimbat.
 3bis. ATENȚIE — asta înseamnă STRICT variante morfologice ale ACELUIAȘI cuvânt (timp, persoană, număr, gen), NU un alt cuvânt diferit care doar seamănă la scris sau începe cu aceleași litere. Exemplu concret de greșeală GRAVĂ, de evitat: dacă cuvântul țintă e "par" (prepoziție, invariabilă, „prin"/„de către"), NU e acceptabil să folosești în schimb "parler" (a vorbi), "partir" (a pleca) sau "parce que" (pentru că) — sunt cuvinte COMPLET DIFERITE, fără nicio legătură reală cu "par", doar coincidență de litere la început. Cuvântul țintă "par" trebuie să apară EL ÎNSUȘI, literă cu literă, cel puțin o dată în fiecare text — nu un cuvânt diferit care începe la fel.
 4. Restul cuvintelor vine din lista de cuvinte cunoscute, pe cât posibil — conectori de bază (articole, pronume, prepoziții comune) mereu permiși.
@@ -2960,8 +2955,7 @@ Format EXACT:
 [RO] <propoziția 1>
 [/TEXT1]
 [TEXT2] ... [/TEXT2]
-[TEXT3] ... [/TEXT3]
-Fără nimic în afara acestor 3 blocuri.`;
+Fără nimic în afara acestor 2 blocuri.`;
 }
 
 /* ---------- AI: "Cuvinte noi în context" - Agentul 3 (marcare {{...}} pe liniile FR finale) ---------- */
@@ -3075,6 +3069,7 @@ let wordListSort = 'stars-desc';
 let wordListSelected = []; // array de cuvinte alese, in modul 'select', max 5
 let wordListLevel = 'a1a2'; // nivelul pentru text, ales explicit in modul select
 let wordListSearchQuery = '';
+let wordListLastClickedId = null; // id-ul cuvantului pe care s-a dat ultimul click - butonul flotant apare mereu chiar sub el, nu la o pozitie fixa pe ecran
 
 // acelasi calcul de stelute ca peste tot in aplicatie (streak+1), nu numarul brut de raspunsuri corecte
 function wordStarsCount(id){
@@ -3099,6 +3094,11 @@ function filterWordListBySearch(rows){
   if(!q) return rows;
   return rows.filter(w => w.fr.toLowerCase().includes(q) || w.ro.toLowerCase().includes(q));
 }
+function floatingConfirmButtonHtml(){
+  return `<button class="btn-block paste-highlight" id="wordListFloatingConfirmBtn" style="width:100%; margin:2px 0 14px; border-width:2px; box-shadow:0 4px 14px rgba(0,0,0,0.22);">
+    <span>✓ Validează selecția (${wordListSelected.length}/5)</span><span>→</span>
+  </button>`;
+}
 function renderWordList(){
   const container = document.getElementById('wordListRows');
   const rows = filterWordListBySearch(sortWordListRows(getPracticedWords()));
@@ -3110,22 +3110,36 @@ function renderWordList(){
     return;
   }
   const isSelectMode = wordListMode === 'select';
-  container.innerHTML = rows.map(w=>{
+  const showFloating = isSelectMode && wordListSelected.length > 0;
+  let floatingInserted = false;
+  const rowsHtml = rows.map(w=>{
     const stars = wordStarsCount(w.id);
     const isPicked = wordListSelected.some(sw=>sw.id === w.id);
     const isDisabled = isSelectMode && !isPicked && wordListSelected.length >= 5;
-    return `<div class="btn-block word-list-row" data-id="${escapeAttr(w.id)}" style="width:100%; margin-bottom:6px; ${isDisabled?'opacity:0.4;':''} ${isPicked?'border-color:var(--red); border-width:2px;':''}">
+    const rowHtml = `<div class="btn-block word-list-row" data-id="${escapeAttr(w.id)}" style="width:100%; margin-bottom:6px; ${isDisabled?'opacity:0.4;':''} ${isPicked?'border-color:var(--red); border-width:2px;':''}">
       <span style="flex:1; overflow:hidden;">
         <span style="font-family:'Literata',serif; font-weight:600;">${formatArticleWord(w)}</span>
         <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); display:block;">${escapeHtml(w.ro)}</span>
       </span>
       <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:${stars>=4?'var(--green)':'var(--gold)'};">${'★'.repeat(Math.min(stars,4))}${stars>4?'+':''}</span>
     </div>`;
+    // butonul flotant se insereaza IMEDIAT dupa randul pe care s-a dat ultimul click - nu la o
+    // pozitie fixa pe ecran, ca sa fie mereu vizibil chiar langa ce tocmai ai ales, indiferent de scroll
+    if(showFloating && w.id === wordListLastClickedId){
+      floatingInserted = true;
+      return rowHtml + floatingConfirmButtonHtml();
+    }
+    return rowHtml;
   }).join('');
+  // plasa de siguranta: daca ultimul cuvant clicked nu mai e vizibil (ex. cautarea l-a filtrat
+  // between timp), punem butonul la finalul listei, ca sa nu dispara complet din vedere
+  container.innerHTML = (showFloating && !floatingInserted) ? rowsHtml + floatingConfirmButtonHtml() : rowsHtml;
+
   if(isSelectMode){
     container.querySelectorAll('.word-list-row').forEach(row=>{
       row.addEventListener('click', ()=>{
         const id = row.dataset.id;
+        wordListLastClickedId = id;
         const already = wordListSelected.findIndex(w=>w.id===id);
         if(already >= 0){ wordListSelected.splice(already, 1); }
         else {
@@ -3137,11 +3151,17 @@ function renderWordList(){
         renderWordList();
       });
     });
+    const floatingBtn = document.getElementById('wordListFloatingConfirmBtn');
+    if(floatingBtn){
+      floatingBtn.addEventListener('click', (e)=>{
+        e.stopPropagation(); // nu lasam click-ul sa "treaca" prin, catre randul de sub el
+        document.getElementById('wordListConfirmBtn').click(); // reutilizam exact acelasi handler de confirmare
+      });
+    }
   }
 }
 function renderWordListSelectedChips(){
   document.getElementById('wordListSelectedCount').textContent = wordListSelected.length;
-  document.getElementById('wordListFloatingCount').textContent = wordListSelected.length;
   document.getElementById('wordListSelectedChips').innerHTML = wordListSelected.map(w=>
     `<span class="chip active word-list-chip-remove" data-id="${escapeAttr(w.id)}">${escapeHtml(w.fr)} ✕</span>`
   ).join('');
@@ -3154,9 +3174,8 @@ function renderWordListSelectedChips(){
   });
   const hasSelection = wordListSelected.length > 0;
   document.getElementById('wordListConfirmBtn').disabled = !hasSelection;
-  // butonul flotant - vizibil doar in modul de selectie, doar cand ai ales cel putin un cuvant,
-  // ca sa nu trebuiasca sa derulezi inapoi sus la butonul static, indiferent cat de jos esti in lista
-  document.getElementById('wordListFloatingConfirmBtn').style.display = (wordListMode === 'select' && hasSelection) ? 'flex' : 'none';
+  // butonul flotant nu mai e un element static - e generat de renderWordList(), inserat direct
+  // sub randul pe care s-a dat ultimul click, deci nu mai are un element persistent de aratat/ascuns aici
 }
 document.getElementById('wordListSearchInput').addEventListener('input', (e)=>{
   wordListSearchQuery = e.target.value;
@@ -3182,24 +3201,20 @@ function openWordListSheet(mode){
   wordListMode = mode;
   wordListSelected = [];
   wordListSearchQuery = '';
+  wordListLastClickedId = null;
   document.getElementById('wordListSearchInput').value = '';
   document.getElementById('wordListSheetTitle').textContent = mode === 'select' ? '✋ Alege până la 5 cuvinte' : '📋 Cuvintele mele exersate';
   document.getElementById('wordListSelectLevelSection').style.display = mode === 'select' ? 'block' : 'none';
   document.getElementById('wordListSelectedSection').style.display = mode === 'select' ? 'block' : 'none';
   if(mode === 'select') renderWordListSelectedChips();
-  else document.getElementById('wordListFloatingConfirmBtn').style.display = 'none';
   renderWordList();
   wordListSheet.classList.add('show');
   sheetOverlay.classList.add('show');
 }
 function closeWordListSheet(){
   wordListSheet.classList.remove('show');
-  document.getElementById('wordListFloatingConfirmBtn').style.display = 'none';
   sheetOverlay.classList.remove('show');
 }
-document.getElementById('wordListFloatingConfirmBtn').addEventListener('click', ()=>{
-  document.getElementById('wordListConfirmBtn').click(); // reutilizam exact acelasi handler de confirmare
-});
 document.getElementById('closeWordListSheetBtn').addEventListener('click', closeWordListSheet);
 document.getElementById('browseWordListBtn').addEventListener('click', ()=>{
   closeSheet();
@@ -3258,66 +3273,44 @@ async function runContextGeneration(words, levelGroup){
   const targetWords = words.map(w => extractCoreWord(w.fr));
   const knownWords = getKnownWordsForLevelGroup(levelGroup);
 
-  statusEl.textContent = 'Se generează 3 texte...';
+  statusEl.textContent = 'Se generează 2 texte...';
   resultSection.style.display = 'none';
   try{
     const genPrompt = buildContextTextPrompt(levelGroup, targetWords, knownWords);
-    const raw = await callClaude(genPrompt, [{type:'text', text: 'Generează cele 3 texte, în formatul cerut.'}], 8192);
+    const raw = await callClaude(genPrompt, [{type:'text', text: 'Generează cele 2 texte, în formatul cerut.'}], 8192);
 
-    // extragem cele 3 blocuri (cu plasa de siguranta daca [TEXT1..3] lipsesc), retinem CATE
-    // linii [FR]/[RO] are fiecare bloc INAINTE de revizuire, ca sa putem re-desparti corect dupa
-    let blocks = splitIntoThreeTexts(raw);
-    const lineCounts = blocks.map(b => (b.match(/^\[(FR|RO)\]/gm) || []).length);
-    const allLines = blocks.join('\n');
+    // extragem cele 2 blocuri (cu plasa de siguranta daca [TEXT1]/[TEXT2] lipsesc)
+    const blocks = splitIntoTexts(raw, 2);
 
-    statusEl.textContent = 'Se verifică gramatical...';
-    let reviewed = allLines;
-    try{
-      const reviewPrompt = buildGrammarReviewSystemPrompt();
-      const reviewResult = await callClaude(reviewPrompt, [{type:'text', text: `"""\n${allLines}\n"""`}], 8192);
-      const origCount = (allLines.match(/^\[(FR|RO)\]/gm) || []).length;
-      const revCount = (reviewResult.match(/^\[(FR|RO)\]/gm) || []).length;
-      if(revCount === origCount) reviewed = reviewResult; // altfel pastram allLines, nerevizuit (mai sigur)
-      if(reviewed.includes('[UNCERTAIN]')){
-        statusEl.textContent = 'Se verifică o bucată incertă cu un model mai avansat...';
-        reviewed = await escalateUncertainSegments(reviewed);
-      }
-    }catch(e){ reviewed = allLines; }
-
-    // re-despartim inapoi in cele 3 texte, pe baza numarului de linii retinut INAINTE de revizuire
-    const reviewedLines = reviewed.split('\n').map(l=>l.trim()).filter(Boolean);
-    const rebuiltBlocks = [];
-    let idx = 0;
-    for(let i=0;i<3;i++){
-      rebuiltBlocks.push(reviewedLines.slice(idx, idx+lineCounts[i]).join('\n'));
-      idx += lineCounts[i];
-    }
-
-    // Agentul 3: marcam DOAR liniile [FR] finale, cu plasa de siguranta PE LINIE
-    statusEl.textContent = 'Se marchează cuvintele...';
-    const allFrLines = rebuiltBlocks.map(b => b.split('\n').filter(l=>l.startsWith('[FR]'))).flat();
-    let markedFrLines = allFrLines.slice();
-    if(allFrLines.length){
+    // procesam FIECARE text SEPARAT (nu concatenat) - formare+fidelitate (translateWithReview,
+    // acelasi mecanism folosit peste tot in aplicatie) apoi marcare, in PARALEL intre cele 2 texte
+    // (independente unul de altul, reduce timpul de asteptare la jumatate fata de secvential)
+    statusEl.textContent = 'Se verifică gramatical și de sens...';
+    async function processOneText(block){
+      if(!block.trim()) return '';
+      const reviewedBlock = await translateWithReview(block);
+      // Agentul 3: marcam DOAR liniile [FR] finale, cu plasa de siguranta PE LINIE
+      const frLines = reviewedBlock.split('\n').filter(l=>l.startsWith('[FR]'));
+      if(!frLines.length) return reviewedBlock;
+      let markedFrLines = frLines.slice();
       try{
         const markPrompt = buildMarkingPrompt(targetWords);
-        const markResult = await callClaude(markPrompt, [{type:'text', text: allFrLines.join('\n')}], 4096);
+        const markResult = await callClaude(markPrompt, [{type:'text', text: frLines.join('\n')}], 4096);
         const candidateLines = markResult.split('\n').map(l=>l.trim()).filter(l=>l.startsWith('[FR]'));
-        if(candidateLines.length === allFrLines.length){
+        if(candidateLines.length === frLines.length){
           markedFrLines = candidateLines.map((markedLine, i)=>{
             const stripped = markedLine.replace(/\{\{(.*?)\}\}/g, '$1');
-            return stripped === allFrLines[i] ? markedLine : allFrLines[i]; // pe linie: daca nu se reproduce exact, ramane simpla
+            return stripped === frLines[i] ? markedLine : frLines[i]; // pe linie: daca nu se reproduce exact, ramane simpla
           });
         }
       }catch(e){ /* pastram liniile nemarcate, nu blocam fluxul */ }
+      let frIdx = 0;
+      return reviewedBlock.split('\n').map(line => line.startsWith('[FR]') ? markedFrLines[frIdx++] : line).join('\n');
     }
 
-    // reasamblam textele finale, inlocuind liniile [FR] cu cele marcate, in ordine
-    let frIdx = 0;
-    const finalBlocks = rebuiltBlocks.map(b=>{
-      return b.split('\n').map(line=> line.startsWith('[FR]') ? markedFrLines[frIdx++] : line).join('\n');
-    });
+    const finalBlocks = await Promise.all(blocks.map(processOneText));
 
-    [1,2,3].forEach((n,i)=>{
+    [1,2].forEach((n,i)=>{
       const parsed = parseTaggedAiResult(finalBlocks[i] || '');
       document.getElementById(`aiContextText${n}`).innerHTML = parsed.html || '<div class="upload-status">Text lipsă.</div>';
     });
@@ -3348,19 +3341,141 @@ document.getElementById('aiContextGenManualBtn').addEventListener('click', ()=>{
 function countTaggedPairs(text){
   return (text.match(/^\[(FR|RO)\]/gm) || []).length;
 }
+
+/* ---------- AI: Agentul 2b - verificare de FIDELITATE prin retraducere INDEPENDENTA (nu prin
+   auto-recitire). Ideea: in loc sa cerem lui Haiku sa-si recunoasca propria greseala de sens (care
+   de multe ori suna fluent si convingator, deci nu "se simte" gresita), il punem sa retraduca
+   romana inapoi in franceza, ORB (fara sa vada franceza originala in acelasi apel), apoi comparam
+   cele doua variante franceze - o divergenta e un semnal OBIECTIV, nu unul care depinde de
+   constientizare. Doar acolo unde divergenta e confirmata, escaladam STRICT acea linie la Sonnet. */
+
+function buildBackTranslatePrompt(){
+  return `Ești un traducător francez independent — primești DOAR un text în limba română, numerotat pe propoziții, fără niciun alt context. Traduce-l în franceză, propoziție cu propoziție, cât mai fidel ca sens și cât mai natural.
+Format primit:
+1. <propoziția română 1>
+2. <propoziția română 2>
+...
+Răspunde STRICT cu traducerea franceză, păstrând exact aceeași numerotare, un rând per linie, fără introducere, fără explicații:
+1. <traducerea franceză a liniei 1>
+2. <traducerea franceză a liniei 2>
+...`;
+}
+
+function buildFidelityComparePrompt(){
+  return `Ești un verificator de fidelitate a traducerii, expert francez-română. Primești DOUĂ seturi de propoziții franceze, numerotate identic: SET A (originalul) și SET B (obținut independent, retraducând în franceză o traducere română a lui A — deci B ar trebui să transmită exact același sens ca A, chiar dacă formularea diferă cuvânt cu cuvânt).
+Pentru FIECARE număr, compară SENSUL (nu formularea exactă) dintre linia din A și linia corespunzătoare din B. Verifică în special: sentiment/polaritate (afirmativ vs. negativ, ușurare vs. avertisment), cauzalitate (cauză vs. consecință — nu inversate), timp/aspect (dacă schimbarea de timp verbal schimbă sensul), și dacă informația esențială s-a păstrat.
+Dacă sensul se potrivește (chiar cu formulare diferită, chiar cu sinonime), scrie:
+N. [MATCH]
+Dacă sensul DIFERĂ vizibil (nu doar nuanță minoră de stil), scrie:
+N. [DIVERGENT] <ce anume diferă, pe scurt, în română>
+Format primit:
+SET A:
+1. ...
+SET B:
+1. ...
+Răspunde STRICT cu liniile numerotate ([MATCH] sau [DIVERGENT] + motiv scurt), nimic altceva — fără introducere, fără concluzie.`;
+}
+
+function buildFidelityFixPrompt(){
+  return `Ești un traducător expert francez-română, senior, chemat să corectezi cazuri unde traducerea română nu reda fidel sensul francezului original — un verificator automat a detectat o divergență de sens.
+Pentru fiecare caz primit, ai: propoziția FRANCEZĂ originală (sursa de adevăr), traducerea ROMÂNĂ curentă (suspectată greșită), și motivul divergenței detectate. Corectează STRICT traducerea română, ca să transmită exact sensul francezului — păstrează naturalețea și stilul, dar sensul (inclusiv polaritate, cauzalitate, timp verbal) trebuie să corespundă exact originalului.
+Format primit, per caz:
+N. FR: <propoziția franceză originală>
+   RO curent: <traducerea suspectă>
+   Motiv: <ce a detectat verificatorul>
+Răspunde STRICT cu liniile numerotate, DOAR traducerea română corectată, fără introducere, fără explicații:
+N. <traducerea română corectată>`;
+}
+
+// extrage linii numerotate ("1. text", "2. text"...) intr-un array ordonat corect - null daca
+// numarul de linii gasite nu se potriveste cu ce asteptam (plasa de siguranta la parsare)
+function parseNumberedLines(text, expectedCount){
+  const matches = [...text.matchAll(/^(\d+)\.[ \t]*(.*)$/gm)];
+  if(matches.length !== expectedCount) return null;
+  const sorted = matches.map(m=>({n: parseInt(m[1],10), text: m[2].trim()})).sort((a,b)=>a.n-b.n);
+  return sorted.map(x=>x.text);
+}
+
+// extrage doar liniile marcate [DIVERGENT], cu index (0-based) si motiv
+function parseDivergences(text, expectedCount){
+  const matches = [...text.matchAll(/^(\d+)\.[ \t]*\[(MATCH|DIVERGENT)\][ \t]*(.*)$/gm)];
+  const divergences = [];
+  matches.forEach(m=>{
+    const idx = parseInt(m[1],10) - 1;
+    if(m[2] === 'DIVERGENT' && idx >= 0 && idx < expectedCount){
+      divergences.push({ index: idx, reason: m[3].trim() });
+    }
+  });
+  return divergences;
+}
+
+// pipeline complet Agent 2b: retraducere oarba -> comparare -> escaladare tintita doar pe liniile
+// unde s-a confirmat divergenta. Primeste textul DUPA revizuirea de forma (Agent 2a), il verifica
+// pe fidelitate de sens, si intoarce textul (eventual cu liniile RO corectate).
+async function verifyFidelityViaBackTranslation(text){
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  const frLines = [], roLines = [], roLineIndices = [];
+  lines.forEach((line, i)=>{
+    const mFr = line.match(/^\[FR\]\s*(.*)$/);
+    const mRo = line.match(/^\[RO\]\s*(.*)$/);
+    if(mFr) frLines.push(mFr[1]);
+    if(mRo){ roLines.push(mRo[1]); roLineIndices.push(i); }
+  });
+  // structura neasteptata (numar diferit de linii FR/RO, sau deloc) - nu riscam, pastram neschimbat
+  if(frLines.length === 0 || frLines.length !== roLines.length) return text;
+
+  // pasul B1: retraducere INDEPENDENTA, oarba - modelul vede DOAR romana, nu franceza originala deloc
+  const roNumbered = roLines.map((l,i)=>`${i+1}. ${l}`).join('\n');
+  const backTranslatedRaw = await callClaude(buildBackTranslatePrompt(), [{type:'text', text: roNumbered}], 4096);
+  const backLines = parseNumberedLines(backTranslatedRaw, roLines.length);
+  if(!backLines) return text; // parsare esuata - nu riscam sa stricam nimic
+
+  // pasul B2: comparare de sens - setul FR original vs. setul FR retradus independent
+  const setA = frLines.map((l,i)=>`${i+1}. ${l}`).join('\n');
+  const setB = backLines.map((l,i)=>`${i+1}. ${l}`).join('\n');
+  const compareRaw = await callClaude(buildFidelityComparePrompt(), [{type:'text', text: `SET A:\n${setA}\n\nSET B:\n${setB}`}], 3072);
+  const divergences = parseDivergences(compareRaw, frLines.length);
+  if(!divergences.length) return text; // totul se potriveste ca sens - gata, fara cost suplimentar
+
+  // pasul B3 (Sonnet, DOAR pt liniile confirmate divergente): corectam STRICT acele linii RO
+  try{
+    const casesText = divergences.map(d =>
+      `${d.index+1}. FR: ${frLines[d.index]}\n   RO curent: ${roLines[d.index]}\n   Motiv: ${d.reason}`
+    ).join('\n');
+    const fixRaw = await callClaude(buildFidelityFixPrompt(), [{type:'text', text: casesText}], 3072, 'claude-sonnet-5');
+    const fixes = parseNumberedLines(fixRaw, divergences.length);
+    if(!fixes) return text; // parsare esuata la corectie - pastram varianta nerevizuita pe sens, dar sigura
+    const newLines = [...lines];
+    divergences.forEach((d, i)=>{
+      newLines[roLineIndices[d.index]] = `[RO] ${fixes[i]}`;
+    });
+    return newLines.join('\n');
+  }catch(err){
+    return text; // escaladarea a esuat (retea etc.) - pastram varianta de dinaintea corectiei de sens
+  }
+}
+
 async function translateWithReview(draftResult){
   const draftPairCount = countTaggedPairs(draftResult);
   if(draftPairCount === 0) return draftResult; // fara etichete (ex. mesaj de redirectionare) - nimic de revizuit
+  let current = draftResult;
+  // pasul 1: revizuire de FORMA (Agentul 2a) - acorduri, punctuatie, "dont", naturalete
   try{
     const reviewPrompt = buildGrammarReviewSystemPrompt();
-    const reviewed = await callClaude(reviewPrompt, [{type:'text', text: `"""\n${draftResult}\n"""`}], 8192);
+    const reviewed = await callClaude(reviewPrompt, [{type:'text', text: `"""\n${current}\n"""`}], 8192);
     const reviewedPairCount = countTaggedPairs(reviewed);
-    if(reviewedPairCount !== draftPairCount) return draftResult; // nepotrivire de numar de perechi - pastram varianta nerevizuita, sigura
-    if(reviewed.includes('[UNCERTAIN]')) return await escalateUncertainSegments(reviewed);
-    return reviewed;
+    if(reviewedPairCount === draftPairCount) current = reviewed; // altfel pastram draftResult, nerevizuit dar sigur
+    if(current.includes('[UNCERTAIN]')) current = await escalateUncertainSegments(current);
   }catch(err){
-    return draftResult; // revizuirea a esuat (retea etc.) - pastram varianta initiala, nu blocam utilizatorul
+    // pasul de forma a esuat - continuam cu draftResult neschimbat spre pasul 2, nu blocam fluxul
   }
+  // pasul 2: verificare de FIDELITATE (Agentul 2b) - retraducere independenta + comparare obiectiva
+  try{
+    current = await verifyFidelityViaBackTranslation(current);
+  }catch(err){
+    // verificarea de fidelitate a esuat - pastram ce aveam dupa pasul 1, nu blocam fluxul
+  }
+  return current;
 }
 
 /* ---------- AI: "Descrie o poza" - descriere imagine, STRICT din vocabularul exersat cu succes ---------- */
