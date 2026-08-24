@@ -1,49 +1,83 @@
 # La Boîte de Fiches — Flashcards Français ⇄ Română
 
-Aplicație de exersat vocabular francez-român, sub formă de PWA (Progressive Web App) instalabilă pe telefon. Aplicație soră a Karteikarten (Deutsch ⇄ Română), aceeași arhitectură și temă vizuală — „La Boîte de Fiches" e echivalentul firesc în franceză al conceptului „Karteikarten" (o cutie de fișe de cartotecă).
+PWA (Progressive Web App) de exersat vocabular francez-român, fără build step — HTML/CSS/JS simplu, deschis direct din browser sau instalat pe telefon. Aplicație-soră a Karteikarten (DE-RO) și a variantei grecești, aceeași arhitectură de bază, găzduite separat pe GitHub Pages.
 
-## Ce conține
+**Documentul ăsta e pentru dezvoltatori** — arhitectură, structuri de date, decizii tehnice. Pentru explicații de utilizare, vezi secțiunea ❓ Ajutor din aplicație (acoperă fiecare modul, grupat pe părți, strict din perspectiva utilizatorului).
 
-- `index.html` — aplicația
-- `vocab-data.js` — baza de vocabular (3541 cuvinte, niveluri A1-C2 complete, verificate manual, resortate după rangul real de frecvență)
-- `manifest.json` — configurare PWA (nume, iconițe, mod de afișare)
-- `sw.js` — service worker (funcționare offline)
-- `icon-192.png`, `icon-512.png` — iconițele aplicației (aceeași temă vizuală și aceleași proporții ca Karteikarten DE-RO, cu banda adezivă tricoloră — albastru-alb-roșu, benzi verticale ca steagul francez — în loc de banda solidă a variantei germane, ca semn distinctiv de serie)
+## Arhitectură
 
-## Funcționalități
+Un singur fișier `index.html` (~4000 linii) conține tot: markup, CSS inline (`<style>`), și JS inline (`<script>`) — fără framework, fără build/bundler, fără dependențe npm la runtime. Vocabularul stă separat, în `vocab-data.js`, încărcat ca script extern (cache offline mai curat, fișier mare care nu se schimbă des).
 
-- Traducere franceză ⇄ română, grilă cu 4 variante de răspuns, cu distractori din aceeași categorie gramaticală (substantiv/verb/expresie/cuvânt funcțional)
-- Niveluri selectabile A1–C2, combinabile între ele, plus **Cuvintele mele** (listă proprie), **Antonime & Sinonime** și **Conjugare verbe** — module noi, exclusiv franceze
-- Sistem de priorități pe bază de streak (răspunsuri corecte consecutive) și stelute vizuale (aurii/verzi/roșii cu „iertare" după 3 reușite) — la A1-B2, cuvintele noi apar în ordinea reală de frecvență, pe benzi de 200
-- **Cuvintele mele** — listă personală, cu adăugare din căutare (lipire din clipboard, evidențiată vizual, cu curățare automată a textului copiat din Reverso), suprascriere cu păstrarea progresului acumulat
-- **Antonime & Sinonime** — 136 perechi antonime + 46 perechi sinonime, verificate manual, exclusiv în franceză
-- **Conjugare verbe** — 100 dintre cele mai frecvente verbe franceze, la présent, imparfait, futur simple, passé composé și plus-que-parfait, cu reguli être/avoir corecte (inclusiv verbe reflexive) și acord de număr la participiu
-- **🤖 AI (Claude)** — panou organizat ca hub, cu 3 destinații (opțional, experimental):
-  - **Traducere & Corectură** — Traducere liberă (RO⇄FR, cu propria cheie API) într-un **pipeline în trei pași**: traducerea propriu-zisă, o revizuire separată (gramatică/ortografie/punctuație/topică, dar și fidelitate de sens, expresii idiomatice, cuvinte inventate), și — rar, doar când e nevoie — escaladarea bucăților incerte către un model mai avansat, pentru o a doua opinie; plus **Corectură franceză** (agent separat, dedicat identificării/corectării greșelilor dintr-un text scris de tine, cu explicații în română); ambele cu dictare vocală, imagine cu text (galerie/clipboard), export text/PDF
-  - **📝 Exersează ce ai învățat** — text generat de Claude, STRICT din vocabularul deja exersat cu succes (prag: minim 2 răspunsuri corecte per cuvânt), pe o temă la alegere, cu traducere ascunsă până o ceri și loc pentru propria încercare înainte
-  - **🆕 Cuvinte noi în context** — 3 texte scurte independente, generate din cuvinte abia întâlnite (văzute 1-2 ori), cu traducere vizibilă direct și cuvintele țintă evidențiate cu roșu, la orice formă gramaticală naturală; selecție automată (gratuită, din progres) sau manuală (din lista „Cuvintele mele exersate", accesibilă și din Setări)
-  - **📜 Istoric** — toate traducerile/corecturile/exercițiile AI, cu filtrare, selecție/ștergere în masă, export JSON/CSV/PDF, import cu deduplicare, și analiză de cuvinte frecvente neadăugate încă în vocabular
-- Selector de direcție: FR→RO, RO→FR, sau ambele amestecat
-- Pronunție audio a cuvintelor franceze (Web Speech API), cu alegere de voce
-- Link direct către Reverso (`dictionary.reverso.net/french-romanian`) pentru fiecare cuvânt francez, ca sursă suplimentară (dict.cc nu are pereche franceză-română directă)
-- Buton "Sari peste" pentru a trece la următorul cuvânt fără să conteze ca greșeală
-- Căutare vocală (cu recunoaștere a elidării franceze: „l'ami" → „ami")
-- Încărcare de liste proprii de vocabular (CSV, TSV sau XLSX)
-- Export al listei curente, statisticilor, și „Cuvintelor mele", ca fișiere CSV
-- Backup complet (progres + preferințe) exportabil/importabil ca fișier .json
-- Preferințele (niveluri, direcție, mod) și statisticile se salvează local, în browser, per dispozitiv
+- `index.html` — aplicația completă
+- `vocab-data.js` — `const VOCAB_DATA = [...]`, array de rânduri `[id, francez, română, articol('le'|'la'|''), nivel, categorie(nefolosit)]`
+- `manifest.json` — config PWA (nume, iconițe `any`+`maskable`, `display:standalone`)
+- `sw.js` — service worker, strategie cache-first cu fallback la rețea; `CACHE_NAME` incrementat la fiecare livrare (invalidează cache-ul vechi)
+- `icon-*.png` — 4 iconițe (192/512 × regulată/maskable), generate cu Pillow, tema tricoloră (steag francez, benzi verticale — spre deosebire de cel german, orizontal)
 
-## Instalare pe telefon
+## Structuri de date cheie
 
-1. Deschide link-ul GitHub Pages al acestui repository, în Chrome (Android) sau Safari (iOS)
-2. Din meniul browserului, alege "Adaugă la ecranul principal" / "Instalează aplicația"
-3. Aplicația apare cu propria iconiță și funcționează parțial offline
+**Cuvânt normal** (din `BUILTIN`, derivat din `VOCAB_DATA`, sau din `myWords`): `{id, fr, ro, artikel, level, category}`.
 
-## Actualizarea aplicației
+**`wordStats[id]`** — progresul per cuvânt: `{attempts, correct, streak, mistakeFlag}`. `streak` = răspunsuri corecte consecutive (resetat la orice greșeală); stelutele afișate = `streak+1`. `mistakeFlag` marchează o greșeală „activă" — se șterge automat după 3 răspunsuri corecte la rând de la ultima greșeală (mecanismul de „iertare").
 
-Pentru a publica o versiune nouă: încarcă fișierele modificate în acest repository (Add file → Upload files → Commit), GitHub Pages redeploy-ează automat în 1-2 minute. Aplicația instalată pe telefon preia schimbările la următoarea deschidere.
+**Niveluri „virtuale"**, structuri de date diferite de un cuvânt normal, generate din funcții dedicate, nu din `VOCAB_DATA`:
+- `ANTSYN_ENTRIES` (din `ANTONYM_PAIRS`/`SYNONYM_PAIRS`) — `{id, level:'ANTSYN', qtype, word, answer}`
+- `VERB_ENTRIES` (din `VERB_DATA`) — `{id, level:'VERBS', verbIdx, tense, person}`
+
+**Atenție**: aceste intrări NU au `.fr`/`.ro` — orice cod care iterează peste `activeWords()` (pool combinat) și presupune implicit forma unui cuvânt normal trebuie să excludă explicit `level==='ANTSYN'`/`'VERBS'`. Exact aici a fost bug-ul critic de la v24 (`classifyWord()` crăpa pe aceste intrări la calculul distractorilor) — vezi changelog.
+
+**`localStorage`** — toate cheile prefixate cu `boitedefiches_` (izolare între aplicațiile-soră, găzduite pe același domeniu GitHub Pages — `localStorage` e izolat per *domeniu*, nu per aplicație). Chei: `wordStats`, `prefs`, `mistakeIds`, `myWords`, `voiceURI`, `installBannerDismissed`, `streak`, `fontZoom`, `claudeApiKey`, `aiHistory`. `BACKUP_KEYS` conține subsetul inclus în export/import de backup (nu include `aiHistory` — are propriul export/import JSON, cu deduplicare, nu suprascriere).
+
+## Algoritmi cheie
+
+- **Prioritate ponderată** (`priorityWeight`): 5 pentru streak 0-1, 3 pentru 2-3, 0.5 pentru 4, 0.3 pentru 5+ — selecție fără repetiție (Efraimidis-Spirakis, `Math.pow(Math.random(), 1/weight)`).
+- **Benzi de frecvență** (doar A1-B2): cuvintele ordonate global după rangul lor real (ID-ul reflectă poziția în `fr_50k.txt`), grupate în benzi de 200; o bandă se deblochează abia după ce toate cuvintele din banda anterioară au fost încercate măcar o dată. C1/C2 nu au benzi (frecvența brută e un indiciu mai slab la rang mare).
+- **Elidare franceză** (`needsElision`): `le`/`la`→`l'` înaintea unei vocale/h — folosită atât la afișarea cuvintelor cât și la construcția formelor reflexive compuse (`m'étais`, nu `me étais`), calculată dinamic după prima literă a formei reale, nu dintr-un tabel static (bug reparat la v22, vezi changelog).
+- **Conjugare verbe**: `VERB_DATA` stochează prezent/imperfect/viitor ca forme literale (verificate manual, nu derivate la runtime); passé composé și plus-que-parfait sunt calculate (`composedForm()`) din auxiliar (prezent/imperfect) + participiu + regulă de acord (`pastParticipleAgreed`), reutilizând aceeași logică pentru ambele timpuri compuse.
+
+## Modulul AI (opțional, cu cheie API proprie a utilizatorului)
+
+Panou organizat ca hub (`aiSheet` → `showAiView(view)`, comută vizibilitatea între sub-view-uri, fără reload). 5 destinații: Traducere/Corectură/Simplifică (trei moduri într-un singur view, `aiMode`), Exersează ce ai învățat, Cuvinte noi în context, Descrie o poză, Istoric.
+
+**Pipeline în trei pași** pentru Traducere/Simplifică (Corectură rămâne un singur agent, nu trece prin revizuire — format de etichete diferit oricum):
+1. **Generare** — `buildAiSystemPrompt()`/`buildSimplifySystemPrompt()`, ieșire `[FR]`/`[RO]` pe perechi.
+2. **Revizuire** (`translateWithReview()`, helper reutilizat de toate modulele cu acest format) — `buildGrammarReviewSystemPrompt()`, strict pe corectitudine (formă, sens, expresii idiomatice, cuvinte inventate — nu doar gramatică). Plasă de siguranță: rezultatul revizuit e acceptat DOAR dacă numărul de perechi `[FR]/[RO]` se păstrează identic (`countTaggedPairs()`) — altfel se păstrează traducerea nerevizuită, mai sigură decât una trunchiată tăcut.
+3. **Escaladare rară** — dacă revizorul marchează explicit `[UNCERTAIN]...[/UNCERTAIN]` pe o bucată de care nu e sigur, DOAR acea bucată (nu tot textul) e trimisă către `claude-sonnet-5` (`escalateUncertainSegments()`), pentru o a doua opinie. `callClaude()` are parametru opțional de model (implicit `claude-haiku-4-5-20251001`).
+
+**Lecție de prompt engineering, repetată constant în changelog**: regulile abstracte ("ai grijă la acorduri", "adaptează la orice formă gramaticală") nu sunt suficiente pentru Haiku — au nevoie de exemplu concret, negativ+pozitiv, cu cazul exact greșit (ex. „o ajutoare"→„un ajutor"; „par" nu devine „parler"). Fiecare regulă adăugată ulterior în prompturi urmează acest tipar.
+
+**Module „Exersează ce ai învățat"/„Descrie o poză"** — folosesc `getKnownWordsForLevelGroup(levelGroup)`, prag fix: cuvânt "cunoscut" = `correct >= 2` (cumulat, nu neapărat consecutiv).
+
+**Modulul „Cuvinte noi în context"** — pipeline în 3 agenți (generare 3 texte independente → revizuire pe liniile concatenate din toate cele 3, redistribuite după numărul de linii per bloc reținut înainte de revizuire → marcare `{{...}}` cu verificare de siguranță PE LINIE: dacă eliminarea marcajelor nu reproduce exact linia originală, rămâne nemarcată). `parseTaggedAiResult()` e „marker-aware" central — orice linie cu `{{` se randează cu `renderWithMarkers()` (span roșu), deci Istoricul/exportul beneficiază automat.
+
+**Lista „Cuvintele mele exersate"** (`wordListSheet`, mod `'browse'`/`'select'`) — orice cuvânt cu `attempts>0`, căutare liberă RO/FR, sortare (stelute ↓/↑, alfabetic, doar greșite), buton de confirmare flotant (`position:fixed`) în mod selecție. Tranziții între `aiSheet`↔`wordListSheet` fără suprapunere: se elimină `.show` doar de pe panoul curent (overlay-ul rămâne), se așteaptă 250ms (durata reală a tranziției CSS, `.sheet{transition:transform 0.25s...}`) înainte de a adăuga `.show` pe următorul.
+
+## Metodologia vocabularului
+
+Sursă: [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) (`fr_50k.txt`, MIT, corpus OpenSubtitles). Lematizare cu spaCy (`fr_core_news_sm`), verificare manuală cuvânt-cu-cuvânt (eliminare nume proprii/zgomot din subtitrări), niveluri A1-C2 atribuite strict după rangul de frecvență (independent de orice curriculum instituțional). Ordinea din interiorul fiecărui nivel reflectă rangul real (esențială pentru sistemul de benzi) — a necesitat resortare completă la v20, după ce corecții manuale ulterioare (cuvinte banale mutate la nivelul corect) rupseseră ordinea inițială.
+
+## Testare
+
+Fără suită de teste automată persistentă în repo — verificare la fiecare modificare, cu jsdom + Node (`vm.runInContext` pe scriptul extras din `index.html`, cu `vocab-data.js` încărcat separat), scenarii scrise ad-hoc per schimbare, rulate și șterse după validare. Pattern constant: simulare DOM completă (nu doar `node -c` pentru sintaxă), testare exhaustivă pe combinatorii mari acolo unde are sens (ex. toate cele 3000 de întrebări posibile de conjugare, toate combinațiile de niveluri selectate simultan), și reproducere explicită a bug-ului pe codul vechi înainte de a considera fix-ul confirmat.
+
+## Testare locală / instalare
+
+Fără server necesar — deschide `index.html` direct în browser (unele funcții, ca service worker-ul, cer `https://` sau `localhost`, nu `file://`; un `python3 -m http.server` rapid rezolvă asta local). Pe telefon: deschide link-ul GitHub Pages în Chrome/Safari, „Adaugă la ecranul principal" din meniul browserului.
+
+## Livrare
+
+Fișierele modificate se încarcă direct în acest repository (Add file → Upload files → Commit); GitHub Pages redeploy-ează automat în 1-2 minute. `CACHE_NAME` din `sw.js` se incrementează la fiecare livrare, ca service worker-ul să invalideze cache-ul vechi pe dispozitivele cu aplicația deja instalată.
 
 ## Changelog
+
+**v29** — completări mari, uniformizare cu aplicația-soră germană, plus reorganizare documentație.
+1. **Lista „Cuvintele mele exersate" refăcută complet**, după modelul german — căutare liberă RO/FR, sortare cu direcție (Stelute ↓/↑, Alfabetic, Doar greșite), rânduri verticale scrolabile (nu chip-uri pe orizontală, care produceau un „perete" de etichete greu de parcurs), buton de confirmare flotant, nivel-pentru-text ales explicit de utilizator (nu mai dedus automat din cuvintele alese). Corectat pe drum: sortarea după stelute folosea `.correct` brut, nu formula `streak+1` folosită peste tot în restul aplicației.
+2. **Modul nou „📷 Descrie o poză"** — încarci o imagine (galerie/clipboard), Claude o descrie strict din vocabularul tău exersat cu succes la nivelul ales (același prag ca la „Exersează ce ai învățat"), cu traducere română și ascultare.
+3. **Modul nou „📖 Simplifică"** — al treilea mod în toggle-ul Traducere/Corectură, lipești un text francez greu, primești o versiune simplificată la nivelul țintă ales (vocabular/structuri tipice CEFR general, nu neapărat cuvintele tale personale — diferă intenționat de „Exersează ce ai învățat"). A necesitat și o refactorizare utilă: handler-ul principal de traducere avea logica de revizuire+escaladare duplicată inline, separat de helper-ul `translateWithReview()` deja construit pentru modulul Descriere — unificate, Traducere și Simplificare folosesc acum exact același cod, ca în germană.
+4. **Regulă lipsă, adăugată la „Exersează ce ai învățat"**: fidelitate față de temă (regula 4b din promptul german) — dacă tema are mai multe părți (ex. „vacanță la munte"), textul trebuie să rămână recognoscibil legat de ambele, nu doar de partea mai ușor de scris cu vocabularul disponibil; cu exemple concrete.
+5. **Secțiunea ❓ Ajutor, reorganizată complet** — grupată explicit pe 5 părți (Bazele aplicației, Module de exersare speciale, Modulul AI, Cuvintele mele exersate, Alte funcții), cu subsecțiune nouă, dedicată, pentru lista de cuvinte (căutare/sortare/selecție), strict din perspectiva utilizatorului.
+6. **README rescris complet** — mutat strict pe conținut de dezvoltator (arhitectură, structuri de date, algoritmi, metodologie de testare), fără narațiune de funcționalități (asta trăiește acum doar în Ajutor, ca să nu existe două surse de adevăr divergente).
+7. **Testat programatic, exhaustiv, la fiecare pas**: mecanismul de listă (streak+1, filtrare, sortare, selecție cu plafon, tranziții), promptul de simplificare, regula 4b, plus regresie confirmată pe bug-ul critic de la v24 (selecție multiplă de niveluri) — 50/50 runde fără erori după toate schimbările.
 
 **v28** — 4 corecții la modulul „Cuvinte noi în context" (nou în v27), găsite la testare reală:
 1. **Listă fără scroll propriu** — „Cuvintele mele exersate" afișa toate cuvintele ca un perete de etichete, fără zonă limitată; acum are propria zonă scrolabilă (max 38% din înălțimea ecranului), independentă de restul panoului.
