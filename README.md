@@ -45,6 +45,15 @@ Pentru a publica o versiune nouă: încarcă fișierele modificate în acest rep
 
 ## Changelog
 
+**v28** — 4 corecții la modulul „Cuvinte noi în context" (nou în v27), găsite la testare reală:
+1. **Listă fără scroll propriu** — „Cuvintele mele exersate" afișa toate cuvintele ca un perete de etichete, fără zonă limitată; acum are propria zonă scrolabilă (max 38% din înălțimea ecranului), independentă de restul panoului.
+2. **Cuvinte invariabile confundate cu cuvinte diferite ce încep la fel** — cuvântul țintă „par" (prepoziție) genera/marca greșit „parler", „partir", „parce que" în loc să folosească „par" însuși — modelul interpreta „adaptează la orice formă gramaticală" ca „găsește un cuvânt înrudit care poate fi conjugat", chiar și pentru cuvinte invariabile care n-au deloc forme flexionate. Reparat în **ambele** prompturi (generare + marcare), cu distincție explicită variabil/invariabil și exemplul exact raportat, ca exemplu concret negativ.
+3. **Filtrul de nivel din listă nu acoperea C1/C2 deloc** — avea doar gruparea grosieră A1-A2/B1-B2; extins la toate cele 6 niveluri CEFR individuale, plus „Cuvintele mele" separat. Reparată și o legătură ruptă rezultată din asta (generarea manuală deducea acum corect nivelul din cuvintele alese, nu din vechiul filtru pe grupuri).
+4. **Sortare după nivel, lipsă** — exista doar stelute/alfabetic; adăugată, cu ordinea CEFR corectă (A1→C2).
+5. **Bonus, neraportat dar găsit pe drum**: butonul de confirmare a selecției nu era vizibil constant la liste lungi — acum „flotant" (`position:sticky`), rămâne la baza zonei vizibile indiferent cât ai scrollat prin cuvinte.
+
+Toate testate programatic (16 verificări suplimentare) și verificate cu regresie pe bug-urile critice anterioare (selecția multiplă de niveluri, v24) — 0 erori.
+
 **v27** — modul nou, mare: **🆕 Cuvinte noi în context**. Diferit de „Exersează ce ai învățat" — aici nu te testezi, ci vezi cuvinte abia întâlnite (văzute o dată sau de două ori) folosite natural, de mai multe ori, în situații diferite, cu traducerea română vizibilă direct (nu ascunsă).
 - **Selecție cuvinte** — automată, direct din progres (fără AI, gratuit, instant), sau manuală, dintr-o listă nouă și separată, „📋 Cuvintele mele exersate" (accesibilă și din ⚙ Setări pentru răsfoit liber, cu filtre de nivel și sortare), plafon 5 cuvinte.
 - **Pipeline în 3 agenți**: (1) generare — 3 texte scurte, independente, fiecare folosind TOATE cuvintele țintă cel puțin o dată, la orice formă gramaticală naturală cere contextul; (2) revizuire — reutilizează agentul de gramatică/ortografie + escaladarea existente, aplicat pe liniile extrase din toate cele 3 texte, recombinate apoi pe baza numărului de linii reținut înainte de revizuire; (3) marcare — un agent nou, dedicat, încadrează cu `{{...}}` fiecare apariție a cuvintelor țintă în liniile franceze finale, cu **verificare de siguranță pe linie** (dacă eliminarea marcajelor nu reproduce exact linia originală, acea linie rămâne simplă, fără evidențiere).

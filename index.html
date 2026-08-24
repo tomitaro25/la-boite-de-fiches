@@ -130,6 +130,7 @@
   .stage-star.green{ color:var(--green); }
   .stage-star.wrong{ color:var(--red); }
   .context-word-mark{ color:var(--red); font-weight:700; }
+  #wordListBox{ max-height:38vh; overflow-y:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--line); border-radius:10px; padding:10px; }
   .help-text p{ font-family:'Literata', serif; font-size:0.82rem; line-height:1.5; margin:0 0 10px; color:var(--ink); }
   .help-text p:last-child{ margin-bottom:0; }
   .tag{ border:1px solid var(--line); border-radius:20px; padding:3px 10px; }
@@ -815,8 +816,13 @@
     <div class="sheet-label">Nivel</div>
     <div class="chip-row">
       <span class="chip word-list-level active" data-level="all">Toate</span>
-      <span class="chip word-list-level" data-level="a1a2">A1-A2</span>
-      <span class="chip word-list-level" data-level="b1b2">B1-B2</span>
+      <span class="chip word-list-level" data-level="A1">A1</span>
+      <span class="chip word-list-level" data-level="A2">A2</span>
+      <span class="chip word-list-level" data-level="B1">B1</span>
+      <span class="chip word-list-level" data-level="B2">B2</span>
+      <span class="chip word-list-level" data-level="C1">C1</span>
+      <span class="chip word-list-level" data-level="C2">C2</span>
+      <span class="chip word-list-level" data-level="MYWORDS">Cuvintele mele</span>
     </div>
   </div>
 
@@ -825,6 +831,7 @@
     <div class="chip-row">
       <span class="chip word-list-sort active" data-sort="stars">Stelute</span>
       <span class="chip word-list-sort" data-sort="alpha">Alfabetic</span>
+      <span class="chip word-list-sort" data-sort="level">Nivel</span>
       <span class="chip word-list-sort" data-sort="mistake">Doar cu greșeală activă</span>
     </div>
   </div>
@@ -833,7 +840,7 @@
     <div id="wordListBox"></div>
   </div>
 
-  <div class="sheet-section" id="wordListSelectActions" style="display:none;">
+  <div class="sheet-section" id="wordListSelectActions" style="display:none; position:sticky; bottom:0; background:var(--paper); padding-top:10px; padding-bottom:10px; box-shadow:0 -6px 12px -6px rgba(0,0,0,0.15);">
     <button class="btn-block paste-highlight" id="wordListUseBtn" style="width:100%;"><span id="wordListUseBtnLabel">Folosește aceste cuvinte (0/5)</span><span>✓</span></button>
   </div>
 
@@ -2814,7 +2821,8 @@ Restul vocabularului pe care elevul îl cunoaște deja bine, de folosit pentru r
 
 1. Generează EXACT 3 texte scurte, INDEPENDENTE, fiecare cu subiect propriu, diferit clar de celelalte două (nu 3 variații ale aceleiași idei).
 2. FIECARE din cele 3 texte trebuie să folosească TOATE cuvintele țintă, cel puțin o dată fiecare — nu doar unele dintre ele, nu doar în unele texte. Exemplu concret de evitat: dacă ai 5 cuvinte țintă, NU e acceptabil ca primul text să folosească doar 1, al doilea toate 5, al treilea doar 3 — FIECARE text trebuie să conțină, separat, TOATE. Verifică intern, înainte de a preda răspunsul, că fiecare text le conține pe toate — dacă lipsește vreunul, rescrie doar acel text. IMPORTANT: nu include în răspuns nicio verificare, numărătoare, explicație sau comentariu vizibil — doar cele 3 texte, exact în formatul cerut, nimic altceva.
-3. IMPORTANT — cuvintele țintă sunt date la forma de bază DOAR ca referință de sens, NU ca formă obligatorie. Folosește-le NATURAL, la orice formă gramaticală corectă cere contextul (conjugate, la plural, la alt gen/acord) — naturalețea și corectitudinea au prioritate absolută asupra păstrării formei exacte din listă.
+3. IMPORTANT — cuvintele țintă sunt date la forma de bază DOAR ca referință de sens, NU ca formă obligatorie. Dacă cuvântul e VARIABIL (verb, substantiv, adjectiv), folosește-l NATURAL, la orice formă gramaticală corectă cere contextul (conjugat, la plural, la alt gen/acord). Dacă cuvântul e INVARIABIL (prepoziție, conjuncție, adverb, pronume) — NU are nicio formă flexionată, folosește-l EXACT așa cum e dat, neschimbat.
+3bis. ATENȚIE — asta înseamnă STRICT variante morfologice ale ACELUIAȘI cuvânt (timp, persoană, număr, gen), NU un alt cuvânt diferit care doar seamănă la scris sau începe cu aceleași litere. Exemplu concret de greșeală GRAVĂ, de evitat: dacă cuvântul țintă e "par" (prepoziție, invariabilă, „prin"/„de către"), NU e acceptabil să folosești în schimb "parler" (a vorbi), "partir" (a pleca) sau "parce que" (pentru că) — sunt cuvinte COMPLET DIFERITE, fără nicio legătură reală cu "par", doar coincidență de litere la început. Cuvântul țintă "par" trebuie să apară EL ÎNSUȘI, literă cu literă, cel puțin o dată în fiecare text — nu un cuvânt diferit care începe la fel.
 4. Restul cuvintelor vine din lista de cuvinte cunoscute, pe cât posibil — conectori de bază (articole, pronume, prepoziții comune) mereu permiși.
 5. Fiecare text: 3-5 propoziții, cu fir logic clar (fiecare propoziție continuă logic din precedenta) — nu propoziții disparate.
 6. Nivel de complexitate — pe lângă vocabular, ȘI structura gramaticală/lungimea propozițiilor trebuie să corespundă nivelului ${levelTxt}: la A1-A2, propoziții scurte, structuri simple; la B1-B2, propoziții ceva mai complexe sunt acceptabile, dar tot clare.
@@ -2839,7 +2847,9 @@ function buildMarkingPrompt(targetWords){
 
 Cuvinte țintă: ${targetList}
 
-Pentru fiecare linie, identifică ORICE apariție a unui cuvânt din lista țintă — indiferent de forma gramaticală exactă (conjugat, la plural, la alt gen) — și încadreaz-o, EXACT AȘA CUM APARE, cu marcajul {{...}}. Marchează FIECARE apariție.
+Pentru fiecare linie, identifică ORICE apariție a unui cuvânt din lista țintă — indiferent de forma gramaticală exactă (conjugat, la plural, la alt gen, DACĂ cuvântul e variabil) — și încadreaz-o, EXACT AȘA CUM APARE, cu marcajul {{...}}. Marchează FIECARE apariție.
+
+ATENȚIE — marchezi STRICT variante morfologice ale ACELUIAȘI cuvânt (timp, persoană, număr, gen), NU un alt cuvânt diferit care doar seamănă la scris sau începe cu aceleași litere. Exemplu concret de greșeală GRAVĂ, de evitat: dacă cuvântul țintă e "par" (prepoziție, invariabilă), NU marchezi "parler", "partir" sau "parce que" — sunt cuvinte COMPLET DIFERITE, fără nicio legătură reală cu "par", doar coincidență de litere la început. Dacă un cuvânt din listă e invariabil (prepoziție, conjuncție, adverb, pronume) și nu apare EXACT, literă cu literă, în linie, NU marca nimic „asemănător" în locul lui.
 
 REGULĂ ABSOLUTĂ: nu schimbi NIMIC din text în afară de adăugarea marcajelor — nu corectezi, nu reformulezi. Textul, în afara marcajelor, trebuie identic, caracter cu caracter.
 
@@ -2941,14 +2951,18 @@ let wordListLevelFilter = 'all';
 let wordListSort = 'stars';
 let aiContextManualWords = []; // cuvintele alese manual, populate la "Foloseste aceste cuvinte"
 
+const WORD_LIST_LEVEL_ORDER = {A1:0, A2:1, B1:2, B2:3, C1:4, C2:5, MYWORDS:6};
 function getWordListEntries(){
-  let entries = BUILTIN.concat(myWords).filter(w => wordStats[w.id]); // doar cele exersate macar o data
-  if(wordListLevelFilter === 'a1a2') entries = entries.filter(w => w.level==='A1' || w.level==='A2');
-  else if(wordListLevelFilter === 'b1b2') entries = entries.filter(w => w.level==='B1' || w.level==='B2');
+  let entries = BUILTIN.concat(myWords).filter(w => wordStats[w.id]); // doar cele exersate (afisate) macar o data
+  if(wordListLevelFilter !== 'all') entries = entries.filter(w => w.level === wordListLevelFilter);
   if(wordListSort === 'mistake') entries = entries.filter(w => mistakeIds.includes(w.id));
   entries = entries.slice();
   if(wordListSort === 'alpha') entries.sort((a,b)=>a.fr.localeCompare(b.fr));
-  else entries.sort((a,b)=>{
+  else if(wordListSort === 'level') entries.sort((a,b)=>{
+    const la = WORD_LIST_LEVEL_ORDER[a.level] ?? 99, lb = WORD_LIST_LEVEL_ORDER[b.level] ?? 99;
+    return la !== lb ? la - lb : a.fr.localeCompare(b.fr);
+  });
+  else entries.sort((a,b)=>{ // stelute (implicit) - si pt "doar cu greseala activa", pastram sortarea dupa stelute
     const sa = wordStats[a.id], sb = wordStats[b.id];
     return (sb ? sb.correct : 0) - (sa ? sa.correct : 0);
   });
@@ -3152,10 +3166,9 @@ document.getElementById('aiContextGenAutoBtn').addEventListener('click', ()=>{
   runContextGeneration(aiContextAutoWords, levelGroup);
 });
 document.getElementById('aiContextGenManualBtn').addEventListener('click', ()=>{
-  // la manual, nivelul il alege utilizatorul explicit prin filtrul de nivel din lista - folosim
-  // filtrul curent daca era a1a2/b1b2; daca era "toate", deducem din cuvintele alese (fallback rezonabil)
-  const levelGroup = (wordListLevelFilter === 'a1a2' || wordListLevelFilter === 'b1b2')
-    ? wordListLevelFilter : deriveLevelGroupFromWords(aiContextManualWords);
+  // nivelul (a1a2/b1b2, folosit de prompt) se deduce din cuvintele efectiv alese - filtrul din
+  // lista e acum pe niveluri individuale (A1-C2), nu mai corespunde direct grupurilor de prompt
+  const levelGroup = deriveLevelGroupFromWords(aiContextManualWords);
   runContextGeneration(aiContextManualWords, levelGroup);
 });
 
