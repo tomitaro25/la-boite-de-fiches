@@ -1075,6 +1075,29 @@ function shuffle(arr){
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+// cuvinte cu "h aspirat" - NU elidiaza (la haine, nu l'haine), spre deosebire de "h mut" (l'homme).
+// lista acopera toate cuvintele cu h din vocab-data.js care sunt aspirate, plus cateva foarte
+// comune, chiar daca nu (inca) in vocabular, pt robustete la cuvinte adaugate manual (myWords)
+const ASPIRATED_H_WORDS = new Set([
+  'haine','hall','hanche','haricot','haricots','hasard','hauteur','haut','haute','hauts','hautes',
+  'honte','héros','héro','huit','hors','hache','hamac','hameau','hangar','harpe','hâte','hibou',
+  'hockey','homard','hongrois','hongroise','hoquet','horde','housse','houle','hurlement','hurler',
+  'hanter','honni','hâle','hâlé'
+]);
+function needsElision(word){
+  // elidare franceza: le/la -> l' inaintea unei vocale sau h MUT (nu h aspirat - vezi lista de mai sus)
+  const w = word.trim().toLowerCase();
+  if(ASPIRATED_H_WORDS.has(w)) return false;
+  return /^[aeiouâàäéèêëïîôöùûüh]/i.test(w);
+}
+// helper unificat: intoarce HTML-ul corect (articol/l' + cuvant) pt un cuvant cu articol -
+// singurul loc care ar trebui sa concateneze articol+cuvant, ca sa nu se repete bug-ul de elidare
+// (gasit in 4 locuri diferite din cod, fiecare concatenand manual, fara sa verifice elidarea)
+function formatArticleWord(word){
+  if(!word.artikel) return escapeHtml(word.fr);
+  const artPrefix = needsElision(word.fr) ? "l'" : word.artikel + ' ';
+  return `${artPrefix}${escapeHtml(word.fr)}`;
+}
 function formatSide(word, side){
   if(side === 'fr'){
     let artHtml = '';
@@ -1255,12 +1278,6 @@ const FUNCTION_WORDS = new Set([
   "oui","non","ne","pas","plus","très","aussi","déjà","encore","toujours","jamais","bien","mal",
   "ici","là","y","en","comment","pourquoi","combien"
 ]);
-
-function needsElision(word){
-  // elidare franceza: le/la -> l' inaintea unei vocale sau h mut (simplificare uzuala:
-  // tratam orice cuvant care incepe cu vocala sau "h" ca elidabil)
-  return /^[aeiouâàäéèêëïîôöùûüh]/i.test(word.trim());
-}
 
 function classifyWord(word){
   const fr = word.fr.trim();
@@ -2167,7 +2184,7 @@ function renderSearchResults(matches){
     return;
   }
   resultsEl.innerHTML = matches.map(w=>{
-    const artikelTxt = w.artikel ? `<span class="art art-${w.artikel}">${w.artikel}</span> ` : '';
+    const artikelTxt = w.artikel ? (needsElision(w.fr) ? `<span class="art art-${w.artikel}">l'</span>` : `<span class="art art-${w.artikel}">${w.artikel}</span> `) : '';
     return `<div class="search-result-row" data-fr="${encodeURIComponent(w.fr)}" style="padding:6px 0; border-bottom:1px solid var(--line); font-family:'Literata',serif; font-size:0.88rem; cursor:pointer;">
       ${artikelTxt}<b>${w.fr}</b> — ${w.ro} <span style="font-family:'IBM Plex Mono',monospace; font-size:0.62rem; color:var(--ink-soft);">[${LEVEL_LABELS[w.level]||w.level}]</span>
     </div>`;
@@ -2257,7 +2274,7 @@ function renderAddWordPrompt(searchedText, lang, targetElId, onWordAdded){
       }
       myWords[existingIdx] = { ...existing, ro, artikel };
       saveMyWords();
-      statusEl.textContent = `✓ Suprascris: ${artikel ? artikel+' ' : ''}${fr} = ${ro}`;
+      statusEl.textContent = `✓ Suprascris: ${artikel ? (needsElision(fr) ? "l'" : artikel+' ') : ''}${fr} = ${ro}`;
       if(isMainSearch) document.getElementById('wordSearchInput').value = '';
       if(typeof onWordAdded === 'function') onWordAdded(fr);
       return;
@@ -2265,7 +2282,7 @@ function renderAddWordPrompt(searchedText, lang, targetElId, onWordAdded){
     myWords.push({ id: `MYWORDS-${Date.now()}`, fr, ro, artikel, level: 'MYWORDS', category: '' });
     saveMyWords();
     updateMyWordsChipLabel();
-    statusEl.textContent = `✓ Adăugat: ${artikel ? artikel+' ' : ''}${fr} = ${ro}`;
+    statusEl.textContent = `✓ Adăugat: ${artikel ? (needsElision(fr) ? "l'" : artikel+' ') : ''}${fr} = ${ro}`;
     if(isMainSearch) document.getElementById('wordSearchInput').value = '';
     if(typeof onWordAdded === 'function') onWordAdded(fr);
   });
@@ -3099,7 +3116,7 @@ function renderWordList(){
     const isDisabled = isSelectMode && !isPicked && wordListSelected.length >= 5;
     return `<div class="btn-block word-list-row" data-id="${escapeAttr(w.id)}" style="width:100%; margin-bottom:6px; ${isDisabled?'opacity:0.4;':''} ${isPicked?'border-color:var(--red); border-width:2px;':''}">
       <span style="flex:1; overflow:hidden;">
-        <span style="font-family:'Literata',serif; font-weight:600;">${escapeHtml(w.artikel ? w.artikel+' '+w.fr : w.fr)}</span>
+        <span style="font-family:'Literata',serif; font-weight:600;">${formatArticleWord(w)}</span>
         <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); display:block;">${escapeHtml(w.ro)}</span>
       </span>
       <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:${stars>=4?'var(--green)':'var(--gold)'};">${'★'.repeat(Math.min(stars,4))}${stars>4?'+':''}</span>
