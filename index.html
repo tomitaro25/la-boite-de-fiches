@@ -422,7 +422,7 @@
     <div class="sheet-section help-text">
       <div class="sheet-label">🆕 Cuvinte noi în context</div>
       <p>Diferit de „Exersează ce ai învățat" — aici nu se testează ce știi deja, ci vezi cuvinte <b>abia întâlnite</b> (văzute o dată sau de două ori) folosite natural, de mai multe ori, în situații diferite. Traducerea română apare direct, vizibilă — scopul e să înțelegi cuvântul în context, nu să te autotestezi.</p>
-      <p>Claude generează <b>2 texte scurte, independente</b>, fiecare cu subiect propriu — nu 2 variații ale aceleiași idei — și fiecare folosește toate cuvintele țintă alese, măcar o dată. Cuvintele apar <b>evidențiate cu roșu</b>, la orice formă gramaticală cere contextul (conjugate, la plural etc.), nu forțat la forma de bază din dicționar.</p>
+      <p>Claude generează <b>2 texte scurte, independente</b>, fiecare cu subiect propriu — nu 2 variații ale aceleiași idei — și fiecare folosește toate cuvintele țintă alese, măcar o dată. Cuvintele apar <b>evidențiate cu roșu</b>, la orice formă gramaticală cere contextul (conjugate, la plural etc.), nu forțat la forma de bază din dicționar. Fiecare text are propriul buton „🔊 Ascultă" dedesubt.</p>
       <p><b>Selecție automată</b> (implicit) — până la 5 cuvinte alese direct din progresul tău, fără niciun apel către AI (gratuit, instant). <b>Selecție manuală</b> — „✋ Choisir manuellement" deschide lista „Cuvintele mele exersate" (vezi Partea 4) în mod selecție — alegi până la 5 cuvinte, un nivel pentru text, apoi „Folosește aceste cuvinte" te aduce înapoi cu un buton separat de generare pentru alegerea ta.</p>
     </div>
     <div class="sheet-section help-text">
@@ -764,9 +764,11 @@
 
     <div class="sheet-section" id="aiContextResultSection" style="display:none;">
       <div class="sheet-label">Text 1</div>
-      <div id="aiContextText1" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6; margin-bottom:16px;"></div>
+      <div id="aiContextText1" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6;"></div>
+      <button class="btn-block" id="aiContextSpeakBtn1" style="width:100%; margin-top:8px; margin-bottom:16px;"><span>🔊 Ascultă textul 1</span><span>▶</span></button>
       <div class="sheet-label">Text 2</div>
       <div id="aiContextText2" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6;"></div>
+      <button class="btn-block" id="aiContextSpeakBtn2" style="width:100%; margin-top:8px;"><span>🔊 Ascultă textul 2</span><span>▶</span></button>
     </div>
   </div>
 
@@ -1878,6 +1880,7 @@ document.getElementById('aiHubContextBtn').addEventListener('click', ()=>{
   showAiView('context');
   aiContextAutoWords = [];
   pendingManualWords = [];
+  lastAiContextRaw = ['', ''];
   document.getElementById('aiContextResultSection').style.display = 'none';
   document.getElementById('aiContextGenManualBtn').style.display = 'none';
   document.getElementById('aiContextManualWordsBox').style.display = 'none';
@@ -3223,6 +3226,7 @@ document.getElementById('browseWordListBtn').addEventListener('click', ()=>{
 
 /* ---------- AI: "Cuvinte noi in context" - UI si pipeline complet (3 agenti) ---------- */
 let aiContextAutoWords = [];
+let lastAiContextRaw = ['', '']; // textul final (marcat+revizuit) per text, pt ascultare separata
 let pendingManualWords = [], pendingManualLevel = 'a1a2';
 
 function renderAiContextAutoWords(){
@@ -3310,6 +3314,7 @@ async function runContextGeneration(words, levelGroup){
 
     const finalBlocks = await Promise.all(blocks.map(processOneText));
 
+    lastAiContextRaw = finalBlocks; // pastram brut, per text, pt ascultare separata
     [1,2].forEach((n,i)=>{
       const parsed = parseTaggedAiResult(finalBlocks[i] || '');
       document.getElementById(`aiContextText${n}`).innerHTML = parsed.html || '<div class="upload-status">Text lipsă.</div>';
@@ -3333,6 +3338,14 @@ document.getElementById('aiContextGenAutoBtn').addEventListener('click', ()=>{
 document.getElementById('aiContextGenManualBtn').addEventListener('click', ()=>{
   // nivelul e ales EXPLICIT de utilizator, din chip-urile "Nivel pentru text" (nu se mai deduce)
   runContextGeneration(pendingManualWords, pendingManualLevel);
+});
+document.getElementById('aiContextSpeakBtn1').addEventListener('click', ()=>{
+  const parsed = parseTaggedAiResult(lastAiContextRaw[0] || '');
+  if(parsed.frenchOnly) speakFrench(parsed.frenchOnly);
+});
+document.getElementById('aiContextSpeakBtn2').addEventListener('click', ()=>{
+  const parsed = parseTaggedAiResult(lastAiContextRaw[1] || '');
+  if(parsed.frenchOnly) speakFrench(parsed.frenchOnly);
 });
 
 /* ---------- AI: helper reutilizabil - traducere/text urmat de revizuire, cu plasa de siguranta

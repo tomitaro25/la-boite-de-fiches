@@ -71,6 +71,8 @@ Fișierele modificate se încarcă direct în acest repository (Add file → Upl
 
 ## Changelog
 
+**v33** — buton de ascultare adăugat la modulul „Cuvinte noi în context" — verificat, era singurul dintre cele 4 secțiuni de rezultat AI (Traducere, Exersează, Descrie, Context) care nu avea deloc buton „🔊 Ascultă", nu doar pe telefon — lipsea din construcție, în toate contextele, nu „a dispărut" la o modificare recentă. Adăugate 2 butoane separate (câte unul per text), fiecare ascultă strict textul lui, cu marcajele `{{...}}` curățate automat (deja gestionat de `parseTaggedAiResult`, doar nefolosit până acum aici). Testat programatic — 9 verificări (existența butoanelor, separarea corectă text1/text2, curățarea marcajelor, resetare la redeschidere, fără eroare pe text gol) — toate trecute, plus regresie confirmată.
+
 **v32** — bug real reparat: butonul „flotant" de confirmare selecție (lista „Cuvintele mele exersate", mod selecție) folosea `position:fixed`, ancorat undeva pe ecran, independent de contextul cu care interacționai — se putea suprapune cu butonul static din secțiunea „Alese". Rescris complet: acum e generat dinamic, inserat **imediat sub rândul pe care s-a dat ultimul click** (nu neapărat ultimul din ordinea de sortare curentă) — se mută la fiecare click, mereu vizibil chiar lângă ultima alegere, indiferent de scroll. Testat programatic — 12 verificări (poziție exactă în DOM relativ la rândul clicked, mutarea corectă la un click nou, dispariția completă la deselectare totală, funcționarea confirmării) — toate trecute, plus regresie confirmată.
 
 **v31** — regândire completă a mecanismului de verificare a traducerii AI, nu doar reguli adăugate.
