@@ -389,6 +389,7 @@
     <div class="sheet-section help-text">
       <div class="sheet-label">🤖 AI (Claude) — prezentare generală</div>
       <p>Un hub cu 5 destinații, toate cu propria ta cheie API de la Anthropic (Claude) — nu se limitează la cele câteva mii de cuvinte din listă, ci acceptă orice text, dictat sau scris, plus imagini cu text (poze, screenshot-uri). Fiecare destinație are subsecțiunea proprie de ajutor mai jos: Traducere & Corectură, Exersează ce ai învățat, Cuvinte noi în context, Descrie o poză, Istoric.</p>
+      <p><b>Ascultare</b> — orice rezultat mai lung (nu cuvintele singure de pe carduri) are un mini-player dedesubt, cu <b>Redă/Pauză</b> și <b>Oprește</b> — poți întrerupe ascultarea oricând, nu doar aștepta până la capăt.</p>
       <p><b>Cum obții o cheie API</b> (gratuită de generat, plata se face separat, per folosire — nu-i legată de un eventual abonament Claude Pro de pe claude.ai, sunt produse diferite):</p>
       <p>1. Mergi pe <b>console.anthropic.com</b> (sau <b>platform.claude.com</b> — e același loc)<br>
       2. Creează cont / autentifică-te (poți folosi același email ca la claude.ai, dar e un cont separat)<br>
@@ -422,7 +423,7 @@
     <div class="sheet-section help-text">
       <div class="sheet-label">🆕 Cuvinte noi în context</div>
       <p>Diferit de „Exersează ce ai învățat" — aici nu se testează ce știi deja, ci vezi cuvinte <b>abia întâlnite</b> (văzute o dată sau de două ori) folosite natural, de mai multe ori, în situații diferite. Traducerea română apare direct, vizibilă — scopul e să înțelegi cuvântul în context, nu să te autotestezi.</p>
-      <p>Claude generează <b>2 texte scurte, independente</b>, fiecare cu subiect propriu — nu 2 variații ale aceleiași idei — și fiecare folosește toate cuvintele țintă alese, măcar o dată. Cuvintele apar <b>evidențiate cu roșu</b>, la orice formă gramaticală cere contextul (conjugate, la plural etc.), nu forțat la forma de bază din dicționar. Fiecare text are propriul buton „🔊 Ascultă" dedesubt.</p>
+      <p>Claude generează <b>2 texte scurte, independente</b>, fiecare cu subiect propriu — nu 2 variații ale aceleiași idei — și fiecare folosește toate cuvintele țintă alese, măcar o dată. Cuvintele apar <b>evidențiate cu roșu</b>, la orice formă gramaticală cere contextul (conjugate, la plural etc.), nu forțat la forma de bază din dicționar. Fiecare text are propriul player de ascultare dedesubt (Redă/Pauză/Oprește).</p>
       <p><b>Selecție automată</b> (implicit) — până la 5 cuvinte alese direct din progresul tău, fără niciun apel către AI (gratuit, instant). <b>Selecție manuală</b> — „✋ Choisir manuellement" deschide lista „Cuvintele mele exersate" (vezi Partea 4) în mod selecție — alegi până la 5 cuvinte, un nivel pentru text, apoi „Folosește aceste cuvinte" te aduce înapoi cu un buton separat de generare pentru alegerea ta.</p>
     </div>
     <div class="sheet-section help-text">
@@ -686,7 +687,7 @@
     <div class="sheet-section">
       <div class="sheet-label">Din istoric</div>
       <div id="aiHistDetailBox" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6; white-space:pre-wrap;"></div>
-      <button class="btn-block" id="aiHistDetailSpeakBtn" style="width:100%; margin-top:8px;"><span>🔊 Ascultă</span><span>▶</span></button>
+      <div id="ttsPlayerSlot-histdetail"></div>
       <div style="display:flex; gap:6px; margin-top:10px;">
         <select id="aiHistDetailFormat" class="btn-block" style="flex:1; appearance:none;">
           <option value="txt">Text (.txt)</option>
@@ -737,7 +738,7 @@
       <div id="aiExerciseTranslationSection" style="display:none; margin-top:12px;">
         <div class="sheet-label">Traducere (AI)</div>
         <div id="aiExerciseTranslationBox" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6; white-space:pre-wrap;"></div>
-        <button class="btn-block" id="aiExerciseSpeakBtn" style="width:100%; margin-top:8px;" disabled><span>🔊 Ascultă (franceză)</span><span>▶</span></button>
+        <div id="ttsPlayerSlot-exercise"></div>
       </div>
     </div>
   </div>
@@ -765,10 +766,10 @@
     <div class="sheet-section" id="aiContextResultSection" style="display:none;">
       <div class="sheet-label">Text 1</div>
       <div id="aiContextText1" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6;"></div>
-      <button class="btn-block" id="aiContextSpeakBtn1" style="width:100%; margin-top:8px; margin-bottom:16px;"><span>🔊 Ascultă textul 1</span><span>▶</span></button>
+      <div id="ttsPlayerSlot-context1" style="margin-bottom:16px;"></div>
       <div class="sheet-label">Text 2</div>
       <div id="aiContextText2" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6;"></div>
-      <button class="btn-block" id="aiContextSpeakBtn2" style="width:100%; margin-top:8px;"><span>🔊 Ascultă textul 2</span><span>▶</span></button>
+      <div id="ttsPlayerSlot-context2"></div>
     </div>
   </div>
 
@@ -804,7 +805,7 @@
     <div class="sheet-section" id="aiDescribeResultSection" style="display:none;">
       <div class="sheet-label">Descriere</div>
       <div id="aiDescribeResultBox" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6; white-space:pre-wrap;"></div>
-      <button class="btn-block" id="aiDescribeSpeakBtn" style="width:100%; margin-top:8px;"><span>🔊 Ascultă (franceză)</span><span>▶</span></button>
+      <div id="ttsPlayerSlot-describe"></div>
     </div>
   </div>
 
@@ -857,7 +858,7 @@
     <div class="sheet-label" id="aiResultLabel">Rezultat</div>
     <div id="aiResultBox" style="font-family:'Literata',serif; font-size:0.92rem; line-height:1.6; white-space:pre-wrap;"></div>
     <div id="aiExplanationsBox" style="display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--line);"></div>
-    <button class="btn-block" id="aiSpeakResultBtn" style="width:100%; margin-top:8px;"><span>🔊 Ascultă rezultatul</span><span>▶</span></button>
+    <div id="ttsPlayerSlot-result"></div>
     <div style="display:flex; gap:6px; margin-top:10px;">
       <select id="aiDownloadFormat" class="btn-block" style="flex:1; appearance:none;">
         <option value="txt">Text (.txt)</option>
@@ -1177,7 +1178,7 @@ function populateVoiceList(){
   }
 }
 
-function speakFrench(text){
+function speakFrench(text, onEndCallback){
   try{
     if(!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel(); // opreste orice rostire anterioara
@@ -1186,11 +1187,81 @@ function speakFrench(text){
     utter.rate = 0.9;
     const chosen = availableVoices.find(v => v.voiceURI === selectedVoiceURI);
     if(chosen) utter.voice = chosen;
+    if(onEndCallback){ utter.onend = onEndCallback; utter.onerror = onEndCallback; }
     window.speechSynthesis.speak(utter);
   }catch(e){ /* TTS indisponibil pe acest dispozitiv - esuam silentios */ }
 }
 
-/* ---------- benzi de frecventa (doar A1/A2/B1/B2, in ordinea REALA de frecventa) ---------- */
+/* ---------- Player TTS reutilizabil (Play/Pauza/Stop) - doar la sectiuni cu continut mai lung
+   (nu la cuvinte singure de pe carduri, acolo un singur tap-ascultare ramane suficient).
+   O singura stare globala: speechSynthesis e un singur "canal" per pagina, nu pot reda 2 lucruri
+   simultan - daca pornesti un player nou, orice alt player activ se opreste automat, vizual la fel. ---------- */
+let ttsCurrentPlayerId = null;
+
+function renderTtsPlayerHtml(playerId){
+  return `<div class="tts-player" data-player-id="${playerId}" style="display:flex; gap:8px; margin-top:8px;">
+    <button class="btn-block tts-play-pause-btn" style="flex:1; min-height:52px;"><span>▶ Redă</span><span></span></button>
+    <button class="btn-block tts-stop-btn" style="flex:1; min-height:52px;" disabled><span>⏹ Oprește</span><span></span></button>
+  </div>`;
+}
+
+function resetTtsPlayerUi(playerId){
+  const wrap = document.querySelector(`.tts-player[data-player-id="${playerId}"]`);
+  if(!wrap) return;
+  wrap.querySelector('.tts-play-pause-btn span').textContent = '▶ Redă';
+  wrap.querySelector('.tts-stop-btn').disabled = true;
+}
+
+// leaga butoanele unui player la textul lui - getTextFn e apelata DOAR la Play (nu la incarcare),
+// ca sa citeasca mereu textul curent (util la Context, unde continutul se schimba dupa generare)
+function initTtsPlayer(playerId, getTextFn){
+  const wrap = document.querySelector(`.tts-player[data-player-id="${playerId}"]`);
+  if(!wrap) return;
+  const playBtn = wrap.querySelector('.tts-play-pause-btn');
+  const stopBtn = wrap.querySelector('.tts-stop-btn');
+
+  playBtn.addEventListener('click', ()=>{
+    // alt player activ - il oprim complet intai (un singur canal de vorbire per pagina)
+    if(ttsCurrentPlayerId && ttsCurrentPlayerId !== playerId){
+      window.speechSynthesis.cancel();
+      resetTtsPlayerUi(ttsCurrentPlayerId);
+      ttsCurrentPlayerId = null;
+    }
+    if(window.speechSynthesis.speaking && !window.speechSynthesis.paused && ttsCurrentPlayerId === playerId){
+      window.speechSynthesis.pause(); // in redare pe ACEST player -> pauza
+      playBtn.querySelector('span').textContent = '▶ Continuă';
+      return;
+    }
+    if(window.speechSynthesis.paused && ttsCurrentPlayerId === playerId){
+      window.speechSynthesis.resume(); // in pauza pe ACEST player -> reia
+      playBtn.querySelector('span').textContent = '⏸ Pauză';
+      return;
+    }
+    const text = getTextFn();
+    if(!text) return;
+    ttsCurrentPlayerId = playerId;
+    speakFrench(text, ()=>{
+      resetTtsPlayerUi(playerId);
+      if(ttsCurrentPlayerId === playerId) ttsCurrentPlayerId = null;
+    });
+    playBtn.querySelector('span').textContent = '⏸ Pauză';
+    stopBtn.disabled = false;
+  });
+
+  stopBtn.addEventListener('click', ()=>{
+    window.speechSynthesis.cancel();
+    resetTtsPlayerUi(playerId);
+    if(ttsCurrentPlayerId === playerId) ttsCurrentPlayerId = null;
+  });
+}
+function setTtsPlayerDisabled(playerId, disabled){
+  const wrap = document.querySelector(`.tts-player[data-player-id="${playerId}"]`);
+  if(!wrap) return;
+  wrap.querySelector('.tts-play-pause-btn').disabled = disabled;
+  if(disabled){ wrap.querySelector('.tts-stop-btn').disabled = true; }
+}
+
+
 // scopul: cuvintele noi apar in ordinea frecventei (cele mai comune primele), nu complet aleator -
 // o banda de 200 cuvinte se "deblocheaza" complet abia dupa ce TOATE cuvintele din banda anterioara
 // au fost incercate macar o data.
@@ -3021,7 +3092,7 @@ document.getElementById('aiExerciseGenerateBtn').addEventListener('click', async
   resultSection.style.display = 'none';
   translationSection.style.display = 'none';
   document.getElementById('aiExerciseUserAttempt').value = '';
-  document.getElementById('aiExerciseSpeakBtn').disabled = true;
+  setTtsPlayerDisabled('exercise', true);
   try{
     const systemPrompt = buildExercisePrompt(aiExerciseLevel, aiExerciseLang, theme, knownWords, maxWords);
     const wrapped = `"""\n${theme}\n"""`;
@@ -3051,7 +3122,7 @@ document.getElementById('aiExerciseRevealBtn').addEventListener('click', ()=>{
   const parsed = parseTaggedAiResult(lastAiExerciseRaw);
   document.getElementById('aiExerciseTranslationBox').innerHTML = parsed.html;
   document.getElementById('aiExerciseTranslationSection').style.display = 'block';
-  document.getElementById('aiExerciseSpeakBtn').disabled = false;
+  setTtsPlayerDisabled('exercise', false);
 
   const userAttempt = document.getElementById('aiExerciseUserAttempt').value.trim();
   const entry = { id: Date.now(), originalText: lastAiExerciseTheme, translatedText: lastAiExerciseRaw, source: 'exercitiu' };
@@ -3061,10 +3132,8 @@ document.getElementById('aiExerciseRevealBtn').addEventListener('click', ()=>{
   saveAiHistory(hist);
 });
 
-document.getElementById('aiExerciseSpeakBtn').addEventListener('click', ()=>{
-  const parsed = parseTaggedAiResult(lastAiExerciseRaw);
-  speakFrench(parsed.frenchOnly);
-});
+document.getElementById('ttsPlayerSlot-exercise').innerHTML = renderTtsPlayerHtml('exercise');
+initTtsPlayer('exercise', ()=> parseTaggedAiResult(lastAiExerciseRaw).frenchOnly);
 
 /* ---------- Lista "Cuvintele mele exersate" - reutilizabila (browse din Setari + selectie din AI) ---------- */
 let wordListMode = 'browse'; // 'browse' | 'select'
@@ -3339,14 +3408,10 @@ document.getElementById('aiContextGenManualBtn').addEventListener('click', ()=>{
   // nivelul e ales EXPLICIT de utilizator, din chip-urile "Nivel pentru text" (nu se mai deduce)
   runContextGeneration(pendingManualWords, pendingManualLevel);
 });
-document.getElementById('aiContextSpeakBtn1').addEventListener('click', ()=>{
-  const parsed = parseTaggedAiResult(lastAiContextRaw[0] || '');
-  if(parsed.frenchOnly) speakFrench(parsed.frenchOnly);
-});
-document.getElementById('aiContextSpeakBtn2').addEventListener('click', ()=>{
-  const parsed = parseTaggedAiResult(lastAiContextRaw[1] || '');
-  if(parsed.frenchOnly) speakFrench(parsed.frenchOnly);
-});
+document.getElementById('ttsPlayerSlot-context1').innerHTML = renderTtsPlayerHtml('context1');
+initTtsPlayer('context1', ()=> parseTaggedAiResult(lastAiContextRaw[0] || '').frenchOnly);
+document.getElementById('ttsPlayerSlot-context2').innerHTML = renderTtsPlayerHtml('context2');
+initTtsPlayer('context2', ()=> parseTaggedAiResult(lastAiContextRaw[1] || '').frenchOnly);
 
 /* ---------- AI: helper reutilizabil - traducere/text urmat de revizuire, cu plasa de siguranta
    pe numarul de perechi si escaladare rara pt bucati incerte. Extras ca functie separata, ca sa
@@ -3610,10 +3675,8 @@ document.getElementById('aiDescribeGenerateBtn').addEventListener('click', async
     statusEl.textContent = `✗ ${err.message}`;
   }
 });
-document.getElementById('aiDescribeSpeakBtn').addEventListener('click', ()=>{
-  const parsed = parseTaggedAiResult(lastAiDescribeRaw);
-  speakFrench(parsed.frenchOnly);
-});
+document.getElementById('ttsPlayerSlot-describe').innerHTML = renderTtsPlayerHtml('describe');
+initTtsPlayer('describe', ()=> parseTaggedAiResult(lastAiDescribeRaw).frenchOnly);
 
 /* ---------- AI: dictare vocala (refoloseste acelasi API ca la cautarea de cuvinte) ---------- */
 let aiVoiceLang = 'ro';
@@ -3916,11 +3979,11 @@ function openAiHistDetail(id){
   showAiView('histdetail');
 }
 document.getElementById('aiHistDetailBackBtn').addEventListener('click', ()=> showAiView('history'));
-document.getElementById('aiHistDetailSpeakBtn').addEventListener('click', ()=>{
+document.getElementById('ttsPlayerSlot-histdetail').innerHTML = renderTtsPlayerHtml('histdetail');
+initTtsPlayer('histdetail', ()=>{
   const entry = loadAiHistory().find(e => e.id === currentAiHistEntryId);
-  if(!entry) return;
-  const parsed = parseTaggedAiResult(entry.translatedText);
-  speakFrench(parsed.frenchOnly);
+  if(!entry) return '';
+  return parseTaggedAiResult(entry.translatedText).frenchOnly;
 });
 document.getElementById('aiHistDetailDownloadBtn').addEventListener('click', ()=>{
   const entry = loadAiHistory().find(e => e.id === currentAiHistEntryId);
@@ -4135,9 +4198,8 @@ document.getElementById('aiTranslateBtn').addEventListener('click', async ()=>{
   }
 });
 
-document.getElementById('aiSpeakResultBtn').addEventListener('click', ()=>{
-  if(lastAiFrenchOnly) speakFrench(lastAiFrenchOnly);
-});
+document.getElementById('ttsPlayerSlot-result').innerHTML = renderTtsPlayerHtml('result');
+initTtsPlayer('result', ()=> lastAiFrenchOnly);
 
 document.getElementById('aiDownloadBtn').addEventListener('click', ()=>{
   const format = document.getElementById('aiDownloadFormat').value;
