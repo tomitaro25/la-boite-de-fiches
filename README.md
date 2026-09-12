@@ -1,306 +1,204 @@
-# Karteikarten — Flashcards Deutsch ⇄ Română
+# La Boîte de Fiches — Flashcards Français ⇄ Română
 
-Aplicație de exersat vocabular german-român, sub formă de PWA (Progressive Web App) instalabilă pe telefon.
+PWA (Progressive Web App) de exersat vocabular francez-român, fără build step — HTML/CSS/JS simplu, deschis direct din browser sau instalat pe telefon. Aplicație-soră a Karteikarten (DE-RO) și a variantei grecești, aceeași arhitectură de bază, găzduite separat pe GitHub Pages.
 
-## Actualizări recente
+**Documentul ăsta e pentru dezvoltatori** — arhitectură, structuri de date, decizii tehnice. Pentru explicații de utilizare, vezi secțiunea ❓ Ajutor din aplicație (acoperă fiecare modul, grupat pe părți, strict din perspectiva utilizatorului).
 
-**v118 — Temă întunecată, nouă (comutabilă din Setări)**
-- **Secțiune nouă „Aspect"**, chiar la-nceputul panoului de Setări — ☀️ Deschis / 🌙 Întunecat. Alegerea rămâne salvată, fără „clipici" la reîncărcare.
-- **Paletă calculată, nu ghicită** — culorile cu sens (roșu/verde pentru corect-greșit, albastru/roz/verde pentru genul cuvintelor) rămân aceleași ca semnificație, doar puțin mai deschise-n modul-ntunecat — fiecare verificată să treacă pragul de lizibilitate WCAG (4.5:1), nu doar „inversată" (o inversare simplă ar fi produs culori confuze — roșul ar fi devenit cyan, roz-ul ar fi devenit verde, confundându-se cu sensul opus).
-- **Câteva culori „hardcodate", găsite și corectate în trecere** — cutia principală de flashcard, un text special, stările de-apăsare ale unor butoane — rămâneau fixe, ne-adaptate la-ntuneric, fără asta.
-- Tema actuală (deschisă) **rămâne complet neschimbată** — noua temă se activează doar prin alegere explicită.
+## Arhitectură
 
-**v117 — corecție navigare, icon nou, relief 3D pe butoane**
-- **„Cuvinte în pereche" — corectat definitiv**: butonul „← Înapoi" te-ntoarce acum la „Module" (rămăsese, dintr-o implementare mai veche, mereu la ecranul principal). Găsită și eliminată, în trecere, o-nregistrare de eveniment duplicată, rămasă din aceeași implementare veche.
-- **Icon „Module"** — 🧩 (emoji colorat, culoare fixă, necontrolabilă) înlocuit cu un SVG propriu, o grilă simplă de 4 pătrate, colorată corect din tema aplicației.
-- **Indicator de-așteptare la „Exersează vorbitul"** — apare acum imediat la deschidere, cât timp partenerul de conversație se pregătește (înainte, în cazul comun — model deja descărcat — nu se arăta nimic în acel interval).
-- **Relief 3D, subtil, pe toate butoanele** — umbră ușoară, consecventă pe `.btn-block`, `.opt` (răspunsuri flashcard), chip-uri, butoane rotunde din bara de sus, butonul „Înapoi" — plus o reducere a umbrei la apăsare (efect tactil) și o umbră interioară la chip-urile active (par „apăsate", nu „ridicate").
+Un singur fișier `index.html` (~4000 linii) conține tot: markup, CSS inline (`<style>`), și JS inline (`<script>`) — fără framework, fără build/bundler, fără dependențe npm la runtime. Vocabularul stă separat, în `vocab-data.js`, încărcat ca script extern (cache offline mai curat, fișier mare care nu se schimbă des).
 
-**v116 — navigare standardizată, în toată aplicația (5 panouri, toate consecvente acum)**
-- **„Cuvintele mele exersate"** — ecran complet, antet fix, ca restul. Butonul „← Înapoi" te-ntoarce exact de unde ai plecat — la „Module" dacă de-acolo ai deschis lista, sau înapoi la „Cuvinte noi în context" (AI) dacă de-acolo ai ales cuvinte manual — nu mereu la ecranul principal.
-- **Secțiunea AI, complet unificată** — un singur antet fix, sus, cu titlu care se schimbă automat după ecranul activ (Traducere, Exersează ce ai învățat, Istoric, etc.) și un singur buton „Înapoi", cu destinația corectă: din orice modul revii la hub-ul AI (nu ieși din tot panoul); din hub, revii la ecranul principal; din „Detaliu istoric" revii la „Istoric" (nu la hub, cum e firesc). Cele 7 butoane vechi, separate (funcționau corect, aveau doar stil vechi) — eliminate, înlocuite cu sistemul nou, unificat. Testat exact aceste 4 cazuri, inclusiv efectul secundar de la „Exersează vorbitul" (oprește ascultarea la ieșire).
-- Corectată, în trecere: o eroare de sintaxă introdusă chiar în timpul acestei restructurări (un fragment orfan, rămas dintr-o-nlocuire imprecisă) — prinsă la validare, înainte de livrare.
+- `index.html` — aplicația completă
+- `vocab-data.js` — `const VOCAB_DATA = [...]`, array de rânduri `[id, francez, română, articol('le'|'la'|''), nivel, categorie(nefolosit)]`
+- `manifest.json` — config PWA (nume, iconițe `any`+`maskable`, `display:standalone`)
+- `sw.js` — service worker, strategie cache-first cu fallback la rețea; `CACHE_NAME` incrementat la fiecare livrare (invalidează cache-ul vechi)
+- `icon-*.png` — 4 iconițe (192/512 × regulată/maskable), generate cu Pillow, tema tricoloră (steag francez, benzi verticale — spre deosebire de cel german, orizontal)
 
-**v115 — restructurare completă: „Setări" pe tot ecranul + panou nou „Module"**
-- **„Setări listă" redenumit „Setări"**, panou pe (aproape) tot ecranul, cu antet fix — titlul „Setări" și zoom-ul, împreună, mereu vizibile, indiferent cât deruleziîn jos. Secțiunea „Mărime font" (dublura zoom-ului) eliminată, redundantă acum.
-- **Panou nou, „Module"** — mutate acolo: „Cuvintele mele exersate", „Cuvinte în pereche" și „Caută un cuvânt" (cu tot ce ține de căutare — comutator RO/DE, câmp, buton de vorbit). Rămân în Setări doar nivelurile, presetările, modulul de-ngrijire și restul secțiunilor generale.
-- **Butonul din bara principală**, 🎤 → 🧩 — deschide acum panoul „Module" direct, nu mai deschide căutarea din Setări; vizibil mereu (nu doar când recunoașterea vocală e suportată, dat fiind că „Module" conține și lucruri fără legătură cu vocea).
-- Corectat, în trecere: un bug real de suprapunere — deschiderea „Cuvinte în pereche" sau „Cuvintele mele" din interiorul „Module" lăsa ambele panouri „deschise" simultan, suprapuse; acum panoul „Module" se-nchide corect înainte.
+## Structuri de date cheie
 
-**v114 — comutare rapidă Vocab/Verbe/Ant-Sin, icon nou la „Cuvinte în pereche"**
-- **Subtitlul static** de sub „Karteikarten" (`DE ⇄ RO · A1–B2`, decorativ, fără legătură cu selecția reală) — înlocuit cu 3 butoane-icon, radio-button: 📖 Vocab, ⚡ Verbe, 🔄↔️ Ant/Sin. Comutare instant-ntre moduri, fără să intri-n Setări. „Vocab" ține minte exact ultima ta selecție normală de niveluri, nu un implicit fix — testat, inclusiv trecerea prin ambele moduri speciale-nainte de revenire.
-- Sincronizat complet cu Setările — schimbarea manuală de niveluri (chip-uri sau presetări) resetează automat radio-ul-napoi la „Vocab".
-- **Icon-ul de la „Cuvinte în pereche"**, refăcut din nou — renunțat la-ncercarea custom (cap + unde, prea abstractă) -n favoarea formei standard, universal recunoscute (difuzor + unde sonore), plus 3 puncte de mărime crescândă, ca să umple mai bine spațiul butonului.
-- Evaluate, dar **neimplementate** — o serie de propuneri externe de optimizare (cache pentru cuvinte, restructurare localStorage, strategie service worker) — găsit un bug real-ntr-una din ele (nume de cheie greșit, ar fi șters aparent toate statisticile la actualizare), documentat separat, în conversație.
+**Cuvânt normal** (din `BUILTIN`, derivat din `VOCAB_DATA`, sau din `myWords`): `{id, fr, ro, artikel, level, category}`.
 
-**v113 — curățare directă a vocabularului (nu doar afișare) + antet complet consolidat**
-- **1045 de intrări curățate în `vocab-data.js`** (nu doar la afișare, în date) — eliminate avertismentele de tip „atenție, NU X" (17, unde erau confuzii reale-ntre română și germană, inutile dat fiind că modulele arată deja direcția exercițiului) și, separat, sensurile secundare de la cuvintele cu mai multe variante (1028, păstrat doar sensul principal/cel mai comun). Excluse explicit, neatinse: perechile masculin/feminin (`Chef`/`Chefin` etc.) și un idiom special unde `/` face parte din construcție, nu dintr-o alegere-ntre sensuri.
-- **Antetul „Cuvinte în pereche", complet consolidat** — „Ce-i ascuns" și „Cuvinte" nu mai sunt secțiuni separate, în corpul derulabil; toate comutatoarele (DE/RO, Învățate/Aleator) s-au mutat sus, pe același rând cu „← Înapoi" și zoom-ul — mai mult loc pentru cele 10 perechi.
+**`wordStats[id]`** — progresul per cuvânt: `{attempts, correct, streak, mistakeFlag}`. `streak` = răspunsuri corecte consecutive (resetat la orice greșeală); stelutele afișate = `streak+1`. `mistakeFlag` marchează o greșeală „activă" — se șterge automat după 3 răspunsuri corecte la rând de la ultima greșeală (mecanismul de „iertare").
 
-**v112 — „Cuvinte în pereche": ajustări ergonomice, după testare directă**
-- **Titlul din antet, înlocuit cu controale de zoom** (A−/A+/procent/reset) — mai practic, poți regla fontul direct din modul, fără să ieși.
-- **Etichete scurtate și mai discrete** — DE/RO (nu „Germana ascunsă"/„Română ascunsă"), Învățate/Aleator (nu „Deja învățate"/„Complet aleator") — mai mult spațiu pentru cele 10 perechi.
-- **Icon nou** (🗣️, nu 🔊), centrat pe buton când arată doar iconul, aliniat stânga când arată cuvântul dezvăluit/hint.
-- **Interacțiunea de-apăsare, redesenată complet** — hint-ul (la ținut apăsat) rămâne vizibil cât timp ții, nu doar o clipă; și, pe telefon, o derulare care trece peste un buton nu-l mai activează accidental — urmărim mișcarea, anulăm acțiunea dacă depășește un prag mic. Testat izolat, 4 scenarii (apăsare scurtă, ținere, derulare-anulare, mișcare mică validă).
+**Niveluri „virtuale"**, structuri de date diferite de un cuvânt normal, generate din funcții dedicate, nu din `VOCAB_DATA`:
+- `ANTSYN_ENTRIES` (din `ANTONYM_PAIRS`/`SYNONYM_PAIRS`) — `{id, level:'ANTSYN', qtype, word, answer}`
+- `VERB_ENTRIES` (din `VERB_DATA`) — `{id, level:'VERBS', verbIdx, tense, person}`
 
-**v111 — panou pe tot ecranul, cu antet fix (Pasul 1, doar la „Cuvinte în pereche")**
-- Primul pas dintr-o redesenare mai amplă, aplicată deocamdată **doar** la „Cuvinte în pereche" — panoul ocupă acum aproape tot ecranul (nu ~78%, cum era înainte), cu titlul și butonul „← Înapoi" fixe sus, vizibile mereu, indiferent cât deruleziconținutul dedesubt.
-- Celelalte panouri (Setări, Cuvintele mele exersate, AI) rămân **complet neschimbate** — urmează, pe rând, dacă acest prim pas confirmă abordarea corectă.
+**Atenție**: aceste intrări NU au `.fr`/`.ro` — orice cod care iterează peste `activeWords()` (pool combinat) și presupune implicit forma unui cuvânt normal trebuie să excludă explicit `level==='ANTSYN'`/`'VERBS'`. Exact aici a fost bug-ul critic de la v24 (`classifyWord()` crăpa pe aceste intrări la calculul distractorilor) — vezi changelog.
 
-**v110 — fontul real al „Cuvinte în pereche" corectat (conflict CSS găsit prin dovadă vizuală)**
-- **Cauza reală, confirmată din capturi de ecran**: butoanele aveau simultan două clase (`btn-block` și `pm-left-box`/`pm-right-box`) — la specificitate CSS egală, regula definită mai jos în foaia de stil câștiga silențios, fără nicio eroare vizibilă. `.btn-block` (monospace) era definit mai jos decât regula mea (Literata), deci acela se aplica de fapt, nu ce credeam eu.
-- **Corectat la sursă** — clasa `btn-block` eliminată complet de pe aceste butoane; rămâne doar stilizarea dedicată, completă (font, padding, aliniere — identică cu `.opt`, butoanele de răspuns din flashcard-uri).
-- **Dezalinierea rândurilor, corectată separat** — restructurare completă din 2 coloane independente (`flex`) într-un singur grid CSS, cu rânduri sincronizate automat în-nălțime — testat programatic, confirmă ordinea corectă stânga/dreapta, cu amestecul din dreapta păstrat intact.
+**`localStorage`** — toate cheile prefixate cu `boitedefiches_` (izolare între aplicațiile-soră, găzduite pe același domeniu GitHub Pages — `localStorage` e izolat per *domeniu*, nu per aplicație). Chei: `wordStats`, `prefs`, `mistakeIds`, `myWords`, `voiceURI`, `installBannerDismissed`, `streak`, `fontZoom`, `claudeApiKey`, `aiHistory`. `BACKUP_KEYS` conține subsetul inclus în export/import de backup (nu include `aiHistory` — are propriul export/import JSON, cu deduplicare, nu suprascriere).
 
-**v109 — zoom funcțional în toată aplicația (bug sistemic real, găsit prin testare directă)**
-- **Cauza reală**: `.chip` și `.btn-block` — cele mai folosite clase din toată aplicația (butoane, etichete de nivel, presetări, module, submeniuri) — aveau dimensiunea de font fixă, în `px`, nu relativă (`rem`). Zoom-ul (A−/A+) modifică doar mărimea rădăcinii, care afectează doar `rem` — de-aia funcționa doar întâmplător, pe puținele elemente care se-ntâmplau să folosească deja `rem`.
-- **Corectat: toate cele 27 de declarații** găsite, convertite la `rem`, cu matematică exactă (păstrează dimensiunea vizuală identică la zoom 100%, doar acum răspunde corect la orice nivel).
-- Verificat cu cascadă CSS reală (nu doar citire de cod): calculat efectiv dimensiunea la 70%, 100%, 130% zoom, într-o structură identică cu un submeniu real (`<details>`) — scalare exactă, proporțională, confirmată matematic.
-- **Umbra de lizibilitate**, redusă din nou (0.4→0.3px) — echilibrată corect, după rezolvarea cauzei reale (fontul, nu umbra, era problema de fond).
-- **Cursorul de viteză**, recolorat — paleta aplicației (negru + gri deschis), nu albastrul implicit al browser-ului.
-- Confirmat, separat: litera „a" lipsă la unele voci Microsoft românești e o limitare a motorului de sinteză, nu ceva reparabil din cod.
+## Algoritmi cheie
 
-**v108 — voce română selectabilă, viteză reglabilă, corecție reală la „Cuvinte în pereche"**
-- **Selector de voce română** — nou, în Setări, alături de cel german deja existent: alegi dintre toate vocile românești instalate pe dispozitiv (ex. mai multe Microsoft + Google), cu testare și preselectare inteligentă. Persistă separat de germană.
-- **Viteză de rostire reglabilă** (cursor, 0.5x-1.5x) — valabilă la ambele voci, peste tot în aplicație. Utilă mai ales pentru că unele motoare de sinteză (ex. unele voci Microsoft) sună natural mai grăbite decât altele, indiferent de setarea implicită.
-- **„Cuvinte în pereche" — cauza reală a afișării/zoom-ului corectată**: modulul folosea dimensiune de font fixă (`px`), nu relativă (`rem`) — de-aia zoom-ul din bara de sus nu se aplica acolo. Corectat, aliniat exact la fontul/dimensiunea din flashcard-uri (`.opt`), acum răspunde corect la zoom.
-- **Umbra de lizibilitate**, ajustată din nou (0.6→0.4px) — echilibrată, după corectarea dimensiunii reale a fontului la modulul nou.
-- Verificat cu DOM real (jsdom): popularea listei de voci române, filtrare corectă, preselectare, persistență — scenariu realist, cu mai multe voci instalate simultan.
+- **Prioritate ponderată** (`priorityWeight`): 5 pentru streak 0-1, 3 pentru 2-3, 0.5 pentru 4, 0.3 pentru 5+ — selecție fără repetiție (Efraimidis-Spirakis, `Math.pow(Math.random(), 1/weight)`).
+- **Benzi de frecvență** (doar A1-B2): cuvintele ordonate global după rangul lor real (ID-ul reflectă poziția în `fr_50k.txt`), grupate în benzi de 200; o bandă se deblochează abia după ce toate cuvintele din banda anterioară au fost încercate măcar o dată. C1/C2 nu au benzi (frecvența brută e un indiciu mai slab la rang mare).
+- **Elidare franceză** (`needsElision`): `le`/`la`→`l'` înaintea unei vocale/h — folosită atât la afișarea cuvintelor cât și la construcția formelor reflexive compuse (`m'étais`, nu `me étais`), calculată dinamic după prima literă a formei reale, nu dintr-un tabel static (bug reparat la v22, vezi changelog).
+- **Conjugare verbe**: `VERB_DATA` stochează prezent/imperfect/viitor ca forme literale (verificate manual, nu derivate la runtime); passé composé și plus-que-parfait sunt calculate (`composedForm()`) din auxiliar (prezent/imperfect) + participiu + regulă de acord (`pastParticipleAgreed`), reutilizând aceeași logică pentru ambele timpuri compuse.
 
-**v107 — ajustări fine, după testare directă: viteză, paranteze, umbră, lățime**
-- **Viteza de rostire** — redusă din nou (0.8→0.5), mai lentă, mai clară.
-- **„Cuvinte în pereche" — explicațiile din paranteze eliminate complet** (ex. "dank (Präposition)" → "dank"), atât din rostire cât și din text afișat — nu doar parantezele, tot conținutul lor.
-- **Umbra de lizibilitate, dublată** (0.3→0.6px) — la text mic (butoane, ~13px), aceeași umbră mică se vedea mult mai puțin decât la textul mare — nu era efect placebo, avea o cauză reală de dimensiune.
-- **Lățimea maximă a conținutului, crescută** (640→760px) — 640px era gândit pentru text dens de citit, nu pentru-o interfață cu butoane, care are nevoie de puțin mai mult spațiu. Fără efect pe telefon (limita nu se activează sub 760px CSS, mult sub lățimea tipică a unui telefon).
+## Modulul AI (opțional, cu cheie API proprie a utilizatorului)
 
-**v106 — corecții găsite prin testare: viteză, buton, layout, lizibilitate**
-- **Viteza de rostire** (0.9→0.8) — mai lentă, mai clară, la toate funcțiile de ascultare din aplicație, nu doar la modulul nou.
-- **„Cuvinte în pereche" — butonul ascuns** — doar 🔊 (fără text), apăsare scurtă rămâne comportamentul obișnuit; ținut apăsat peste ~350ms arată temporar și textul cuvântului, ca hint, dispare la eliberare.
-- **Layout centrat, pe ecrane late** — panourile ȚI ecranul principal (bară de sus, zona de card) au acum o lățime maximă (640px), centrate — spațiul gol rămâne pe margini, nu mai lungește butoanele pe tot ecranul. Fără efect pe telefon (limita nu se activează sub 640px).
-- **Lizibilitate** — o umbră simetrică, foarte subtilă, pe tot textul din aplicație, care „îngroașă" ușor literele fără să schimbe dimensiunea sau greutățile deja setate — ajută pe fundalul cu textură fină.
+Panou organizat ca hub (`aiSheet` → `showAiView(view)`, comută vizibilitatea între sub-view-uri, fără reload). 5 destinații: Traducere/Corectură/Simplifică (trei moduri într-un singur view, `aiMode`), Exersează ce ai învățat, Cuvinte noi în context, Descrie o poză, Istoric.
 
-**v105 — modul nou: „🔗 Cuvinte în pereche" (exersare de consolidare, fără AI)**
-- 10 cuvinte, într-o coloană ascunse (doar ascultate, text-to-speech), în cealaltă traducerile lor, amestecate — apeși un cuvânt ascuns ca să-l asculți, apoi alegi corespondentul; corect, se dezvăluie și rămâne marcat; greșit, butonul apăsat se-nroșește scurt, poți încerca din nou. Fără scor.
-- **Sinteză vocală și pentru română** — adăugată separat de cea germană (voci diferite pe dispozitiv), cu detectare reală de disponibilitate, nu presupusă.
-- **Comutator de direcție** — alegi ce limbă e ascunsă (germană sau română).
-- **Comutator de sursă** — cuvinte deja exersate (favorizează pe cele mai puțin consolidate, folosind mecanismul de ponderare deja existent, strict citire) sau complet aleator (fără ponderare, ca să difere real).
-- **Cuvintele ratate reapar** — orice cuvânt nenimerit din prima are prioritate la runda următoare, până-l nimerești fără greșeală o singură dată; urmărire doar în memorie, pe durata sesiunii, fără nicio scriere pe stelute sau progres.
-- Complet separat de restul aplicației — panou propriu, nu-n interiorul secțiunii AI, nicio legătură cu Claude sau costuri.
-- Verificat cu DOM real (jsdom): mecanismul complet de potrivire (selecție, greșeală, succes, completare rundă) și logica de prioritizare a cuvintelor ratate, pe scenariul exact descris în cerere.
+**Pipeline de fidelitate în mai mulți pași** pentru Traducere/Simplifică (Corectură rămâne un singur agent, format de etichete diferit oricum), toate în `translateWithReview()` — helper reutilizat de toate modulele cu format `[FR]`/`[RO]`:
+1. **Generare** — `buildAiSystemPrompt()`/`buildSimplifySystemPrompt()`, ieșire `[FR]`/`[RO]` pe perechi.
+2. **Revizuire de FORMĂ** (Agent 2a, `buildGrammarReviewSystemPrompt()`) — strict acorduri/punctuație/„dont"/naturalețe, NU sens (vezi mai jos, de ce separat). Plasă de siguranță: acceptat DOAR dacă numărul de perechi `[FR]/[RO]` se păstrează identic (`countTaggedPairs()`).
+3. **Verificare de FIDELITATE prin retraducere independentă** (Agent 2b, `verifyFidelityViaBackTranslation()`) — decizie arhitecturală centrală: în loc să ceară Agentului 2a să-și recunoască propriile greșeli de sens (regulă `[UNCERTAIN]`, care depinde de auto-conștientizare — ineficientă pe erori care „sună" corect), textul românesc e retradus înapoi în franceză **orb**, într-un apel separat care nu vede deloc franceza originală (`buildBackTranslatePrompt()`), apoi cele două variante franceze sunt comparate obiectiv de un al treilea apel (`buildFidelityComparePrompt()`) — o divergență devine un semnal măsurabil, nu unul introspectiv.
+4. **Escaladare țintită** — DOAR liniile cu divergență confirmată (`[DIVERGENT]`) sunt trimise, STRICT pe acea bucată, către `claude-sonnet-5` (`buildFidelityFixPrompt()`). Cost: 4 apeluri Haiku per traducere (generare+formă+retraducere+comparare) + Sonnet doar la divergență reală, nu la orice ezitare — nu la fiecare traducere. `callClaude()` are parametru opțional de model (implicit `claude-haiku-4-5-20251001`).
 
-**v104 — emoji eliminate complet din „Exersează vorbitul" (găsit prin testare reală)**
-- Modelul (persona „prietenoasă") adăuga adesea un emoji la finalul răspunsului — browser-ul îl "rostea" ciudat, la sinteza vocală, un sunet nepotrivit, greu de identificat ca fiind chiar asta. Confirmat direct dintr-o conversație reală, salvată și analizată.
-- Eliminate acum complet, o singură dată, la sursă — nu doar din ce se rostește, ci și din text (afișare + salvare), consecvent, în toate modurile (local/Claude, bilingv/simplu).
+**Lecție de prompt engineering, repetată constant în changelog**: regulile abstracte ("ai grijă la acorduri", "adaptează la orice formă gramaticală") nu sunt suficiente pentru Haiku — au nevoie de exemplu concret, negativ+pozitiv, cu cazul exact greșit (ex. „o ajutoare"→„un ajutor"; „par" nu devine „parler"; „Dieu merci"≠„Dumnezeu ferește"). Fiecare regulă adăugată ulterior în prompturi urmează acest tipar — dar la v31 s-a dovedit că unele categorii de erori (sens inversat, idiom-cu-sentiment-opus) nu se pot preveni doar prin liste tot mai lungi de reguli, fiindcă depind de auto-conștientizare — de-aici mecanismul de retraducere independentă, care detectează obiectiv, nu doar previne.
 
-**v103 — „Exersează vorbitul": conversație bilingvă (RO/DE), text fără sunet, salvare, câmp de scris**
-- **API-uri dedicate, locale** (Translator + Language Detector, separate de „Prompt API") — dacă disponibile, poți scrie sau vorbi în română SAU germană; textul tău și răspunsul partenerului apar traduse 1-la-1, în ambele limbi. Dacă nu-s disponibile, modulul rămâne funcțional în forma simplă (doar germană), fără să blocheze nimic.
-- **Câmp de text**, alături de microfon — utilizabil oricând, nu doar dacă microfonul lipsește.
-- **Buton de mut** (🔊/🔇) — conversație complet în text, fără sunet, dacă preferi (util pe calculator).
-- **Salvare conversație** — descarcă tot schimbul, într-un fișier text, cu dată și modul folosit (local/Claude) menționate.
-- Modul prin Claude rămâne neschimbat (simplu, doar germană) — bilingvismul se aplică doar motorului local, cu unelte dedicate.
-- Verificat: pipeline-ul bilingv complet (detectare + traducere + răspuns + traducere înapoi), izolat, cu ambele cazuri (intrare română, intrare germană).
+**Module „Exersează ce ai învățat"/„Descrie o poză"** — folosesc `getKnownWordsForLevelGroup(levelGroup)`, prag fix: cuvânt "cunoscut" = `correct >= 2` (cumulat, nu neapărat consecutiv).
 
-**v102 — mic tutorial pliabil, la „Exersează vorbitul", pentru activarea AI-ului local în Chrome**
-- Dacă detectarea automată nu găsește suport local, apare acum un ghid pas-cu-pas (pliabil, opțional) pentru activarea manuală din `chrome://flags` — cu mențiunea onestă că pe versiuni mai noi de Chrome s-ar putea să nici nu fie nevoie.
-- Activarea flag-urilor **nu** se poate face programatic, din nicio aplicație web — barieră de securitate a browser-ului, nu limitare proprie; tutorialul rămâne singura cale posibilă de-a ajuta utilizatorul.
+**Modulul „Cuvinte noi în context"** — 2 texte (redus de la 3 la v31, pentru mai puțină diluare de atenție), generate într-un apel (`buildContextTextPrompt()`, `splitIntoTexts(raw, n)` generalizată), procesate SEPARAT, în PARALEL (`Promise.all`) — fiecare text trece prin `translateWithReview()` complet (formă + fidelitate), apoi marcare `{{...}}` cu verificare de siguranță PE LINIE (dacă eliminarea marcajelor nu reproduce exact linia originală, rămâne nemarcată). `parseTaggedAiResult()` e „marker-aware" central — orice linie cu `{{` se randează cu `renderWithMarkers()` (span roșu), deci Istoricul/exportul beneficiază automat.
 
-**v101 — modul nou: „🗣️ Exersează vorbitul" (partener de conversație vocală)**
-- **Implicit, 100% local/offline** — rulează direct pe dispozitiv, prin AI-ul integrat în Chrome (Gemini Nano, „Prompt API"), fără cheie, fără cost. Vorbești în germană, un partener simplu (nivel A2-B1) răspunde scurt (1-2 propoziții) și pune o întrebare, ca să continue conversația — cu o corectură scurtă, în română, între paranteze, dacă apare o greșeală gravă.
-- **Doar Chrome de pe calculator** — pe Android, Google exclude explicit suportul, indiferent de performanța telefonului (limitare de software, nu de putere — verificat direct în documentația oficială).
-- **Opțiune de rezervă, prin Claude** — dacă AI-ul local nu-i disponibil (majoritatea cazurilor, mai ales pe telefon), poți alege să continui aceeași conversație prin cheia ta Claude, cost mic per schimb — aceeași interfață, doar alt model în spate.
-- Complet izolat de restul funcțiilor AI — nu atinge pipeline-ul Claude existent, buton propriu, exclus din verificarea de cheie (rămâne mereu accesibil).
-- Verificat: sintaxa API curentă (nu cea învechită, `window.ai.languageModel`), construcția istoricului de conversație pentru Claude (alternanță corectă user/assistant, necesară dat fiind că API-ul Claude nu ține minte singur conversația, spre deosebire de sesiunea locală).
+**Lista „Cuvintele mele exersate"** (`wordListSheet`, mod `'browse'`/`'select'`) — orice cuvânt cu `attempts>0`, căutare liberă RO/FR, sortare (stelute ↓/↑, alfabetic, doar greșite). În mod selecție, butonul de confirmare (`floatingConfirmButtonHtml()`) e generat dinamic și inserat direct în fluxul DOM, imediat după rândul pe care s-a dat ultimul click (`wordListLastClickedId`) — nu `position:fixed` (variantă abandonată la v32, se putea suprapune vizual cu alte elemente, independent de contextul interacțiunii). Tranziții între `aiSheet`↔`wordListSheet` fără suprapunere: se elimină `.show` doar de pe panoul curent (overlay-ul rămâne), se așteaptă 250ms (durata reală a tranziției CSS, `.sheet{transition:transform 0.25s...}`) înainte de a adăuga `.show` pe următorul.
 
-**v100 — arhitectura în 2 pași (generare + traducere separate) extinsă la încă 3 module**
-- **Descrie o poză**, **Simplifică**, și **Exersează ce ai învățat** trec de la generare combinată (germană + română, într-un singur apel) la **2 pași dedicați** — aceeași abordare aplicată deja la „Cuvinte noi în context", care a arătat, prin testare extinsă, o traducere mai consecventă și mai fidelă.
-- La „Exersează ce ai învățat" (singurul modul bidirecțional — poate genera în germană SAU română), traducerea Pasului 2 se adaptează automat la direcția corectă, oricare-ar fi ea.
-- **Traducere liberă** și **Corectură** rămân neschimbate — nu au aceeași structură (traducere de conținut dat de utilizator, respectiv corectare fără traducere), deci separarea în 2 pași nu li se aplică.
-- Curățare: o funcție de prompt veche, devenită neapelată, a fost eliminată complet din cod.
-- Verificat: sintaxă validă pe tot fișierul, ambele prompturi noi (generare exercițiu, traducere cu direcție parametrizată) testate izolat pentru ambele direcții (DE→RO și RO→DE).
+## Metodologia vocabularului
 
-**v99 — "Cuvinte noi în context" trece la generare în 2 pași separați (germană, apoi traducere)**
-- Generarea combinată (germană + română, într-un singur apel) e înlocuită cu **doi pași dedicați**: Pasul 1 generează strict textul german (cu persona de profesor de germanistică și o rutină de auto-verificare internă, în 3 etape); Pasul 2, separat, traduce liniile germane deja finalizate, cu un prompt dedicat exclusiv acurateței traducerii (consecvență pe concepte repetate, fără informații adăugate/omise, ortografie română atentă).
-- Motivul schimbării: testare extinsă, manuală, a arătat că traducerea produsă în același apel cu generarea germană tindea să fie inconsecventă (același concept tradus diferit de două ori) sau să adauge/omită nuanțe — separarea completă a eliminat aceste probleme, în testele făcute, fără cost suplimentar semnificativ.
-- Restul mecanismului (marcarea cuvintelor, evidențierea roșie, istoricul) rămâne neschimbat — se leagă direct de rezultatul celor 2 pași noi.
-- Verificat programatic: recombinarea corectă a perechilor [DE]/[RO] după cei 2 pași, inclusiv plasa de siguranță dacă traducerea eșuează (rămâne doar germana, nu se amestecă nimic greșit).
+Sursă: [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) (`fr_50k.txt`, MIT, corpus OpenSubtitles). Lematizare cu spaCy (`fr_core_news_sm`), verificare manuală cuvânt-cu-cuvânt (eliminare nume proprii/zgomot din subtitrări), niveluri A1-C2 atribuite strict după rangul de frecvență (independent de orice curriculum instituțional). Ordinea din interiorul fiecărui nivel reflectă rangul real (esențială pentru sistemul de benzi) — a necesitat resortare completă la v20, după ce corecții manuale ulterioare (cuvinte banale mutate la nivelul corect) rupseseră ordinea inițială.
 
-**v98 — renunțare la nivelurile de calitate AI (cost real mult mai mare la Sonnet, fără câștig observabil), plus 2 corecții confirmate**
-- **Selectorul de calitate (Rapid/Îmbunătățită/Superioară) eliminat complet** — verificare de cost real a arătat consum considerabil mai mare la Sonnet, fără diferență observată în calitate/corectitudine, și texte de fapt mai simple decât la Haiku. Rămâne doar pipeline-ul Haiku (Rapid), cu escaladarea țintită către Sonnet deja existentă, doar când chiar e nevoie (acorduri nesigure, sau divergență de sens confirmată la texte mai lungi).
-- **Buton flotant persistent** — bug real confirmat: la confirmarea selecției, panoul se închidea printr-o cale care uita să ascundă butonul flotant. Corectat.
-- **Player audio, simplificat la un singur buton Redă/Oprește** — Pauză/Reluare eliminate: `speechSynthesis.pause()`+`resume()` are un bug documentat, pe scară largă, în browsere/Android (reluarea nu funcționează fiabil) — aceeași limitare care exclusese și derularea cu secunde.
-- Verificat cu DOM real (jsdom): toggle Redă↔Oprește, izolare corectă între playere multiple.
+## Testare
 
-**v97 — corecții critice la nivelul de calitate AI, plus mini-player audio**
-- **Eroarea de generare la Calitate îmbunătățită/superioară** (`effort: Extra inputs are not permitted`) — corectată: parametrul de efort trebuia încadrat în `output_config`, nu trimis direct.
-- **Mesaje rămase la "3 texte"** — actualizate peste tot la 2, inclusiv cele trimise efectiv către API.
-- **Butonul flotant de validare** — mutat în afara panoului de listă (era copil al unui element cu `transform`, ceea ce-i rupea poziționarea fixă reală); acum rămâne vizibil corect, indiferent de scroll.
-- **Selectorul de calitate** — mutat din hub, direct lângă fiecare buton „Generează"/„Tradu"/„Descrie", ca alegerea să fie clară, la locul unde se folosește.
-- **Mini-player audio (Redă/Pauză/Oprește)** — la toate rezultatele mai lungi (traducere, exerciții, descriere poză, cuvinte noi în context); fără derulare cu secunde (Web Speech API nu expune nicio poziție de timp în vorbire).
-- Verificat cu DOM real (jsdom): ciclul complet Redă→Pauză→Reia→Oprește, izolare corectă între playere multiple.
+Fără suită de teste automată persistentă în repo — verificare la fiecare modificare, cu jsdom + Node (`vm.runInContext` pe scriptul extras din `index.html`, cu `vocab-data.js` încărcat separat), scenarii scrise ad-hoc per schimbare, rulate și șterse după validare. Pattern constant: simulare DOM completă (nu doar `node -c` pentru sintaxă), testare exhaustivă pe combinatorii mari acolo unde are sens (ex. toate cele 3000 de întrebări posibile de conjugare, toate combinațiile de niveluri selectate simultan), și reproducere explicită a bug-ului pe codul vechi înainte de a considera fix-ul confirmat.
 
-**v96 — 3 niveluri de calitate AI, verificare de fidelitate prin retraducere independentă, mini-player audio**
-- **Nivel de calitate ales de utilizator** — ⚡ Rapid / ✨ Calitate îmbunătățită / 💎 Calitate superioară, selectabil direct din panoul AI. Diferențele de cost sunt mici, explicat clar la fiecare alegere și în Ajutor.
-- **Rapid** (implicit) — pipeline complet: traducere, verificare gramaticală, și (doar la texte mai lungi, peste 3 perechi de propoziții) o verificare suplimentară de fidelitate — un model retraduce independent traducerea română înapoi în germană, fără să vadă originalul, apoi se compară obiectiv dacă sensul (cauzalitate, sentiment, timp) s-a păstrat; doar diferențele reale se corectează, țintit.
-- **Calitate îmbunătățită/superioară** — un singur model, mai atent, generează direct rezultatul final.
-- „Cuvinte noi în context" generează acum **2 texte**, nu 3.
-- Verificat programatic: toate cele 3 niveluri de dispecerizare, pragul de lungime pentru verificarea de fidelitate, parsarea (inclusiv un bug real de regex evitat din start), și cazurile cu/fără divergență de sens.
+## Testare locală / instalare
 
-**v95 — căutare și buton flotant în „Cuvintele mele exersate"**
-- **Câmp de căutare** — filtrează instant lista, răspunde atât la cuvinte germane cât și românești, insensibil la majuscule.
-- **Buton flotant de validare** — la selecția manuală de cuvinte, un buton cu poziție fixă (jos, centrat) rămâne vizibil indiferent cât ai derulat lista, arătând numărul curent de cuvinte alese (X/5) — nu mai trebuie să revii sus pentru a confirma.
+Fără server necesar — deschide `index.html` direct în browser (unele funcții, ca service worker-ul, cer `https://` sau `localhost`, nu `file://`; un `python3 -m http.server` rapid rezolvă asta local). Pe telefon: deschide link-ul GitHub Pages în Chrome/Safari, „Adaugă la ecranul principal" din meniul browserului.
 
-**v94 — 5 corecții suplimentare la „Cuvinte noi în context", găsite prin testare intensivă**
-- **Generarea eșua complet** (toate cele 3 texte „lipsă"), atât la selecție automată cât și manuală — cauza probabilă: o instrucțiune de prompt care invita modelul să scrie vizibil verificarea lui, stricând formatul strict așteptat. Simplificat, cu interdicție explicită de comentarii vizibile în răspuns.
-- **Plasă de siguranță nouă la parsare** — dacă formatul `[TEXT1]/[TEXT2]/[TEXT3]` ar lipsi complet din răspuns (orice motiv), aplicația recuperează acum liniile de traducere existente și le împarte aproximativ în 3, în loc să afișeze „text lipsă" la toate.
-- **Cuvinte compuse/expresii** (ex. „Chef, -s / Chefin", „dank (Präposition)") — în loc să fie excluse din selecție, se extrage acum forma utilizabilă (până la primul spațiu sau `/`), păstrând afișarea completă către utilizator neschimbată.
-- **Nivelul dedus din cuvintele alese nu ajungea explicit în prompt** — era folosit doar indirect (restrângerea vocabularului), fără să i se spună clar modelului „scrie la nivel A1-A2/B1-B2". Corectat — nivelul e acum menționat explicit, cu instrucțiune și despre complexitatea gramaticală potrivită.
-- Verificat programatic: toate cele 5 corecții testate izolat, cu exemple reale din date.
+## Livrare
 
-**v93 — 5 corecții la „Cuvinte noi în context", găsite prin testare**
-- **Roșu pierdut în Istoric** — corectat: se salvează acum textul final (marcat + revizuit), nu ciorna brută; parserul comun recunoaște marcajele oriunde apar, inclusiv la redeschiderea unei intrări vechi.
-- **Cuvinte inconsistente între cele 3 texte** — regulă de prompt mai fermă, plus verificare programatică (dacă un text nu conține toate cuvintele-țintă, se reîncearcă generarea o singură dată).
-- **Nivel dedus automat** — textul folosește acum nivelul (A1-A2/B1-B2) determinat de majoritatea cuvintelor-țintă alese, nu tot vocabularul cunoscut nediferențiat.
-- **Generare manuală separată de selecție** — butoane distincte („Generează — Cuvinte alese aleatoriu" / „Generează — Cuvinte alese manual"); alegerea cuvintelor nu mai declanșează automat generarea.
-- **Panouri suprapuse, în ambele sensuri** — corectat: fundalul întunecat rămâne continuu pe durata tranziției (nu mai dispare și reapare), tranziția calibrată exact la durata reală CSS (250ms).
+Fișierele modificate se încarcă direct în acest repository (Add file → Upload files → Commit); GitHub Pages redeploy-ează automat în 1-2 minute. `CACHE_NAME` din `sw.js` se incrementează la fiecare livrare, ca service worker-ul să invalideze cache-ul vechi pe dispozitivele cu aplicația deja instalată.
 
-**v92 — corecție critică la backup (combinare reală, nu suprascriere), plus selecție manuală de cuvinte**
-- **Backup general** (cuvinte exersate, stelute, cuvinte proprii): la import, acum se **combină** cu progresul deja existent pe dispozitiv, nu-l mai suprascrie — dacă exersezi și pe telefon și pe PC, nu mai pierzi progresul niciunuia. Cuvintele exersate pe ambele: încercările se adună, starea curentă (stelute, greșeli) vine din activitatea cea mai recentă. Setările (nivel selectat, voce) rămân cele locale ale dispozitivului, nu se suprascriu.
-- **Listă nouă, „📋 Cuvintele mele exersate"** — în Setări, toate cuvintele la care ai răspuns până acum, sortabile după stelute/alfabetic, sau filtrate doar pe cele cu greșeală activă.
-- **Selecție manuală în „Cuvinte noi în context"** — „✋ Alege manual cuvintele" deschide aceeași listă, în mod selecție (până la 5 cuvinte, ca niște etichete, nu bife) — alegi și nivelul (A1-A2/B1-B2) care determină restul vocabularului folosit în text.
-- Verificat programatic: scenariu realist de combinare progres telefon+PC, sortare/filtrare listă.
+## Changelog
 
-**v91 — modul nou (AI): „🆕 Cuvinte noi în context"**
-- Alege automat până la 5 cuvinte văzute abia o dată sau de două ori (indiferent dacă răspunsul a fost corect) — selecția se face direct în cod, din progresul local, fără niciun apel AI, gratuit și instant.
-- Generează 3 texte scurte, independente, fiecare cu temă proprie, în care cele 5 cuvinte apar natural — conjugate/declinate cum cere gramatica reală, nu forțate la forma de bază.
-- Cuvintele țintă sunt evidențiate cu roșu, oriunde apar, indiferent de forma exactă folosită — un al treilea pas dedicat (după generare și revizuire gramaticală) cere modelului să marcheze el însuși formele exacte folosite, cu verificare de siguranță pe fiecare linie, ca marcarea să nu poată altera și textul.
-- Traducere română vizibilă direct (nu ascunsă), ascultare disponibilă imediat pentru fiecare text.
+**v35** — separarea generării de traducere, în cele 4 module care generau conținut nou (nu Traducere/Corectură, care sunt deja traduceri de la sursă). Descoperire prin comparație cu aplicația-soră germană, verificată riguros înainte de implementare (nu totul din propunerea inițială s-a confirmat corect).
+1. **Arhitectură nouă, per modul**: un **Agent 1** dedicat generează conținutul STRICT într-o singură limbă (fără traducere inclusă, format numerotat pe propoziții), apoi un **Agent 1.5** nou, separat, traduce — cu prompt dedicat exclusiv acurateței și consecvenței (nu doar fluenței). Motiv: un singur apel care generează ȘI traduce simultan tinde spre traduceri inconsecvente (același concept tradus diferit de două ori în text) sau adaugă/omite nuanțe.
+2. **Aplicat la Simplifică, Exersează ce ai învățat (bidirecțional FR↔RO), Descrie o poză, și Cuvinte noi în context** (regulile 2bis/3bis despre cuvinte invariabile, păstrate EXACT neschimbate). Traducerea liberă (mod „Traducere") rămâne neschimbată — nu e o sarcină de generare, e deja o traducere de la sursă, separarea nu i se aplică.
+3. **Păstrat, nu înlocuit**: pipeline-ul de revizuire de formă + verificare de fidelitate prin retraducere independentă (`translateWithReview`), aplicat DUPĂ recombinarea în perechi `[FR]`/`[RO]` — rezultatul combină acum ambele îmbunătățiri, nu una în locul celeilalte.
+4. **Bug real evitat, găsit la implementare**: mecanismul de fidelitate presupune mereu franceza ca limbă-sursă autoritară (verifică dacă traducerea română corespunde francezei) — la Exersare, când textul se generează în română (direcție RO→FR), aplicarea neschimbată ar fi verificat greșit direcția, riscând să „corecteze" greșit română deja corectă. Restricționat să ruleze doar când sursa generată chiar e franceza.
+5. **Verificare riguroasă a recomandărilor primite**, înainte de implementare — nu toate s-au confirmat: „textul de Ajutor zice 3 texte" era parțial greșit (doar un comentariu de cod, nu textul vizibil utilizatorului); „backup-ul suprascrie fără avertisment, e un bug" s-a dovedit fals — mesajul din aplicație spune deja explicit „Progresul curent va fi suprascris" înainte de acțiune, comportament deliberat, nu bug.
+6. **Testat programatic, exhaustiv**: 12 verificări pe piesele comune noi (`parseNumberedLinesAny`, `translateNumberedLines`, `generateThenTranslate`, toate cele 4 prompturi noi, regulile 2bis/3bis confirmate păstrate exact), plus 5 verificări end-to-end pe pipeline-ul complet de 4 agenți al modulului de Context — toate trecute, plus regresie confirmată (50 de runde, 0 erori).
 
-**v90 — extindere majoră: 3 timpuri noi, verbe separabile marcate vizual, 37 verbe noi, plus corecții acumulate**
-- Modulul de conjugare primește 3 timpuri noi: **Plusquamperfekt** (mai mult ca perfectul), **Futur I** (viitor), **Konjunktiv II** (condițional — formă sintetică pentru verbele foarte comune precum sein/haben/modalele, formă analitică cu „würde" pentru restul).
-- Verbele separabile (ex. „aufhören") sunt acum marcate vizual: infinitiv cu punct median (`auf·hören`, convenția din dicționare), prefix colorat oriunde apare în răspunsuri, etichetă discretă pe card.
-- Modulul de conjugare crește de la 100 la **137 de verbe** (4110 întrebări, față de 1200 inițial) — 24 verbe separabile suplimentare, deja existente în vocabular, plus „fernsehen" și încă 12 verbe complet noi.
-- Vocabularul general crește cu 13 cuvinte noi (7120→7133): „fernsehen" la A1, restul la Suplimentar.
-- Verificat programatic: 4110 combinații testate exhaustiv (137 verbe × 5 timpuri × 6 persoane), 0 eșecuri.
-- Text de susținere (Ko-fi) reformulat mai general — „susții întreținerea și dezvoltarea" în loc de o mențiune tehnică prea specifică.
+**v34** — mini-player de ascultare (Play/Pauză/Stop), la toate cele 6 secțiuni cu conținut mai lung — Traducere & Corectură & Simplifică, Exersează ce ai învățat, Cuvinte noi în context (ambele texte, separat), Descrie o poză, Istoric detaliu. Rezolvă o problemă reală: până acum, odată pornită ascultarea, nu exista nicio cale s-o oprești înainte de final. Butoane mari, aerisite (52px înălțime, spațiate), două: Redă/Pauză (comută) și Oprește. Derularea cu ±secunde a fost analizată și abandonată deliberat — Web Speech API nu expune deloc o poziție de timp în vorbirea sintetizată (spre deosebire de `<audio>`), orice aproximare ar fi fost inconsecventă; păstrat simplu, doar ce e nativ și sigur. Nu s-a atins deloc ascultarea de pe carduri/rezultate de căutare (cuvinte singure, unde un singur tap-ascultare rămâne suficient). Testat programatic — 21 de verificări (ciclul complet Redă→Pauză→Reia→Oprește, izolare corectă între playere diferite — pornirea unuia oprește vizual celălalt, integrare cu regula de „ascultare blocată până la dezvăluire" la Exersează, comportament sigur pe text gol) — toate trecute, plus regresie confirmată.
 
-**v88 — text generat mai fidel temei cerute, plus opțiune discretă de susținere**
-- „Exersează ce ai învățat": textul generat rămâne acum clar legat de tema cerută, chiar cu vocabular limitat — găsit prin testare că teme ca „Anul Nou" sau „vacanță de vară" puteau aluneca spre ceva generic ("o zi nouă", "vacanță" fără mențiunea sezonului), fără nicio legătură recognoscibilă cu ce s-a cerut.
-- Buton discret de susținere (Ko-fi), în Setări, sub semnătură — aplicația rămâne complet gratuită, opțiunea ajută doar cine vrea să susțină întreținerea și dezvoltarea ei în continuare; menționat și în Ajutor, ca reper.
+**v33** — buton de ascultare adăugat la modulul „Cuvinte noi în context" — verificat, era singurul dintre cele 4 secțiuni de rezultat AI (Traducere, Exersează, Descrie, Context) care nu avea deloc buton „🔊 Ascultă", nu doar pe telefon — lipsea din construcție, în toate contextele, nu „a dispărut" la o modificare recentă. Adăugate 2 butoane separate (câte unul per text), fiecare ascultă strict textul lui, cu marcajele `{{...}}` curățate automat (deja gestionat de `parseTaggedAiResult`, doar nefolosit până acum aici). Testat programatic — 9 verificări (existența butoanelor, separarea corectă text1/text2, curățarea marcajelor, resetare la redeschidere, fără eroare pe text gol) — toate trecute, plus regresie confirmată.
 
-**v87 — calitate traducere îmbunătățită, plus escaladare rară către model mai avansat**
-- Agentul 2 (revizuire) verifică acum și acordul participiilor, fidelitatea de sens (nu doar gramatica), și expresiile idiomatice traduse mecanic, greșit — găsite prin testare pe text real.
-- Regulă nouă, critică: dacă Agentul 2 nu e sigur de un cuvânt/expresie, NU mai inventează sau ghicește — marchează explicit acea bucată, iar aplicația trimite **doar acel fragment**, cu context, către un model mai avansat (Sonnet), care-l rezolvă. Cost suplimentar doar rar, când chiar e nevoie, nu la fiecare traducere.
-- Verificat programatic: extragerea și recombinarea fragmentelor marcate, cu fallback sigur dacă escaladarea eșuează sau nu se potrivește numeric.
+**v32** — bug real reparat: butonul „flotant" de confirmare selecție (lista „Cuvintele mele exersate", mod selecție) folosea `position:fixed`, ancorat undeva pe ecran, independent de contextul cu care interacționai — se putea suprapune cu butonul static din secțiunea „Alese". Rescris complet: acum e generat dinamic, inserat **imediat sub rândul pe care s-a dat ultimul click** (nu neapărat ultimul din ordinea de sortare curentă) — se mută la fiecare click, mereu vizibil chiar lângă ultima alegere, indiferent de scroll. Testat programatic — 12 verificări (poziție exactă în DOM relativ la rândul clicked, mutarea corectă la un click nou, dispariția completă la deselectare totală, funcționarea confirmării) — toate trecute, plus regresie confirmată.
 
-**v86 — corecție critică: prăbușire silențioasă la selectarea combinată de niveluri, descoperită la aplicația-soră franceză**
-- Dacă erau selectate simultan cel puțin un nivel normal de vocabular ȘI cel puțin unul dintre nivelurile „virtuale" (Antonime & Sinonime, Conjugare verbe), generarea rundei putea eșua silențios, intermitent — pagina rămânea aproape goală, fără mesaj de eroare, în funcție de ce cuvinte ieșeau aleatoriu în eșantion. Cauza: funcția de clasificare gramaticală era apelată și pe intrări din nivelurile virtuale, care au altă structură de date (fără câmpul folosit pentru clasificare).
-- Corectat: intrările din nivelurile virtuale sunt acum excluse explicit din grupul folosit la generarea distractorilor.
-- Verificat programatic: 200/200 simulări eșuau înainte de corecție, 0/200 după.
+**v31** — regândire completă a mecanismului de verificare a traducerii AI, nu doar reguli adăugate.
+1. **Cauza reală identificată**: toate erorile mai grave găsite la testare (sens inversat, idiomuri cu sentiment opus, fragmente incoerente nesemnalate) aveau un numitor comun — Agentul 2 (revizorul) depindea de **auto-conștientizare** (regula `[UNCERTAIN]`) ca să detecteze o problemă, dar tocmai greșelile periculoase sunt cele care „sună" corect, fluent, convingător — Haiku nu-și „simte" greșeala, deci nu o marchează niciodată.
+2. **Mecanism nou, Agentul 2b**: verificare de fidelitate prin **retraducere independentă**, nu prin auto-recitire. Textul românesc e retradus înapoi în franceză, „orb" (într-un apel separat, care NU vede franceza originală deloc), apoi cele două variante franceze sunt comparate obiectiv de un al treilea apel — o divergență de sens devine un semnal MĂSURABIL, nu unul care depinde de introspecție. Doar liniile cu divergență confirmată sunt trimise, STRICT pe acea bucată, către `claude-sonnet-5`.
+3. **Agentul 2a (revizuire), restrâns strict la FORMĂ** — acorduri, punctuație, „dont", naturalețe posesive; regulile de sens/idiom/fragmente eliminate de-acolo (deveniseră responsabilitatea noului mecanism), prompt mai concis, mai concentrat.
+4. **Strat de prevenție** adăugat direct în promptul traducătorului (Agentul 1) — aceleași capcane cunoscute (timp verbal, cauzalitate, idiom-cu-sentiment-opus) menționate condensat, ca să fie evitate din start, nu doar detectate ulterior.
+5. **Modulul „Cuvinte noi în context" redus la 2 texte** (de la 3) — revizuire acum **per text**, nu concatenată pe toate deodată (reduce diluarea atenției pe volum mare, un factor identificat ca posibilă cauză a erorilor scăpate anterior); cele 2 texte procesate în **paralel** (`Promise.all`), reducând timpul de așteptare.
+6. **Cost**: rămâne pe Haiku pentru toți pașii de bază (traducere + formă + retraducere + comparare — 4 apeluri Haiku per traducere, față de 2 înainte), Sonnet intervine DOAR la divergență confirmată obiectiv, nu la orice ezitare — țintă păstrată: cost redus, calitate maximă unde chiar contează.
+7. **2 bug-uri reale de regex găsite și reparate în timpul construcției** (nu la testare externă) — `\s*` la parsarea liniilor numerotate includea `\n`, „mânca" involuntar linia următoare; corectat cu spațiu orizontal explicit (`[ \t]*`), verificat pe cazuri care expuneau exact problema.
+8. **Testat exhaustiv, programatic**: 28 de verificări noi, toate trecute — inclusiv cazul exact raportat de utilizator (`Dieu merci`→`Dumnezeu ferește`, corectat corect prin escaladare la Sonnet), confirmarea că Sonnet NU se declanșează la traduceri corecte (cost zero suplimentar în cazul normal), toate căile de eșec (parsare eșuată, rețea căzută, structură neașteptată — fiecare cu fallback sigur la varianta anterioară), plus regresie completă pe bug-ul critic de la v24 (50 de runde, 0 erori).
 
-**v85 — două module noi (AI): „Simplifică" și „Descrie o poză"**
-- **📖 Simplifică** — al treilea mod în panoul de traducere (lângă Traducere/Corectură): lipești un text german greu, alegi nivelul țintă (A1-A2/B1-B2), primești o versiune simplificată, cu vocabular tipic acelui nivel general (CEFR), plus traducere română.
-- **📷 Descrie o poză** — modul separat, în hub: încarci o poză personală, Claude o descrie în germană, strict din cuvintele tale exersate cu succes la nivelul ales (ca la „Exersează ce ai învățat"), cu traducere română alături.
-- Ambele refolosesc integral infrastructura existentă — formatul `[DE]`/`[RO]`, Agentul 2 de revizuire, ascultare, istoric.
+**v30** — bug de elidare franceză reparat, plus 8 corecții de date în vocabular, găsite prin testare reală.
+1. **Elidare (l') lipsă în 4 locuri din cod**: `formatSide()` (cardul principal) avea logica corectă, dar 4 alte locuri — lista „Cuvintele mele exersate", rezultatele de căutare, mesajele de confirmare la adăugare/suprascriere de cuvinte — concatenau articolul + cuvântul direct, fără verificare (`la affaire`, `le ami`, `le argent` în loc de `l'affaire`, `l'ami`, `l'argent`). Unificat într-un helper comun (`formatArticleWord()`), ca bug-ul să nu se mai poată repeta la un al 5-lea loc viitor.
+2. **Excepția „h aspirat", lipsă complet** — `needsElision()` trata orice cuvânt care începe cu „h" ca elidabil, dar franceza are două tipuri: h mut (elidiază: `l'homme`, `l'heure`) și h aspirat (NU elidiază: `la haine`, `le hall`, `le hasard`). Verificate manual toate cele 61 de cuvinte cu H din vocabular — 8 sunt aspirate (`haine`, `hall`, `hanche`, `haricot`, `hasard`, `hauteur`, `honte`, `héros`), adăugate ca excepții explicite.
+3. **8 corecții de date în `vocab-data.js`**: `dieu`→`Dieu` (majusculă, fără articol — uzul curent, monoteist, care se potrivește traducerii „Dumnezeu"; „un dieu"/cu articol e pentru o divinitate generică, alt sens), plus 7 adjective/adverbe care aveau articol `le` rămas din greșeală, deși nu au uz de substantiv (`odieux`, `marrant`, `terriblement`, `crucial`, `vital`, `global`, `chaleureux`). Verificate și ~150 de alte cazuri suspecte (sufixe tipice de adjectiv) — restul erau substantive legitime; ~5 cazuri ambigue (`collectif`, `dynamique`, `créatif`, `cynique`, `lointain`, care au uz real de substantiv în anumite contexte) lăsate neatinse.
+4. **Testat end-to-end, cu DOM real**, exact pe cazurile raportate — inclusiv lista de selecție cuvinte pentru modulul AI „Cuvinte noi în context" (aceeași listă ca „Cuvintele mele exersate") — toate cele 3 liste afectate confirmate corecte, plus regresie pe selecția multiplă de niveluri.
 
-**v84 — mod nou: „✓ Corectură germană" (AI), portat din aplicația-soră franceză**
-- Chip nou în panoul de traducere ("🔄 Traducere" / "✓ Corectură germană") — comută modul, în același panou, fără buton separat.
-- Scrii (sau dictezi, sau fotografiezi) propriul tău text în germană — Claude corectează doar greșeli reale (ortografie, acorduri, conjugări, topică, cratime), fără să reformuleze stilul; afișează și o listă de explicații, în română, pentru fiecare greșeală găsită.
-- Agentul 2 de revizuire (folosit la traducere) a primit și el verificări suplimentare, portate din franceză: punctuație completă, poziția verbului/topică germană.
+**v29** — completări mari, uniformizare cu aplicația-soră germană, plus reorganizare documentație.
+1. **Lista „Cuvintele mele exersate" refăcută complet**, după modelul german — căutare liberă RO/FR, sortare cu direcție (Stelute ↓/↑, Alfabetic, Doar greșite), rânduri verticale scrolabile (nu chip-uri pe orizontală, care produceau un „perete" de etichete greu de parcurs), buton de confirmare flotant, nivel-pentru-text ales explicit de utilizator (nu mai dedus automat din cuvintele alese). Corectat pe drum: sortarea după stelute folosea `.correct` brut, nu formula `streak+1` folosită peste tot în restul aplicației.
+2. **Modul nou „📷 Descrie o poză"** — încarci o imagine (galerie/clipboard), Claude o descrie strict din vocabularul tău exersat cu succes la nivelul ales (același prag ca la „Exersează ce ai învățat"), cu traducere română și ascultare.
+3. **Modul nou „📖 Simplifică"** — al treilea mod în toggle-ul Traducere/Corectură, lipești un text francez greu, primești o versiune simplificată la nivelul țintă ales (vocabular/structuri tipice CEFR general, nu neapărat cuvintele tale personale — diferă intenționat de „Exersează ce ai învățat"). A necesitat și o refactorizare utilă: handler-ul principal de traducere avea logica de revizuire+escaladare duplicată inline, separat de helper-ul `translateWithReview()` deja construit pentru modulul Descriere — unificate, Traducere și Simplificare folosesc acum exact același cod, ca în germană.
+4. **Regulă lipsă, adăugată la „Exersează ce ai învățat"**: fidelitate față de temă (regula 4b din promptul german) — dacă tema are mai multe părți (ex. „vacanță la munte"), textul trebuie să rămână recognoscibil legat de ambele, nu doar de partea mai ușor de scris cu vocabularul disponibil; cu exemple concrete.
+5. **Secțiunea ❓ Ajutor, reorganizată complet** — grupată explicit pe 5 părți (Bazele aplicației, Module de exersare speciale, Modulul AI, Cuvintele mele exersate, Alte funcții), cu subsecțiune nouă, dedicată, pentru lista de cuvinte (căutare/sortare/selecție), strict din perspectiva utilizatorului.
+6. **README rescris complet** — mutat strict pe conținut de dezvoltator (arhitectură, structuri de date, algoritmi, metodologie de testare), fără narațiune de funcționalități (asta trăiește acum doar în Ajutor, ca să nu existe două surse de adevăr divergente).
+7. **Testat programatic, exhaustiv, la fiecare pas**: mecanismul de listă (streak+1, filtrare, sortare, selecție cu plafon, tranziții), promptul de simplificare, regula 4b, plus regresie confirmată pe bug-ul critic de la v24 (selecție multiplă de niveluri) — 50/50 runde fără erori după toate schimbările.
 
-**v83 — verificare gramaticală în doi pași (AI), pentru traducere și exerciții**
-- Fiecare traducere/generare trece acum printr-un al doilea apel automat, un "corector" separat — verifică acorduri de gen/număr (română), cazuri gramaticale (germană), ortografie, și dacă sensul s-a păstrat corect.
-- Plasă de siguranță: dacă verificarea ar produce un număr diferit de perechi `[DE]`/`[RO]` decât originalul (semn de pierdere de conținut), se păstrează traducerea inițială, nerevizuită — niciodată un rezultat trunchiat.
-- Cost: aproximativ dublu per traducere (2 apeluri, nu 1) — rămâne sub un cent per traducere scurtă cu modelul Haiku.
+**v28** — 4 corecții la modulul „Cuvinte noi în context" (nou în v27), găsite la testare reală:
+1. **Listă fără scroll propriu** — „Cuvintele mele exersate" afișa toate cuvintele ca un perete de etichete, fără zonă limitată; acum are propria zonă scrolabilă (max 38% din înălțimea ecranului), independentă de restul panoului.
+2. **Cuvinte invariabile confundate cu cuvinte diferite ce încep la fel** — cuvântul țintă „par" (prepoziție) genera/marca greșit „parler", „partir", „parce que" în loc să folosească „par" însuși — modelul interpreta „adaptează la orice formă gramaticală" ca „găsește un cuvânt înrudit care poate fi conjugat", chiar și pentru cuvinte invariabile care n-au deloc forme flexionate. Reparat în **ambele** prompturi (generare + marcare), cu distincție explicită variabil/invariabil și exemplul exact raportat, ca exemplu concret negativ.
+3. **Filtrul de nivel din listă nu acoperea C1/C2 deloc** — avea doar gruparea grosieră A1-A2/B1-B2; extins la toate cele 6 niveluri CEFR individuale, plus „Cuvintele mele" separat. Reparată și o legătură ruptă rezultată din asta (generarea manuală deducea acum corect nivelul din cuvintele alese, nu din vechiul filtru pe grupuri).
+4. **Sortare după nivel, lipsă** — exista doar stelute/alfabetic; adăugată, cu ordinea CEFR corectă (A1→C2).
+5. **Bonus, neraportat dar găsit pe drum**: butonul de confirmare a selecției nu era vizibil constant la liste lungi — acum „flotant" (`position:sticky`), rămâne la baza zonei vizibile indiferent cât ai scrollat prin cuvinte.
 
-**v75 — modul nou: „Exersează ce ai învățat" (AI)**
-- Claude generează un text scurt, pe o temă dată de tine, folosind strict cuvintele la care ai răspuns corect de cel puțin 2 ori (nu tot vocabularul disponibil, nici cuvintele abia atinse o singură dată) — alegi nivelul (A1-A2, max 60 cuvinte, sau B1-B2, max 100 cuvinte) și limba în care apare textul.
-- Traducerea rămâne ascunsă până apeși „Arată traducerea"; poți scrie întâi propria încercare, într-un câmp liber, ca autotestare.
-- Fiecare exercițiu se salvează automat în Istoric (tag `[exc]`), cu propria încercare afișată alături de traducerea corectă la redeschidere.
+Toate testate programatic (16 verificări suplimentare) și verificate cu regresie pe bug-urile critice anterioare (selecția multiplă de niveluri, v24) — 0 erori.
 
-**v69 — corecții de izolare/layout, descoperite la aplicația-soră de greacă:**
-- Toate cele 10 chei `localStorage` (progres, istoric AI, cuvinte proprii, cheie API etc.) sunt acum prefixate cu `karteikarten_`, ca să nu se mai amestece cu datele aplicațiilor-soră (franceză, greacă) găzduite pe același domeniu GitHub Pages. **Progresul salvat anterior versiunii asta nu mai e citit** — compromis necesar pentru a rezolva amestecul definitiv.
-- Zoom (A−/A+) rămâne mereu vizibil și accesibil pe orice lățime de ecran; doar procentul afișat și butonul de resetare se ascund pe ecrane foarte înguste (sub ~420px).
-- Numele aplicației se trunchiază cu „…" pe ecrane foarte înguste, în loc să împingă butonul de Setări pe un rând nou.
+**v27** — modul nou, mare: **🆕 Cuvinte noi în context**. Diferit de „Exersează ce ai învățat" — aici nu te testezi, ci vezi cuvinte abia întâlnite (văzute o dată sau de două ori) folosite natural, de mai multe ori, în situații diferite, cu traducerea română vizibilă direct (nu ascunsă).
+- **Selecție cuvinte** — automată, direct din progres (fără AI, gratuit, instant), sau manuală, dintr-o listă nouă și separată, „📋 Cuvintele mele exersate" (accesibilă și din ⚙ Setări pentru răsfoit liber, cu filtre de nivel și sortare), plafon 5 cuvinte.
+- **Pipeline în 3 agenți**: (1) generare — 3 texte scurte, independente, fiecare folosind TOATE cuvintele țintă cel puțin o dată, la orice formă gramaticală naturală cere contextul; (2) revizuire — reutilizează agentul de gramatică/ortografie + escaladarea existente, aplicat pe liniile extrase din toate cele 3 texte, recombinate apoi pe baza numărului de linii reținut înainte de revizuire; (3) marcare — un agent nou, dedicat, încadrează cu `{{...}}` fiecare apariție a cuvintelor țintă în liniile franceze finale, cu **verificare de siguranță pe linie** (dacă eliminarea marcajelor nu reproduce exact linia originală, acea linie rămâne simplă, fără evidențiere).
+- **Randare marker-aware, centralizată** — `parseTaggedAiResult()` transformă acum `{{cuvânt}}` în evidențiere roșie oriunde apare, deci Istoricul și exportul beneficiază automat, fără cod duplicat; citirea cu voce și exportul text/PDF curăță marcajele automat.
+- **Plasă de siguranță pentru format lipsă** — dacă `[TEXT1]`/`[TEXT2]`/`[TEXT3]` lipsesc complet din răspuns, conținutul `[FR]`/`[RO]` existent e recuperat și împărțit în 3, în loc de casete goale.
+- Istoric — sursă nouă, `[nou]`, cu evidențierea păstrată la redeschidere (se salvează textul final, marcat și revizuit, nu ciorna dinaintea marcării).
+- **Testat programatic, exhaustiv**: 26 de verificări (5 obligatorii + bonus) — extragere/recombinare cu revizuire simulată, `splitIntoThreeTexts` pe format normal ȘI complet absent, `extractCoreWord` pe cazul real din vocabular, `deriveLevelGroupFromWords` pe toate cazurile (majoritate/egalitate/fără nivel clar), confirmare că promptul conține explicit nivelul țintă, randare marker-aware, și plasa de siguranță pe linie — toate trecute.
+- **Bug real găsit pe drum**: `mistakeIds` e `Array`, nu `Set` — codul nou folosea `.has()`, care ar fi aruncat eroare la filtrul „doar cu greșeală activă"; corectat la `.includes()`.
+- Regresie verificată: selecția multiplă de niveluri (A1+Conjugare verbe+C1+C2+Antonime, bug reparat la v24) — 50 de runde, 0 erori.
 
-## Ce conține
+**v26** — bug vizual reparat: chip-ul de direcție de pe carduri (deasupra întrebării) afișa „DE → RO"/„RO → DE" în loc de „FR → RO"/„RO → FR" — text rămas hardcodat dintr-o versiune veche, într-un loc pe care scanările automate de „reziduuri germane" nu-l prinseseră (nu conținea cuvinte căutate ca „german"/„Karteikarten", doar litera „DE" izolată). Restul logicii (ce parte a cardului arată franceza vs. română) era deja corectă — doar eticheta afișată era greșită. Verificat funcțional pe toate cele 3 opțiuni de direcție (FR→RO, RO→FR, mixt).
 
-- `index.html` — aplicația
-- `vocab-data.js` — baza de vocabular (A1/A2/B1/B2 + Suplimentar, ~6570 cuvinte)
-- `manifest.json` — configurare PWA (nume, iconițe, mod de afișare)
-- `sw.js` — service worker (funcționare offline)
-- `icon-192.png`, `icon-512.png` — iconițele aplicației
+**v25** — pipeline de traducere extins de la 2 la 3 pași, plus 4 categorii noi de verificare la revizuire.
+- **Promptul de revizuire (pasul 2)** acoperea deja topică și acord gen/număr articol-substantiv, dar îi lipseau: **acordul participiilor** (cu „a fi"/pasiv, separat de acordul articol-substantiv), **fidelitate de sens** (o propoziție poate fi corectă gramatical dar să spună altceva decât originalul), **expresii idiomatice** (traduse mecanic, cuvânt-cu-cuvânt, în loc de echivalentul natural din limba țintă), și **interzicerea cuvintelor inventate** (compuse fabricate, plauzibile dar inexistente). Toate patru adăugate, fiecare cu exemplu concret negativ+pozitiv (regulile abstracte nu sunt suficiente pentru un model mic — aceeași lecție aplicată deja la cratime/acord).
+- **Pas nou, al treilea, rar și țintit**: dacă la revizuire modelul întâlnește o bucată de care chiar nu e sigur (nu ezitare minoră de stil), o marchează explicit (`[UNCERTAIN]...[/UNCERTAIN]`) în loc să ghicească — doar acea bucată exactă (nu tot textul) e trimisă mai departe către un model mai capabil (`claude-sonnet-5`), pentru o a doua opinie. Cost suplimentar doar când chiar e nevoie, nu la fiecare traducere.
+- **`callClaude`** primește acum parametru opțional de model (implicit tot Haiku pentru restul aplicației — neschimbat).
+- **Testat programatic, exhaustiv**: extragere segmente marcate (fără marcaje / un marcaj / mai multe, cu ordinea păstrată), recombinare corectă după „rezolvare", fallback sigur la nepotrivire de număr de răspunsuri sau la eroare de rețea, și confirmare că mecanismul NU se declanșează deloc (fără apel API suplimentar) când nu există nimic marcat — 15 verificări, toate trecute.
 
-## Funcționalități
+**v24** — bug critic reparat: pagină aproape goală / rundă nouă blocată la selecții multiple de niveluri.
+- **Cauza exactă**: la construirea unei runde, pentru fiecare cuvânt normal (A1-C2) se calculau distractori parcurgând TOATE cuvintele active — dar dacă erau selectate simultan și nivelurile „Conjugare verbe" și/sau „Antonime & Sinonime" (structuri de date complet diferite, fără câmpul `.fr`), funcția de clasificare gramaticală (`classifyWord`) crăpa pe ele (`Cannot read properties of undefined (reading 'trim')`), oprind tăcut toată construcția rundei.
+- **De-aici veneau exact simptomele descrise**: pagină goală (eroare neafișată, doar conținut vechi rămas), intermitent (depindea de ce combinație de cuvinte extrăgea aleatoriu eșantionul rundei — uneori pica pe combinația care crăpa, uneori nu, explicând de ce „după câteva refresh-uri apar"), și butonul „Rundă nouă" blocat (apela aceeași funcție afectată).
+- **Fix**: distractorii unui cuvânt normal se aleg acum strict din alte cuvinte normale, excluzând explicit intrările „Conjugare verbe"/„Antonime & Sinonime" din calcul (oricum n-ar fi avut sens ca distractori pentru o întrebare de traducere obișnuită).
+- **Verificat riguros**: reprodus bug-ul cu certitudine (eroare exactă confirmată pe codul vechi), apoi testat fix-ul pe 13 combinații diferite de niveluri × 30 de runde fiecare (390 runde total, inclusiv toate nivelurile + Verbe + Antonime simultan) — 0 erori.
 
-- Traducere germană ⇄ română, grilă cu 4 variante de răspuns, cu distractori din aceeași categorie gramaticală (substantiv/verb/expresie/cuvânt funcțional)
-- Niveluri selectabile A1–B2 + Suplimentar + **Îngrijire** (vocabular de specialitate pentru asistenți medicali/îngrijitori în azile de bătrâni), combinabile între ele
-- Selector de direcție: DE→RO, RO→DE, sau ambele amestecat
-- Mod de exersare "inteligent" (repetiție spațiată bazată pe istoricul de răspunsuri) sau complet aleator
-- Pronunție audio a cuvintelor germane (Web Speech API), cu alegere de voce
-- Link direct către dict.cc pentru fiecare cuvânt german, ca sursă suplimentară
-- Buton "Sari peste" pentru a trece la următorul cuvânt fără să conteze ca greșeală
-- Încărcare de liste proprii de vocabular (CSV, TSV sau XLSX)
-- Export al listei curente și al statisticilor, ca fișiere CSV
-- Preferințele (niveluri, direcție, mod) și statisticile se salvează local, în browser, per dispozitiv
-- **Presetări rapide** (Începător / Conversație / Avansat / La job) — setează nivelurile dintr-un tap
-- **Progres pe niveluri** — procent de cuvinte exersate și rată de răspunsuri corecte, per nivel
-- **Mod „Doar greșeli"** — revizuiește exclusiv cuvintele la care ai greșit recent, cu contor dinamic
-- **Serie de zile (streak)** — afișată în linia de rezumat, calculată din activitatea zilnică
-- **Căutare vocală** (🎤, unde browserul o suportă) — rostești un cuvânt în română sau germană, aplicația îl caută în listă și afișează + pronunță rezultatul; tolerantă la lipsa diacriticelor și la articolele germane rostite din reflex
-- **Adaugă cuvinte care lipsesc din listă** — dacă o căutare scrisă nu găsește nimic, poți verifica traducerea pe dict.cc și adăuga cuvântul manual, cu ajutor de lipire din clipboard; rămâne salvat permanent, ca nivel separat ("Cuvintele mele"), exportabil CSV
-- **Antonime & Sinonime** — nivel nou, exclusiv în germană (213 perechi, 426 de întrebări, generate automat în ambele sensuri): vezi un cuvânt, alegi opusul sau apropiatul ca sens, din 4 variante tot germane, cu ascultare și dict.cc disponibile pe fiecare după ce răspunzi
-- **Conjugare verbe** — nivel extins (137 verbe germane comune, incluzând 41 verbe separabile, cu prefix marcat vizual — punct median în infinitiv, prefix colorat în răspunsuri, etichetă pe card): vezi infinitivul, alegi forma corectă la Präsens, Perfekt, Plusquamperfekt, Futur I, sau Konjunktiv II, pentru persoana cerută (4110 de întrebări); distractorii sunt mereu alte forme ale aceluiași verb
-- **🤖 AI (Claude) — traducere liberă, experimental** — funcție opțională, separată de restul aplicației: folosește propria ta cheie API de la Anthropic pentru a traduce orice text (nu doar cele ~7000 de cuvinte din listă), dictat sau scris, cu detectare automată română/germană și traducere naturală (nu cuvânt-cu-cuvânt); acceptă și imagini cu text (poze, screenshot-uri); text lung se aliniază automat propoziție-cu-propoziție; rezultatul se descarcă ca `.txt` sau `.pdf` (prin funcția de printare a telefonului). Cheia rămâne salvată doar pe dispozitiv, costul folosirii se plătește direct către Anthropic — detalii complete și pașii de obținere a cheii, în tab-ul de Ajutor din aplicație.
-- **Backup complet** — exportă/restaurează tot progresul (statistici, preferințe, greșeli, streak) ca fișier `.json`
-- **Prompt de instalare** — banner automat pe Android/Chrome (instalare cu un tap) și instrucțiuni clare pe iOS Safari (unde Apple nu permite instalare programatică)
-- Panou de setări organizat pe secțiuni pliabile (Vocabular / Exersare / Date & fișiere / Voce)
+**v23** — corecție de calitate a traducerii, găsită prin testare pe text real (articol Le Monde): „une aide" era tradus greșit „o ajutoare" (formă de plural, articulată greșit la singular — corect: „un ajutor"). Nu era doar o greșeală izolată, ci un gol real în pipeline-ul de doi agenți:
+1. **Promptul de traducere** (agentul 1) — adăugată o regulă explicită despre acordul gen/număr al substantivelor românești alese, cu exemplul concret „o ajutoare"→„un ajutor" (regulile abstracte nu sunt suficiente pentru un model mic ca Haiku — are nevoie de exemplu concret, negativ+pozitiv, aceeași lecție aplicată deja la cratime).
+2. **Promptul de revizuire gramaticală** (agentul 2) — menționa doar acorduri adjectiv-substantiv/participiu-subiect, dar **omitea explicit acordul articol-substantiv** (exact cazul „o ajutoare"); plus, formularea „NU înlocuiești cuvinte" risca să fie interpretată prea larg, tratând o formă greșită ca pe o alegere deliberată de netins. Clarificat explicit: corectarea formei (gen/număr) unui cuvânt deja ales nu e „înlocuire de cuvânt".
+3. **Plasă de siguranță întărită** — verificarea că rezultatul revizuit e valid controla doar dacă mai are etichete `[FR]/[RO]`, nu și dacă numărul de perechi s-a păstrat; la texte lungi, multi-paragraf, o pierdere/contopire silențioasă de conținut la pasul 2 ar fi trecut neobservată. Acum se compară explicit numărul de perechi înainte/după revizuire — dacă nu se potrivește, se păstrează traducerea nerevizuită (mai sigură decât una scurtată).
+4. Notă onestă adăugată în textul de ajutor despre limitele reale ale modelului Haiku (cel mai ieftin) pe texte lungi/complexe.
 
-## Instalare pe telefon
+**v22** — 3 timpuri noi la modulul „Conjugare verbe": imparfait, plus-que-parfait, futur simple (pe lângă présent și passé composé, existente deja). Lista de verbe redusă de la 136 la **100, cele mai frecvente** (după rangul real din `fr_50k.txt`), ca extinderea la 5 timpuri să nu se piardă în cazuri rare.
+- **Imparfait** — derivat algoritmic (rădăcina de la „nous" prezent minus „-ons"), cu excepția reală unică din toată limba (être) și 3 excepții tehnice de ortografie (manger/changer/commencer, unde nous/vous pierd „e"/„ç"-ul suplimentar).
+- **Futur simple** — regulă generală (infinitiv, cu -re care pierde „e" final) + tabel de rădăcini neregulate pentru ~15 verbe frecvente (être→ser-, aller→ir-, faire→fer-, venir→viendr- etc.), inclusiv dublarea de consoană la appeler (appellerai) și mourir (mourrai).
+- **Plus-que-parfait** — auxiliarul la imperfect + același participiu/acord de la passé composé, fără date noi, doar reutilizare de cod.
+- **Bug real găsit la testare**: elidarea reflexivă (m'/t'/s' vs. me/te/se) era calculată static, presupunând doar formele de prezent ale lui être (unde doar „es"/„est" încep cu vocală) — la plus-que-parfait, auxiliarul e la imperfect, unde TOATE cele 6 forme (étais/était/étions...) încep cu vocală, deci toate persoanele reflexive au nevoie de elidare, nu doar 2. Corectat: elidarea se calculează acum dinamic, după prima literă a formei reale de auxiliar folosite, nu dintr-un tabel fix.
+- **Testat exhaustiv**: toate cele 3000 de întrebări posibile (100 verbe × 6 persoane × 5 timpuri) au exact 4 opțiuni unice; verificare suplimentară, automată, că nu mai există nicio formă reflexivă neelidată greșit, nicăieri.
 
-1. Deschide link-ul GitHub Pages al acestui repository, în Chrome (Android) sau Safari (iOS)
-2. Din meniul browserului, alege "Adaugă la ecranul principal" / "Instalează aplicația"
-3. Aplicația apare cu propria iconiță și funcționează parțial offline
+**v21** — verificare de audit după v20 (fără funcționalitate nouă, doar corecții de precizie):
+1. **0 reziduuri germane găsite** — scanare exhaustivă (text, cod, ID-uri HTML, clase CSS, funcții) — nimic rămas din Karteikarten.
+2. **Paritate completă cu germana confirmată programatic** — comparație funcție-cu-funcție, ID-cu-ID, clasă-cu-clasă între cele două `index.html`; singurele diferențe sunt cele franceze specifice, așteptate (Corectură franceză, elidare, passé composé etc.) — nimic lipsă (în afara modulului „Îngrijire"/PFLEGE, exclus intenționat, nefiind relevant pentru franceză).
+3. **Corecții text de Ajutor** — descrierea modulului AI încă spunea „două funcții separate", frazare rămasă de dinainte de restructurarea în hub (v20); actualizată să reflecte cele 3 destinații. O altă frază („redirecționează spre exercițiu") era ambiguă după apariția modulului nou „Exersează ce ai învățat" cu acest nume exact — clarificată.
+4. Secțiunea de Confidențialitate menționează acum explicit istoricul AI ca dată stocată local.
+5. **15 teste funcționale suplimentare** (DOM real, jsdom) — navigare hub completă, prag „cunoscut", salvare/randare istoric cu tag-uri corecte, verificare de regresie pe Verbe/Antonime — toate trecute.
 
-## Actualizarea aplicației
+**v20** — replicat din Karteikarten (aplicația-soră germană): două module noi mari, plus restructurare a panoului AI.
+- **🤖 Panoul AI restructurat ca hub** — 3 destinații: Traducere & Corectură (ce exista deja), 📝 Exersează ce ai învățat (nou), 📜 Istoric (nou).
+- **📝 Exersează ce ai învățat** — Claude generează un text scurt, pe o temă la alegere, folosind STRICT vocabularul deja exersat cu succes (prag exact: cel puțin 2 răspunsuri corecte, cumulat, per cuvânt) — nu tot vocabularul din aplicație. Grupare pe 2 niveluri (A1-A2 → max 60 cuvinte; B1-B2 → max 100, cu A1-A2 permis liber ca bază gramaticală). Plafon strict de 15% cuvinte din afara listei cunoscute. Direcție aleasă manual (FR sau RO). Traducerea rămâne ascunsă până apeși „Arată traducerea", cu loc pentru propria încercare înainte — comparație directă, salvată automat în Istoric.
+- **📜 Istoric** — toate traducerile/corecturile/exercițiile AI, cu filtrare an/lună, sortare, selecție și ștergere în masă, view de detaliu (inclusiv „Exersarea ta" vs. traducerea corectă, la exerciții), export JSON (pentru combinat între dispozitive)/CSV/PDF, import cu deduplicare automată, și analiză de „cuvinte frecvente, neadăugate" (scanează istoricul, sugerează cuvinte franceze repetate de 2+ ori, absente din vocabular — adăugare cu un tap).
+- **Bug real găsit pe drum**: fișierul avea două implementări duplicate ale pipeline-ului de revizuire gramaticală (de la o versiune anterioară), care rulau de două ori la fiecare traducere — consolidat la o singură trecere.
 
-Pentru a publica o versiune nouă: încarcă fișierele modificate în acest repository (Add file → Upload files → Commit), GitHub Pages redeploy-ează automat în 1-2 minute. Aplicația instalată pe telefon preia schimbările la următoarea deschidere.
+**v19** — corecție de gramatică română: eticheta implicită de pe cardurile modului obișnuit de traducere era „Traduce" (fără sens gramatical clar ca instrucțiune) — corectată la „Tradu" (imperativ informal singular), consecvent cu tonul „tu" folosit peste tot în restul aplicației (texte de ajutor, mesaje). Etichetele proprii de la Antonime/Sinonime/Conjugare rămân neschimbate.
+
+**v18** — completare la fix-ul de la v17 (separarea `localStorage`): restaurarea unui backup **vechi** (exportat înainte de prefixare) nu mai afișează fals „Backup restaurat" fără să restaureze de fapt nimic (fiindcă niciuna dintre cheile vechi nu se mai potrivea cu `BACKUP_KEYS`, actualizat la cele prefixate) — acum verifică explicit dacă există cel puțin o cheie compatibilă în fișier înainte de a cere confirmare; dacă nu găsește niciuna, oprește procesul cu un mesaj clar, fără să reîncarce aplicația.
+
+**v17** — trei corecții găsite în timp ce lucram la aplicația soră de greacă (arhitectură identică):
+1. **Amestec de date între aplicații** — toate cele 9 chei `localStorage` folosite (`wordStats`, `prefs`, `mistakeIds`, `myWords`, `voiceURI`, `installBannerDismissed`, `streak`, `fontZoom`, `claudeApiKey`) au fost prefixate cu `boitedefiches_`, inclusiv în `BACKUP_KEYS` — altfel, fiindcă toate aplicațiile-soră (germană, franceză, greacă) sunt găzduite pe același domeniu GitHub Pages, `localStorage` fiind izolat per domeniu (nu per aplicație), își suprascriau reciproc progresul. Notă: progresul salvat anterior rămâne sub cheile vechi, necitit după acest update — aplicația pornește curat.
+2. **Zoom-ul de bază (A−/A+) rămâne mereu vizibil** pe ecrane înguste — doar procentul și butonul de resetare se ascund sub ~420px lățime.
+3. **Layout topbar mobil** — numele aplicației se trunchiază cu „..." dacă nu încape, în loc să împingă butonul de Setări pe un rând nou; grupul din dreapta (căutare vocală/AI/setări) rămâne compact, pe același rând.
 
 ## Surse și atribuiri
 
-- **Selecția și nivelizarea cuvintelor A1–B2** sunt construite **integral și independent** din rangul de frecvență reală de utilizare a limbii germane, pe baza listei [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) (`content/2018/de/de_50k.txt`, derivată din corpus OpenSubtitles), licență **MIT**. Cuvintele au fost lematizate (formă de bază + tip gramatical) cu spaCy (`de_core_news_sm`), verificate manual pentru a elimina nume proprii, forme flexionate duplicate și zgomot din subtitrări, apoi împărțite pe niveluri A1–B2 exclusiv după poziția lor în clasamentul de frecvență. Nicio parte din selecția A1–B2 nu depinde de curriculumul vreunei instituții de examinare.
-- Etichetele CEFR (A1, A2, B1, B2) sunt un standard public, deschis, al Consiliului Europei — nu proprietatea vreunei organizații.
-- Categoria **"Suplimentar"** conține cuvinte adiționale (multe provenind din compilații publice ale [DWDS](https://www.dwds.de/) și dintr-un glosar public „Deutsch Online B2", © 2021 Goethe-Institut e.V., folosite ca punct de plecare istoric) care nu se încadrează în nivelizarea principală A1–B2 bazată pe frecvență — nu sunt etichetate CEFR și sunt oferite ca material suplimentar opțional.
-- Categoria **"Îngrijire"** (455 termeni) e un vocabular de specialitate, compilat manual, pentru asistenți medicali/îngrijitori în azile de bătrâni — relația cu colegii, cu rezidenții, cu aparținătorii, cu medicii, situații de urgență, programul de lucru, acte/fluturaș de salariu, vocabular de igienă/funcții corporale (clinic și colocvial), expresii din perspectiva rezidentului, roluri de specialitate (`Praxisanleiter`, `Alltagsbegleiter`) și termeni din software-ul de documentare MEDIFOX DAN, folosit frecvent în azilele germane. Nu e legat de frecvența generală a limbii, e curatoriat pe relevanță profesională.
-- Categoria **"Îngrijire — auxiliar"** (55 termeni) conține obiecte și instrumentar folosite în azil/spital (dispozitive de ridicare, scutece, instrumentar medical, mobilier, bucătărie/baie) — utilă și în context spitalicesc general, nu doar azil.
+- **Selecția și nivelizarea cuvintelor** sunt construite **integral și independent** din rangul de frecvență reală de utilizare a limbii franceze, pe baza listei [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) (`content/2018/fr/fr_50k.txt`, derivată din corpus OpenSubtitles), licență **MIT**. Cuvintele sunt lematizate (formă de bază + tip gramatical) cu spaCy (`fr_core_news_sm`), verificate manual pentru a elimina nume proprii, forme flexionate duplicate și zgomot din subtitrări, apoi împărțite pe niveluri A1–C2 după poziția lor în clasamentul de frecvență. Nicio parte din selecție nu depinde de curriculumul vreunei instituții de examinare.
+- Etichetele CEFR (A1, A2, B1, B2, C1, C2) sunt un standard public, deschis, al Consiliului Europei — nu proprietatea vreunei organizații.
+- Toate cele 6 niveluri sunt complete: A1 (519), A2 (477), B1 (763), B2 (538), C1 (342), C2 (902) — **3541 de cuvinte în total**. La rang mare (C1/C2), frecvența e un indiciu mai slab pentru dificultate reală, iar corpusul conține un procent mult mai mare de nume proprii/personaje din subtitrări (sute excluse manual) și cuvinte vulgare. Ordinea din interiorul fiecărui nivel reflectă rangul real de frecvență (esențial pentru sistemul de benzi/priorități) — verificată și resortată integral.
+- **Corecție manuală suplimentară de nivel**: cuvinte foarte banale (numerele de bază 1-90, culori de bază, animale/mâncare/corp comune) au fost mutate la nivelul CEFR corespunzător chiar și acolo unde frecvența lor brută în corpus le-ar fi plasat mai sus — subtitrările nu numără sau colorează la fel de des cum vorbesc despre alte teme. Exemplu concret: numerele de bază (`un`, `deux`, `trois`...) lipseau aproape complet din selecția inițială, pentru că extragerea automată exclude categoria gramaticală „numeral" alături de cifre/simboluri — corectat manual.
 - Traducerile în limba română sunt muncă originală.
-- Câteva perechi de cuvinte germane des confundate cu cuvinte românești similare la scris (ex. `kalt`/"cald", `tot`/"tot") au fost identificate cu ajutorul [Wiktionary — Appendix: False friends between German and Romanian](https://en.wiktionary.org/wiki/Appendix:False_friends_between_German_and_Romanian) (licență CC BY-SA). Am preluat doar faptul lingvistic obiectiv (care cuvinte se aseamănă), nu text sau exprimare de-a lor — notele de atenție din aplicație sunt scrise integral de la zero.
-- Acest proiect e o resursă personală de studiu, nu revendică nicio afiliere cu Goethe-Institut, DWDS, hermitdave, Wiktionary, Anthropic sau alte instituții/persoane menționate.
-
-## Notă despre conținut
-
-Vocabularul de nivel B1/B2 provine parțial dintr-un corpus de subtitrări de film (OpenSubtitles), deci include ocazional cuvinte cu tematică mai matură (infracțiuni, conflict, violență fictivă) — tratate ca vocabular dicționar neutru, fără conținut explicit intenționat. Dacă găsești ceva ce consideri nepotrivit, poate fi eliminat ușor din `vocab-data.js`.
+- Acest proiect e o resursă personală de studiu, nu revendică nicio afiliere cu hermitdave, Reverso, Anthropic sau alte instituții/persoane menționate.
 
 ## Confidențialitate
 
-Aplicația nu colectează, nu transmite și nu stochează nicio dată pe niciun server. Tot ce ține de progres (statistici, preferințe) rămâne local, în browser-ul dispozitivului tău. Singurele conexiuni externe sunt: Google Fonts (fonturi), dict.cc (doar dacă apeși linkul respectiv) și motorul de sinteză vocală al telefonului. **Excepție:** funcția de căutare vocală (🎤) trimite sunetul către serverele browserului (ex. Google, pentru Chrome) ca să fie transformat în text — o limitare a tehnologiei din browser, nu ceva controlat de noi. Nu apare deloc pe iOS/Safari (Apple nu oferă acest API acolo).
+Aplicația nu colectează, nu transmite și nu stochează nicio dată pe niciun server propriu. Tot ce ține de progres (statistici, preferințe, „Cuvintele mele", istoricul AI) rămâne local, în browser-ul dispozitivului tău. Conexiuni externe: Google Fonts (fonturi), Reverso (doar dacă apeși linkul respectiv), motorul de sinteză vocală al telefonului, motorul de recunoaștere vocală al browserului (dacă folosești căutarea/dictarea vocală — trimite sunetul către serverele browserului, ex. Google pentru Chrome, ca să fie transformat în text), și — doar dacă activezi opțional funcția AI (Claude) și adaugi propria cheie API — serverele Anthropic, pentru traducerile/corecturile/exercițiile cerute explicit. Cheia API rămâne salvată doar local, nu trece niciodată prin noi.
 
 ## Licență
 
-Codul aplicației (`index.html`, `sw.js`, `manifest.json`) e liber de refolosit, adaptat, sau folosit ca bază pentru alte proiecte — cu o singură condiție: **menționează sursa**. O mențiune simplă, vizibilă undeva (README, footer, secțiune de credite), e suficientă:
-
-> Bazat pe Karteikarten, de tomitaro25 — github.com/tomitaro25
-
-Vocabularul urmează atribuirile separate de mai sus (MIT pentru selecția de frecvență din hermitdave/FrequencyWords; traducerile românești sunt muncă originală, libere de refolosit cu aceeași condiție de atribuire).
+Codul aplicației (`index.html`, `sw.js`, `manifest.json`) e disponibil liber pentru refolosire și modificare personală. Vocabularul urmează atribuirile de mai sus (MIT pentru selecția de frecvență; traducerile românești sunt libere de folosit, fără garanții).
 
 ## Disclaimer
 
-Vocabularul și traducerile pot conține ocazional imprecizii; verifică independent (ex. dict.cc, linkul din aplicație) orice cuvânt de care nu ești sigur. Aplicația nu oferă consultanță de niciun fel — e strict un instrument de exersare, oferit "ca atare", fără nicio garanție.
+Vocabularul și traducerile pot conține ocazional imprecizii; verifică independent (ex. Reverso, linkul din aplicație) orice cuvânt de care nu ești sigur. Aplicația nu oferă consultanță de niciun fel — e strict un instrument de exersare, oferit "ca atare", fără nicio garanție.
 
 ## Donații / susținere
 
-Aplicația **nu costă nimic** și rămâne liberă de folosit — dar dacă vrei să susții întreținerea și dezvoltarea ei în continuare, poți lăsa o mică donație, complet opțională:
-
-- **Ko-fi** — [ko-fi.com/tomitaro25](https://ko-fi.com/tomitaro25) — 0% comision pe planul gratuit, nu-ți cere niciun cont special
-- **GitHub Sponsors** — direct de pe [github.com/tomitaro25](https://github.com/tomitaro25), dacă preferi
-
-Nimic din aplicație nu depinde de donații — toate funcțiile rămân complet gratuite, indiferent dacă susții sau nu proiectul.
+Aplicația **nu are** (deocamdată) niciun buton de donații (Ko-fi, Buy Me a Coffee etc.) și nu e monetizată în niciun fel. E un proiect personal, făcut pentru uz propriu și distribuit liber.
