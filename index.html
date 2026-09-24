@@ -425,21 +425,28 @@
     border:none; border-radius:10px; padding:14px; min-height:50px; margin-top:6px;
   }
   #aiPrintArea{ display:none; }
-  /* Telefon: bara de sus pe exact doua randuri - (1) titlul + Module/AI/Setari,
-     (2) 📖/⚡/🔄↔️ + A−/A+ + scorul. Containerele .brand si .top-right "dispar" din asezare
-     (display:contents), iar elementele lor sunt reordonate direct in bara; un separator
-     invizibil de latime 100% forteaza trecerea pe al doilea rand. Calculatorul nu e atins. */
+  /* Telefon: bara de sus pe exact doua randuri, garantat. O grila (nu un rand care se poate
+     rupe): titlul si 📖/⚡/🔄↔️ in coloana din stanga, Module/AI/Setari pe primul rand in dreapta,
+     A−/A+ si scorul sub ele. Containerele .brand si .top-right "dispar" din asezare
+     (display:contents), ca elementele lor sa intre direct in grila. O grila nu poate crea un al
+     treilea rand, oricat de mare ar fi textul (ex. marirea textului din Android). Calculatorul nu e atins. */
   @media (max-width: 600px){
-    .topbar{ row-gap:0; column-gap:6px; }
+    .topbar{
+      display:grid; grid-template-columns:minmax(0,1fr) auto auto auto;
+      column-gap:6px; row-gap:6px; align-items:center; padding:4px 12px 8px;
+    }
     .topbar .brand, .topbar .top-right{ display:contents; }
-    .topbar .brand-title{ order:1; flex:1 1 0; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .topbar #moduleShortcutBtn{ order:2; }
-    .topbar #aiShortcutBtn{ order:3; }
-    .topbar #openSheetBtn{ order:4; }
-    .topbar::after{ content:''; order:5; flex-basis:100%; height:0; }
-    .topbar #modeRadioRow{ order:6; margin-top:6px !important; }
-    .topbar .zoom-controls{ order:7; margin-left:auto; margin-top:6px; }
-    .topbar .stats{ order:8; margin-top:6px; }
+    .topbar .brand-title{ grid-area:1 / 1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .topbar #modeRadioRow{ grid-area:2 / 1; flex-wrap:nowrap; margin-top:0 !important; min-width:0; }
+    .topbar #moduleShortcutBtn{ grid-area:1 / 2; justify-self:end; }
+    .topbar #aiShortcutBtn{ grid-area:1 / 3; }
+    .topbar #openSheetBtn{ grid-area:1 / 4; }
+    .topbar .zoom-controls{ grid-area:2 / 2; justify-self:end; }
+    .topbar .stats{ grid-area:2 / 3 / 3 / 5; justify-self:end; white-space:nowrap; }
+    /* spatii mai stranse pe telefon; procentul si ↺ raman in antetele panourilor */
+    .topbar #modeRadioRow{ gap:3px !important; }
+    .topbar .mode-radio{ padding:2px 7px !important; }
+    .topbar .zoom-percent, .topbar .zoom-reset-btn{ display:none; }
   }
   /* ecrane foarte inguste (ex. „Dimensiune afisaj" marita in Android): titlul putin mai mic, ca sa incapa intreg */
   @media (max-width: 339px){
@@ -563,7 +570,7 @@
       <p><b>📖 / ⚡ / 🔄↔️</b>, sub titlul „La Boîte de Fiches" — comutare rapidă între moduri, fără să intri în Setări: <b>📖 Vocab</b> (vocabularul normal, exact ce aveai selectat înainte de a schimba), <b>⚡ Verbe</b> (conjugare), <b>🔄↔️ Ant/Sin</b> (antonime și sinonime). Funcționează ca un grup radio — mereu unul singur activ. „Vocab" ține minte ultima ta selecție normală de niveluri, inclusiv după ce închizi aplicația.</p>
       <p><b>☀️ Deschis / 🌙 Întunecat</b> — chiar la începutul Setărilor (secțiunea „Aspect") — schimbă tema întregii aplicații. Culorile cu sens (roșu/verde pentru greșit/corect, albastru/roz pentru le/la) își păstrează semnificația, doar puțin mai luminoase pe întuneric, ca să rămână lizibile. Alegerea rămâne salvată data viitoare.</p>
       <p><b>Bara de sus</b>: 🧩 deschide „Module" (cuvintele exersate, „Cuvinte în pereche" și căutarea), 🤖 deschide AI-ul, ⚙ deschide Setările. Fiecare panou ocupă tot ecranul și are sus butonul <b>←</b> (Înapoi), care te duce exact de unde ai venit.</p>
-      <p>Butoanele <b>A− / A+</b> din bara de sus (sau din antetul oricărui panou, mereu vizibil sus) măresc sau micșorează textul de citit (util fără ochelari): cardurile, modulele, Ajutorul și toate textele. Procentul curent e afișat între ele, iar butonul <b>↺</b> revine la 100%. Alegerea rămâne salvată data viitoare. <b>Navigarea nu se mărește</b>: bara de sus, linia de sub ea și antetele panourilor (←, titlul, A−/A+, comutatoarele) au mereu aceeași mărime, potrivită ecranului — pe telefon puțin mai mare decât pe calculator —, ca să încapă la orice zoom. Pe telefon, bara de sus are mereu două rânduri: titlul cu Module / AI / Setări, apoi 📖 ⚡ 🔄↔️ cu A−/A+ și scorul.</p>
+      <p>Butoanele <b>A− / A+</b> din bara de sus (sau din antetul oricărui panou, mereu vizibil sus) măresc sau micșorează textul de citit (util fără ochelari): cardurile, modulele, Ajutorul și toate textele. Procentul curent e afișat între ele, iar butonul <b>↺</b> revine la 100%. Alegerea rămâne salvată data viitoare. <b>Navigarea nu se mărește</b>: bara de sus, linia de sub ea și antetele panourilor (←, titlul, A−/A+, comutatoarele) au mereu aceeași mărime, potrivită ecranului ca să încapă la orice zoom. Pe telefon, bara de sus are mereu două rânduri: titlul cu Module / AI / Setări, apoi 📖 ⚡ 🔄↔️ cu A−/A+ și scorul.</p>
     </div>
     <div class="sheet-section help-text">
       <div class="sheet-label">Voce, viteză și volum</div>
@@ -3441,7 +3448,7 @@ function loadZoom(){
 /* ---------- Navigare cu marime fixa ----------
    Zoom-ul e pentru citire: mareste cardurile, modulele, Ajutorul si toate textele, dar nu si
    navigarea - bara de sus, linia de sub ea si antetele tuturor panourilor raman la o marime
-   fixa: pe telefon cea de la nivelul 1 de zoom (110%), pe calculator cea de la 100%.
+   fixa, cea de la 100% (pe telefon s-a incercat si 110%, dar pe dispozitivul real bara nu mai incapea).
    Elementele nu sunt enumerate de mana: se inventariaza automat, din pagina (inclusiv in
    panourile inchise). Pentru fiecare se masoara ce proprietati depind de marimea fontului de
    baza (rem/em - fontul, spatierile, colturile...), iar doar acelea se fixeaza, in px, la
@@ -3455,8 +3462,9 @@ const NAV_PROPS = ['font-size','line-height','letter-spacing',
   'border-top-left-radius','border-top-right-radius','border-bottom-left-radius','border-bottom-right-radius'];
 const navOriginalInline = new Map(); // element -> {prop: valoare inline originala}
 function navScale(){
-  const phone = window.matchMedia('(pointer:coarse)').matches || window.innerWidth < 600;
-  return phone ? 1.1 : 1;
+  // 100% peste tot: pe telefon s-a incercat 110%, dar pe dispozitivul real bara nu mai incapea
+  // (ca in Karteikarten v140). Functia ramane punctul unic de reglaj.
+  return 1;
 }
 function navElements(){
   const roots = [...document.querySelectorAll(NAV_ROOT_SELECTOR)];

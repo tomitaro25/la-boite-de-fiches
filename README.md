@@ -73,6 +73,11 @@ Fișierele modificate se încarcă direct în acest repository (Add file → Upl
 
 ## Changelog
 
+**v41** — bara de sus pe telefon, reglată după testul pe dispozitiv.
+- **Navigarea pe telefon coboară la 100%** (ca în Karteikarten v140): la 110%, pe telefonul real, bara se întindea pe trei rânduri și ocupa prea mult din ecran.
+- **Două rânduri garantat**: bara de pe telefon e acum o grilă (titlul și 📖/⚡/🔄↔️ în stânga; Module/AI/Setări, apoi A−/A+ și scorul în dreapta), care nu poate crea un al treilea rând, oricât de mare ar fi textul — spre deosebire de v40, unde elementele se puteau rupe pe încă un rând. Spații mai strânse; procentul de zoom și ↺ rămân în antetele panourilor.
+- Testat la lățimi de 320–599px (inclusiv 384 și 412px, Galaxy Ultra): două rânduri, 94px (sub 12% din ecran la 384px), fără suprapuneri; și cu textul mărit simulat la ~130% (setarea de mărire a textului din Android/Chrome): tot două rânduri, fără suprapuneri. Suitele anterioare rerulate, toate trecute.
+
 **v40** — navigare cu mărime fixă și bara de sus pe două rânduri pe telefon (după modelul din Karteikarten v139).
 - **Zoom-ul (A−/A+) mărește doar conținutul de citit**: cardurile, modulele, Ajutorul și toate textele. Navigarea (bara de sus, linia de sub ea și antetele tuturor panourilor: ←, titlul, A−/A+, comutatoarele FR/RO și Învățate/Aleator) are mărime fixă: pe telefon cea de la nivelul 1 de zoom (110%), pe calculator cea de la 100%. Elementele se inventariază automat din pagină (inclusiv în panourile închise); pentru fiecare se fixează, în px, doar proprietățile care depind de fontul de bază (font, spațieri, colțuri), iar valorile inline originale se păstrează. Măsurătoarea se reface la rotire/redimensionare. Titlul aplicației rămâne mereu vizibil (înainte dispărea peste 150%).
 - **Telefon (sub 600px): bara de sus pe exact două rânduri** — titlul cu Module / AI / Setări, apoi 📖 ⚡ 🔄↔️ cu A−/A+ și scorul (`display:contents` pe containere + reordonare + separator invizibil). Sub 340px, titlul e puțin mai mic, ca să încapă întreg.
