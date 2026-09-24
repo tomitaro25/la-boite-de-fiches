@@ -425,6 +425,26 @@
     border:none; border-radius:10px; padding:14px; min-height:50px; margin-top:6px;
   }
   #aiPrintArea{ display:none; }
+  /* Telefon: bara de sus pe exact doua randuri - (1) titlul + Module/AI/Setari,
+     (2) 📖/⚡/🔄↔️ + A−/A+ + scorul. Containerele .brand si .top-right "dispar" din asezare
+     (display:contents), iar elementele lor sunt reordonate direct in bara; un separator
+     invizibil de latime 100% forteaza trecerea pe al doilea rand. Calculatorul nu e atins. */
+  @media (max-width: 600px){
+    .topbar{ row-gap:0; column-gap:6px; }
+    .topbar .brand, .topbar .top-right{ display:contents; }
+    .topbar .brand-title{ order:1; flex:1 1 0; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .topbar #moduleShortcutBtn{ order:2; }
+    .topbar #aiShortcutBtn{ order:3; }
+    .topbar #openSheetBtn{ order:4; }
+    .topbar::after{ content:''; order:5; flex-basis:100%; height:0; }
+    .topbar #modeRadioRow{ order:6; margin-top:6px !important; }
+    .topbar .zoom-controls{ order:7; margin-left:auto; margin-top:6px; }
+    .topbar .stats{ order:8; margin-top:6px; }
+  }
+  /* ecrane foarte inguste (ex. „Dimensiune afisaj" marita in Android): titlul putin mai mic, ca sa incapa intreg */
+  @media (max-width: 339px){
+    .topbar .brand{ font-size:0.9rem; }
+  }
   @media (max-width: 420px){
     /* pe ecrane inguste, A-/A+ raman mereu vizibile - ascundem doar elementele
        mai putin esentiale din grupul de zoom, ca sa nu impinga restul barei */
@@ -543,7 +563,7 @@
       <p><b>📖 / ⚡ / 🔄↔️</b>, sub titlul „La Boîte de Fiches" — comutare rapidă între moduri, fără să intri în Setări: <b>📖 Vocab</b> (vocabularul normal, exact ce aveai selectat înainte de a schimba), <b>⚡ Verbe</b> (conjugare), <b>🔄↔️ Ant/Sin</b> (antonime și sinonime). Funcționează ca un grup radio — mereu unul singur activ. „Vocab" ține minte ultima ta selecție normală de niveluri, inclusiv după ce închizi aplicația.</p>
       <p><b>☀️ Deschis / 🌙 Întunecat</b> — chiar la începutul Setărilor (secțiunea „Aspect") — schimbă tema întregii aplicații. Culorile cu sens (roșu/verde pentru greșit/corect, albastru/roz pentru le/la) își păstrează semnificația, doar puțin mai luminoase pe întuneric, ca să rămână lizibile. Alegerea rămâne salvată data viitoare.</p>
       <p><b>Bara de sus</b>: 🧩 deschide „Module" (cuvintele exersate, „Cuvinte în pereche" și căutarea), 🤖 deschide AI-ul, ⚙ deschide Setările. Fiecare panou ocupă tot ecranul și are sus butonul <b>←</b> (Înapoi), care te duce exact de unde ai venit.</p>
-      <p>Butoanele <b>A− / A+</b> din bara de sus (sau din antetul oricărui panou, mereu vizibil sus) măresc sau micșorează fontul din toată aplicația (util fără ochelari) — procentul curent e afișat între ele, iar butonul <b>↺</b> revine la 100%. Alegerea rămâne salvată data viitoare. La mărimi foarte mari, titlul aplicației dispare, ca restul barei să încapă.</p>
+      <p>Butoanele <b>A− / A+</b> din bara de sus (sau din antetul oricărui panou, mereu vizibil sus) măresc sau micșorează textul de citit (util fără ochelari): cardurile, modulele, Ajutorul și toate textele. Procentul curent e afișat între ele, iar butonul <b>↺</b> revine la 100%. Alegerea rămâne salvată data viitoare. <b>Navigarea nu se mărește</b>: bara de sus, linia de sub ea și antetele panourilor (←, titlul, A−/A+, comutatoarele) au mereu aceeași mărime, potrivită ecranului — pe telefon puțin mai mare decât pe calculator —, ca să încapă la orice zoom. Pe telefon, bara de sus are mereu două rânduri: titlul cu Module / AI / Setări, apoi 📖 ⚡ 🔄↔️ cu A−/A+ și scorul.</p>
     </div>
     <div class="sheet-section help-text">
       <div class="sheet-label">Voce, viteză și volum</div>
@@ -3418,15 +3438,68 @@ function loadZoom(){
     if(!fontZoom || isNaN(fontZoom)) fontZoom = ZOOM_DEFAULT;
   }catch(e){ fontZoom = ZOOM_DEFAULT; }
 }
+/* ---------- Navigare cu marime fixa ----------
+   Zoom-ul e pentru citire: mareste cardurile, modulele, Ajutorul si toate textele, dar nu si
+   navigarea - bara de sus, linia de sub ea si antetele tuturor panourilor raman la o marime
+   fixa: pe telefon cea de la nivelul 1 de zoom (110%), pe calculator cea de la 100%.
+   Elementele nu sunt enumerate de mana: se inventariaza automat, din pagina (inclusiv in
+   panourile inchise). Pentru fiecare se masoara ce proprietati depind de marimea fontului de
+   baza (rem/em - fontul, spatierile, colturile...), iar doar acelea se fixeaza, in px, la
+   valoarea pe care o au la marimea navigarii. Ce e deja in px (latimea butoanelor etc.) ramane
+   neatins. Valorile inline originale se pastreaza si se refac la fiecare re-masurare. */
+const NAV_ROOT_SELECTOR = '.topbar, .summary-line, .sheet-header-sticky';
+const NAV_PROPS = ['font-size','line-height','letter-spacing',
+  'padding-top','padding-right','padding-bottom','padding-left',
+  'margin-top','margin-right','margin-bottom','margin-left',
+  'row-gap','column-gap','min-width','min-height',
+  'border-top-left-radius','border-top-right-radius','border-bottom-left-radius','border-bottom-right-radius'];
+const navOriginalInline = new Map(); // element -> {prop: valoare inline originala}
+function navScale(){
+  const phone = window.matchMedia('(pointer:coarse)').matches || window.innerWidth < 600;
+  return phone ? 1.1 : 1;
+}
+function navElements(){
+  const roots = [...document.querySelectorAll(NAV_ROOT_SELECTOR)];
+  return roots.flatMap(r => [r, ...r.querySelectorAll('*')]);
+}
+function unpinNavSizes(){
+  navOriginalInline.forEach((orig, el)=>{
+    NAV_PROPS.forEach(prop => el.style.removeProperty(prop));
+    Object.entries(orig).forEach(([prop, val]) => { if(val) el.style.setProperty(prop, val); });
+  });
+  navOriginalInline.clear();
+}
+function pinNavSizes(){
+  const rootStyle = document.documentElement.style;
+  unpinNavSizes();
+  const els = navElements();
+  const measure = (px)=>{
+    rootStyle.fontSize = px + 'px';
+    return els.map(el => { const cs = getComputedStyle(el); return NAV_PROPS.map(p => cs.getPropertyValue(p)); });
+  };
+  const a = measure(16), b = measure(24), target = measure(16 * navScale());
+  rootStyle.fontSize = (16 * fontZoom) + 'px';
+  els.forEach((el, i)=>{
+    NAV_PROPS.forEach((prop, j)=>{
+      if(a[i][j] === b[i][j]) return; // nu depinde de fontul de baza - nimic de fixat
+      if(!navOriginalInline.has(el)) navOriginalInline.set(el, {});
+      const orig = navOriginalInline.get(el);
+      if(!(prop in orig)) orig[prop] = el.style.getPropertyValue(prop);
+      el.style.setProperty(prop, target[i][j]);
+    });
+  });
+}
 function applyZoom(){
   document.documentElement.style.fontSize = (16 * fontZoom) + 'px';
   try{ localStorage.setItem('boitedefiches_fontZoom', String(fontZoom)); }catch(e){}
   document.querySelectorAll('.zoom-percent').forEach(el => el.textContent = Math.round(fontZoom * 100) + '%');
-  // la zoom mare nu mai incape titlul langa restul barei de sus - il scoatem de tot,
-  // in loc sa-l lasam trunchiat/ingramadit
-  const brandTitle = document.querySelector('.brand-title');
-  if(brandTitle) brandTitle.style.display = fontZoom > 1.5 ? 'none' : '';
 }
+// la rotirea telefonului / redimensionarea ferestrei pot intra in joc alte reguli CSS - re-masuram
+let navResizeTimer = null;
+window.addEventListener('resize', ()=>{
+  clearTimeout(navResizeTimer);
+  navResizeTimer = setTimeout(pinNavSizes, 150);
+});
 document.querySelectorAll('.zoom-in-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     fontZoom = Math.min(ZOOM_MAX, Math.round((fontZoom + ZOOM_STEP) * 100) / 100);
@@ -5910,6 +5983,7 @@ document.getElementById('aiDownloadBtn').addEventListener('click', ()=>{
 (async function init(){
   loadZoom();
   applyZoom();
+  pinNavSizes();
   await loadStats();
   await loadMistakes();
   await loadMyWords();
