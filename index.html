@@ -15,12 +15,28 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="La Boîte de Fiches">
+<meta name="apple-mobile-web-app-title" content="Boîte de Fiches">
 <meta name="theme-color" content="#F2E9D8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title>La Boîte de Fiches — Français ⇄ Română</title>
+<meta name="description" content="Flashcards gratuite pentru vocabular francez–român, de la A1 la C2: pronunție, jocuri și exerciții cu AI. Merge și offline, instalată ca aplicație.">
+<!-- previzualizarea linkului (WhatsApp, Facebook, Messenger etc.) - imaginea trebuie data ca adresa completa -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="La Boîte de Fiches">
+<meta property="og:title" content="La Boîte de Fiches — franceză ⇄ română">
+<meta property="og:description" content="Flashcards gratuite pentru vocabular francez–român, de la A1 la C2: pronunție, jocuri și exerciții cu AI. Merge și offline.">
+<meta property="og:url" content="https://tomitaro25.github.io/la-boite-de-fiches/">
+<meta property="og:image" content="https://tomitaro25.github.io/la-boite-de-fiches/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="La Boîte de Fiches — flashcards franceză ⇄ română, A1–C2">
+<meta property="og:locale" content="ro_RO">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="La Boîte de Fiches — franceză ⇄ română">
+<meta name="twitter:description" content="Flashcards gratuite pentru vocabular francez–român, de la A1 la C2.">
+<meta name="twitter:image" content="https://tomitaro25.github.io/la-boite-de-fiches/og-image.png">
 <style>
   /* Fonturi gazduite local (folderul fonts/), fara dependenta de Google Fonts - aceleasi
      fisiere, aceleasi axe (Literata variabil: opsz 7-72 + wght 200-900), aceleasi subseturi
@@ -151,6 +167,8 @@
     background:var(--paper-dark); border:1.5px solid var(--ink); border-radius:10px; flex-shrink:0;
   }
   .install-banner span{ flex:1; font-family:var(--font-text); font-size:0.82rem; line-height:1.3; }
+  .install-banner span svg, .install-steps svg{ display:inline-block; vertical-align:-3px; margin:0 2px; }
+  .install-steps{ margin:4px 0 0 18px; padding:0; font-family:var(--font-text); font-size:0.85rem; line-height:1.5; }
   .install-banner-btn{
     font-family:var(--font-ui); font-size:0.72rem; font-weight:600; background:var(--ink);
     color:var(--paper); border:none; border-radius:8px; padding:8px 12px; cursor:pointer; flex-shrink:0;
@@ -458,7 +476,7 @@
         <rect x="10" y="10" width="7" height="7" rx="1.5" fill="var(--ink)"/>
       </svg>
     </button>
-    <button class="gear-btn" id="aiShortcutBtn" style="display:none;" aria-label="Exersează cu AI">🤖</button>
+    <button class="gear-btn" id="aiShortcutBtn" aria-label="Exersează cu AI">🤖</button>
     <button class="gear-btn" id="openSheetBtn" aria-label="Setări">⚙</button>
   </div>
 </div>
@@ -510,9 +528,9 @@
     </div>
   </div>
 
-  <div class="sheet-section" id="installSection" style="display:none;">
-    <div class="sheet-label">Instalare</div>
-    <div id="installContent"></div>
+  <div class="sheet-section" id="installSection">
+    <div class="sheet-label">Instalare și recomandare</div>
+    <div class="install-content"></div>
   </div>
 
   <details class="sheet-group">
@@ -524,7 +542,7 @@
       <p>Alegi unul sau mai multe <b>niveluri</b> de vocabular din secțiunea „Vocabular", apoi răspunzi la întrebări cu 4 variante — una corectă, trei greșite. Direcția întrebării (franceză→română sau invers) se alege din „Exersare".</p>
       <p><b>📖 / ⚡ / 🔄↔️</b>, sub titlul „La Boîte de Fiches" — comutare rapidă între moduri, fără să intri în Setări: <b>📖 Vocab</b> (vocabularul normal, exact ce aveai selectat înainte de a schimba), <b>⚡ Verbe</b> (conjugare), <b>🔄↔️ Ant/Sin</b> (antonime și sinonime). Funcționează ca un grup radio — mereu unul singur activ. „Vocab" ține minte ultima ta selecție normală de niveluri, inclusiv după ce închizi aplicația.</p>
       <p><b>☀️ Deschis / 🌙 Întunecat</b> — chiar la începutul Setărilor (secțiunea „Aspect") — schimbă tema întregii aplicații. Culorile cu sens (roșu/verde pentru greșit/corect, albastru/roz pentru le/la) își păstrează semnificația, doar puțin mai luminoase pe întuneric, ca să rămână lizibile. Alegerea rămâne salvată data viitoare.</p>
-      <p><b>Bara de sus</b>: 🧩 deschide „Module" (cuvintele exersate, „Cuvinte în pereche" și căutarea), 🤖 deschide AI-ul (apare după ce ai salvat și testat o cheie), ⚙ deschide Setările. Fiecare panou ocupă tot ecranul și are sus butonul <b>←</b> (Înapoi), care te duce exact de unde ai venit.</p>
+      <p><b>Bara de sus</b>: 🧩 deschide „Module" (cuvintele exersate, „Cuvinte în pereche" și căutarea), 🤖 deschide AI-ul, ⚙ deschide Setările. Fiecare panou ocupă tot ecranul și are sus butonul <b>←</b> (Înapoi), care te duce exact de unde ai venit.</p>
       <p>Butoanele <b>A− / A+</b> din bara de sus (sau din antetul oricărui panou, mereu vizibil sus) măresc sau micșorează fontul din toată aplicația (util fără ochelari) — procentul curent e afișat între ele, iar butonul <b>↺</b> revine la 100%. Alegerea rămâne salvată data viitoare. La mărimi foarte mari, titlul aplicației dispare, ca restul barei să încapă.</p>
     </div>
     <div class="sheet-section help-text">
@@ -569,7 +587,7 @@
     <div style="font-family:var(--font-display); font-size:0.92rem; margin:20px 0 2px; padding:10px 0 6px; border-bottom:2px solid var(--ink);">PARTEA 3 — 🤖 MODULUL AI (Claude), OPȚIONAL</div>
     <div class="sheet-section help-text">
       <div class="sheet-label">🤖 AI (Claude) — prezentare generală</div>
-      <p>Un hub cu 5 destinații, toate cu propria ta cheie API de la Anthropic (Claude) — nu se limitează la cele câteva mii de cuvinte din listă, ci acceptă orice text, dictat sau scris, plus imagini cu text (poze, screenshot-uri). Fiecare destinație are subsecțiunea proprie de ajutor mai jos: Traducere & Corectură, Exersează ce ai învățat, Cuvinte noi în context, Descrie o poză, Istoric.</p>
+      <p>Un hub cu 6 destinații: 5 cu propria ta cheie API de la Anthropic (Claude), plus „🗣️ Exersează vorbitul", care merge și local, fără cheie. Cele cu cheie — nu se limitează la cele câteva mii de cuvinte din listă, ci acceptă orice text, dictat sau scris, plus imagini cu text (poze, screenshot-uri). Fiecare destinație are subsecțiunea proprie de ajutor mai jos: Traducere & Corectură, Exersează ce ai învățat, Cuvinte noi în context, Descrie o poză, Istoric.</p>
       <p><b>Ascultare</b> — orice rezultat mai lung (nu cuvintele singure de pe carduri) are un mini-player dedesubt, cu <b>Redă/Pauză</b> și <b>Oprește</b> — poți întrerupe ascultarea oricând, nu doar aștepta până la capăt.</p>
       <p><b>Cum obții o cheie API</b> (gratuită de generat, plata se face separat, per folosire — nu-i legată de un eventual abonament Claude Pro de pe claude.ai, sunt produse diferite):</p>
       <p>1. Mergi pe <b>console.anthropic.com</b> (sau <b>platform.claude.com</b> — e același loc)<br>
@@ -581,6 +599,13 @@
       <p><b>Cost aproximativ</b> (model Haiku, cel mai ieftin): o traducere sau corectură scurtă costă sub un cent — cu 5$ ajungi la mii de utilizări. O imagine costă considerabil mai mult (poate câteva sute de poze cu 5$) — decupează poza doar pe zona cu text, nu tot ecranul, ca să reduci costul.</p>
       <p><b>Limită onestă:</b> fiind cel mai ieftin model Claude, Haiku poate ocazional greși pe texte lungi și complexe (articole întregi, mai ales) — acorduri greșite, cuvinte inventate, sau chiar sens schimbat față de original, uneori într-un fel care sună convingător, nu evident greșit. Simplifică, Exersează ce ai învățat, Cuvinte noi în context și Descrie o poză generează conținutul în <b>doi pași separați</b> — un agent dedicat scrie STRICT textul (fără traducere), apoi un al doilea agent, dedicat exclusiv traducerii, îl traduce separat (descoperire prin testare: un singur apel care face amândouă deodată tinde spre traduceri inconsecvente — același concept tradus diferit de două ori). Rezultatul trece apoi printr-o **revizuire de formă** (gramatică, ortografie, acorduri) și o **verificare de fidelitate prin retraducere independentă** — textul românesc e retradus înapoi, „orb" (fără să vadă originalul), iar cele două variante sunt comparate obiectiv; o divergență confirmată astfel e trimisă STRICT pe acea bucată către un model mai avansat, pentru corectare. Costul suplimentar apare doar la divergențe reale, confirmate, nu la fiecare traducere — nu garantează perfecțiune 100%, dar reduce mult riscul de erori grave. Verifică oricând ceva pare nefiresc, mai ales la texte lungi, dintr-o sursă reală.</p>
       <p><b>Confidențialitate:</b> cheia ta rămâne salvată doar pe acest dispozitiv (nu trece niciodată prin noi) — costul folosirii se plătește direct către Anthropic, separat de acest proiect.</p>
+    </div>
+    <div class="sheet-section help-text">
+      <div class="sheet-label">🗣️ Exersează vorbitul</div>
+      <p>Singurul modul AI care merge <b>fără cheie</b>: implicit rulează 100% pe dispozitiv, gratuit, prin AI-ul integrat în Chrome (Gemini Nano). Vorbești în franceză (butonul mare 🎙️) sau scrii în câmpul de dedesubt; partenerul răspunde scurt (1–2 propoziții), cu o întrebare, ca să continue conversația. Tot schimbul rămâne scris pe ecran și e rostit cu vocea franceză aleasă în Setări.</p>
+      <p><b>Română și franceză, 1-la-1</b> — dacă browserul are și traducerea locală (Translator), poți scrie sau vorbi și în română: textul se traduce în franceză înainte să ajungă la partener, iar fiecare răspuns apare și în română, dedesubt. La prima folosire, Chrome descarcă o dată pachetul de limbă; dacă apare butonul „🌐 Activează traducerea română", apasă-l. Greșelile gramaticale mari sunt corectate scurt, între paranteze, la începutul răspunsului.</p>
+      <p><b>Rol opțional</b> — scrie sus ce rol să joace interlocutorul (în română sau franceză: vânzător, chelner, profesor...). Se aplică automat, dacă-l scrii înainte să începi; dacă-l schimbi în mijlocul conversației, apasă „↺ Nouă".</p>
+      <p><b>Doar Chrome de pe calculator</b> — pe telefoane, Google nu oferă încă AI-ul local (e o limitare de software, nu de putere). Dacă nu e disponibil, poți continua prin Claude (cheia ta, cost mic per schimb): aceeași interfață, calitate mai bună, cu corecturile direct în română. 🔊/🔇 oprește sunetul, dacă preferi doar text; „💾 Salvează conversația" o descarcă într-un fișier text.</p>
     </div>
     <div class="sheet-section help-text">
       <div class="sheet-label">Traducere & Corectură & Simplifică</div>
@@ -636,6 +661,12 @@
     </div>
 
     <div style="font-family:var(--font-display); font-size:0.92rem; margin:20px 0 2px; padding:10px 0 6px; border-bottom:2px solid var(--ink);">PARTEA 5 — ALTE FUNCȚII UTILE</div>
+    <div class="sheet-section help-text">
+      <div class="sheet-label">📲 Instalare și recomandare</div>
+      <p>Instalată, aplicația se deschide ca oricare alta, de pe ecranul principal, pe tot ecranul și fără internet. Pe Android și pe calculator (Chrome, Edge) se instalează cu un singur buton; pe iPhone și iPad, din Safari: butonul de Partajare, apoi „Adaugă pe ecranul principal". Dacă ai deschis linkul din Facebook, Instagram sau Messenger, deschide-l întâi în Chrome (Android) sau Safari (iPhone) — din browserele lor interne nu se poate instala.</p>
+      <p>Bannerul de instalare apare singur abia după prima rundă terminată; dacă îl închizi cu ✕, revine după 14 zile. „Recomandă aplicația" trimite linkul, cu o scurtă prezentare, prin orice aplicație de pe telefon (WhatsApp, e-mail...) sau îl copiază.</p>
+      <div class="install-content" style="margin-top:8px;"></div>
+    </div>
     <div class="sheet-section help-text">
       <div class="sheet-label">Presetări, progres, listă proprie, backup</div>
       <p><b>Presetări rapide</b> — setează dintr-un tap o combinație de niveluri potrivită unui scop (începător, conversație, avansat, expert).</p>
@@ -895,14 +926,77 @@
 
   <div id="aiHubView">
     <div class="sheet-section" id="aiNoKeyNotice" style="display:none;">
-      <div class="upload-status">Nu ai încă o cheie salvată — închide acest panou, mergi în ⚙ (Setări) → „AI (Claude)" și adaug-o mai întâi.</div>
+      <div class="upload-status">Modulele de mai jos (în afară de „🗣️ Exersează vorbitul") au nevoie de o cheie Claude — închide acest panou, mergi în ⚙ (Setări) → „AI (Claude)" și adaug-o. „Exersează vorbitul" merge și fără cheie, pe Chrome de calculator.</div>
     </div>
     <div class="sheet-section">
       <button class="btn-block paste-highlight" id="aiHubTranslateBtn" style="width:100%;"><span>🌐 Traducere liberă & Corectură</span><span>›</span></button>
       <button class="btn-block" id="aiHubExerciseBtn" style="width:100%; margin-top:8px;"><span>📝 Exersează ce ai învățat</span><span>›</span></button>
       <button class="btn-block" id="aiHubContextBtn" style="width:100%; margin-top:8px;"><span>🆕 Cuvinte noi în context</span><span>›</span></button>
       <button class="btn-block" id="aiHubDescribeBtn" style="width:100%; margin-top:8px;"><span>📷 Descrie o poză</span><span>›</span></button>
+      <button class="btn-block" id="aiHubVoicePartnerBtn" style="width:100%; margin-top:8px;"><span>🗣️ Exersează vorbitul</span><span>›</span></button>
       <button class="btn-block" id="aiHubHistoryBtn" style="width:100%; margin-top:8px;"><span>📜 Istoric</span><span>›</span></button>
+    </div>
+  </div>
+
+  <div id="aiVoicePartnerView" style="display:none;">
+    <div class="sheet-section" id="aiVoicePartnerUnsupported" style="display:none;">
+      <div class="upload-status">
+        Acest browser nu are (încă) AI local, integrat (Chrome „Prompt API" / Gemini Nano) — funcția asta nu poate rula complet offline aici. Momentan, doar Chrome de pe calculator (nu telefon) îl poate avea.
+      </div>
+      <details style="margin-top:10px;">
+        <summary style="cursor:pointer; font-family:var(--font-ui); font-size:0.75rem; color:var(--ink-soft);">Cum activez, dacă am Chrome pe calculator?</summary>
+        <div class="upload-status" style="margin-top:8px;">
+          Pe versiunile noi de Chrome ar trebui să funcționeze deja, fără niciun pas suplimentar — verificarea se reface automat de fiecare dată când redeschizi acest ecran. Dacă tot nu merge, încearcă:
+          <ol style="margin:6px 0 0 18px; padding:0;">
+            <li>Scrie <code>chrome://flags</code> în bara de adrese, Enter.</li>
+            <li>Caută (bara de căutare din pagină) după „gemini", „prompt api" sau „on-device".</li>
+            <li>La rezultatele găsite, schimbă din „Default" în „Enabled".</li>
+            <li>Apasă „Relaunch" (butonul apare jos, după activare) — Chrome se repornește.</li>
+            <li>Revino aici și redeschide „Exersează vorbitul" — la prima folosire, modelul se descarcă (o singură dată).</li>
+          </ol>
+          Denumirile exacte ale flag-urilor se mai schimbă între versiuni Chrome — dacă nu găsești un rezultat exact, caută variantele de mai sus, una câte una.
+        </div>
+      </details>
+      <button class="btn-block paste-highlight" id="aiVoicePartnerUseClaudeBtn" style="width:100%; margin-top:10px;"><span>Folosește prin Claude, în schimb (cheia ta, cost mic)</span><span>→</span></button>
+    </div>
+
+    <div class="sheet-section" id="aiVoicePartnerInitializing" style="display:none;">
+      <div class="upload-status">Se pregătește partenerul de conversație... (câteva secunde, prima dată în această sesiune)</div>
+    </div>
+
+    <div class="sheet-section" id="aiVoicePartnerDownloading" style="display:none;">
+      <div class="upload-status">Se descarcă modelul local (o singură dată — la conexiuni mai lente poate dura). Rămâi pe pagina asta până se termină.</div>
+    </div>
+
+    <div class="sheet-section" id="aiVoicePartnerMain" style="display:none;">
+      <div class="sheet-label">Cum funcționează</div>
+      <p class="help-text" id="aiVoicePartnerModeNote" style="font-family:var(--font-text); font-size:0.85rem; margin:0;"></p>
+      <button class="chip" id="aiVoicePartnerEnableTranslationBtn" style="display:none; margin-top:8px;">🌐 Activează traducerea română</button>
+
+      <div style="margin-top:12px;">
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="aiVoicePartnerRoleInput" class="btn-block" style="flex:1;" placeholder="Ce rol să joace interlocutorul? (opțional — ex. vânzător, profesor, chelner...)">
+          <button class="chip" id="aiVoicePartnerResetBtn" style="flex:0 0 auto;">↺ Nouă</button>
+        </div>
+        <div class="upload-status" id="aiVoicePartnerRoleNote" style="margin-top:4px;">Se aplică automat, dacă-l scrii înainte să-ncepi conversația. Dacă-l schimbi în mijlocul ei, apasă „↺ Nouă".</div>
+      </div>
+
+      <div id="aiVoicePartnerConversation" style="max-height:40vh; overflow-y:auto; margin-top:12px; font-family:var(--font-text); font-size:0.92rem; line-height:1.6;"></div>
+
+      <div style="display:flex; gap:6px; margin-top:12px;">
+        <button class="btn-block paste-highlight" id="aiVoicePartnerTalkBtn" style="flex:1; min-height:64px;"><span>🎙️ Apasă pentru a vorbi</span><span></span></button>
+        <button class="btn-block" id="aiVoicePartnerMuteBtn" style="flex:0 0 64px; min-height:64px;" aria-label="Oprește/pornește sunetul"><span>🔊</span></button>
+      </div>
+      <div class="upload-status" id="aiVoicePartnerStatus" style="text-align:center;"></div>
+
+      <div style="display:flex; gap:6px; margin-top:10px;">
+        <input type="text" id="aiVoicePartnerTextInput" class="btn-block" style="flex:1;" placeholder="Sau scrie aici (română sau franceză)...">
+        <button class="btn-block" id="aiVoicePartnerTextSendBtn" style="flex:0 0 auto; padding:0 16px;"><span>Trimite</span></button>
+      </div>
+
+      <div style="display:flex; gap:6px; margin-top:10px;">
+        <button class="chip" id="aiVoicePartnerSaveBtn">💾 Salvează conversația</button>
+      </div>
     </div>
   </div>
 
@@ -2248,6 +2342,7 @@ function nextQuestion(){
 document.getElementById('nextBtnBottom').addEventListener('click', nextQuestion);
 
 function showEndScreen(){
+  markEngaged();
   const card = document.getElementById('card');
   const pct = sessionTotal ? Math.round((sessionScore/sessionTotal)*100) : 0;
   card.innerHTML = `
@@ -2281,6 +2376,9 @@ function showAiView(view){
   document.getElementById('aiExerciseView').style.display = view === 'exercise' ? 'block' : 'none';
   document.getElementById('aiContextView').style.display = view === 'context' ? 'block' : 'none';
   document.getElementById('aiDescribeView').style.display = view === 'describe' ? 'block' : 'none';
+  document.getElementById('aiVoicePartnerView').style.display = view === 'voicepartner' ? 'block' : 'none';
+  // parasirea ecranului opreste microfonul si rostirea (din orice directie: Inapoi, alt modul)
+  if(view !== 'voicepartner' && typeof stopVoicePartnerListening === 'function') stopVoicePartnerListening();
   if(view === 'history'){ populateAiHistFilters(); renderAiHistList(); }
   currentAiView = AI_VIEW_INFO[view] ? view : 'hub';
   document.getElementById('aiHeaderTitle').textContent = AI_VIEW_INFO[currentAiView].title;
@@ -2297,7 +2395,8 @@ const AI_VIEW_INFO = {
   translate:  { title: '🌐 Traducere liberă', back: 'hub' },
   exercise:   { title: '📝 Exersează ce ai învățat', back: 'hub' },
   context:    { title: '🆕 Cuvinte noi în context', back: 'hub' },
-  describe:   { title: '📷 Descrie o poză', back: 'hub' }
+  describe:   { title: '📷 Descrie o poză', back: 'hub' },
+  voicepartner: { title: '🗣️ Exersează vorbitul', back: 'hub' }
 };
 let currentAiView = 'hub';
 document.getElementById('aiHeaderBackBtn').addEventListener('click', ()=>{
@@ -2315,6 +2414,7 @@ function refreshAiHubButtons(){
   document.getElementById('aiHubContextBtn').disabled = !hasKey;
   document.getElementById('aiHubDescribeBtn').disabled = !hasKey;
   document.getElementById('aiNoKeyNotice').style.display = hasKey ? 'none' : 'block';
+  // „Exersează vorbitul" nu se dezactiveaza: merge local, fara cheie
   return hasKey;
 }
 function openAiSheet(){
@@ -2322,7 +2422,10 @@ function openAiSheet(){
   showAiView('hub');
   refreshAiHubButtons();
 }
-function closeAiSheet(){ aiSheet.classList.remove('show'); sheetOverlay.classList.remove('show'); }
+function closeAiSheet(){
+  aiSheet.classList.remove('show'); sheetOverlay.classList.remove('show');
+  if(typeof stopVoicePartnerListening === 'function') stopVoicePartnerListening();
+}
 document.getElementById('openSheetBtn').addEventListener('click', openSheet);
 document.getElementById('closeSheetBtn').addEventListener('click', closeSheet);
 document.getElementById('aiShortcutBtn').addEventListener('click', openAiSheet);
@@ -2338,6 +2441,13 @@ document.getElementById('aiHubContextBtn').addEventListener('click', ()=>{
   document.getElementById('aiContextGenManualBtn').style.display = 'none';
   document.getElementById('aiContextManualWordsBox').style.display = 'none';
   renderAiContextAutoWords();
+});
+document.getElementById('aiHubVoicePartnerBtn').addEventListener('click', ()=>{
+  // traducerile se pornesc IMEDIAT, in acelasi click: daca pachetele de limba trebuie
+  // descarcate, Chrome cere un gest recent al utilizatorului, care expira dupa cateva secunde
+  startVoicePartnerBilingualSetup();
+  showAiView('voicepartner');
+  initVoicePartnerView();
 });
 document.getElementById('aiHubDescribeBtn').addEventListener('click', ()=>{
   showAiView('describe');
@@ -2357,6 +2467,7 @@ function closeAllSheets(){
   closeSheet();
   [aiSheet, wordListSheet, moduleSheet, document.getElementById('pairMatchSheet')].forEach(s => s.classList.remove('show'));
   if(typeof stopPairMatch === 'function') stopPairMatch();
+  if(typeof stopVoicePartnerListening === 'function') stopVoicePartnerListening();
   sheetOverlay.classList.remove('show');
   wordListReturnTo = 'main';
 }
@@ -3061,74 +3172,185 @@ document.querySelectorAll('.voice-lang-chip').forEach(chip=>{
 });
 document.getElementById('voiceRecordBtn').addEventListener('click', startVoiceSearch);
 
-/* ---------- instalare PWA (Android/desktop nativ + fallback iOS) ---------- */
+/* ---------- instalare, deschidere din browserele interne, recomandare ---------- */
+// Acelasi model ca in "Știri în neștire": bannerul apare abia dupa implicare reala (prima runda
+// terminata), ✕ il amana 14 zile (nu pentru totdeauna), bannerul de actualizare are prioritate,
+// iar din browserele interne (Facebook, Instagram...) - unde instalarea e imposibila - propunem
+// deschiderea in Chrome (Android) sau copierea linkului pt Safari (iPhone), imediat.
+const APP_URL = 'https://tomitaro25.github.io/la-boite-de-fiches/';
+const APP_SHARE_TEXT = 'La Boîte de Fiches — flashcards gratuite pentru vocabular francez–român, de la A1 la C2, cu pronunție, jocuri și exerciții cu AI. Merge și offline, ca aplicație pe telefon.';
+const INSTALL_SNOOZE_DAYS = 14;
+const IN_APP_BROWSER_RE = /FBAN|FBAV|FB_IAB|FBIOS|Instagram|Messenger|Line\/|musical_ly|BytedanceWebview|Snapchat|LinkedInApp|GSA\/|; wv\)/i;
+const SHARE_ICON_SVG = '<svg width="16" height="18" viewBox="0 0 16 18" fill="none" aria-label="Partajare"><path d="M8 1v11M4.5 4.5L8 1l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 7.5H3.5a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1H11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 let deferredInstallPrompt = null;
-const installSection = document.getElementById('installSection');
-const installContent = document.getElementById('installContent');
 const installBanner = document.getElementById('installBanner');
 const installBannerText = document.getElementById('installBannerText');
 const installBannerBtn = document.getElementById('installBannerBtn');
 const installBannerClose = document.getElementById('installBannerClose');
+let inAppBannerTimer = null;
 
 function isStandaloneApp(){
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
 function isIOSDevice(){
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  // iPad-urile noi se prezinta ca Mac ("MacIntel") - le deosebim dupa ecranul tactil
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
-function installDismissed(){
-  try{ return localStorage.getItem('boitedefiches_installBannerDismissed') === '1'; }catch(e){ return false; }
-}
-function dismissInstallBanner(){
+function isAndroidDevice(){ return /Android/i.test(navigator.userAgent); }
+function isInAppBrowser(){ return IN_APP_BROWSER_RE.test(navigator.userAgent); }
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+function isMarkedInstalled(){ return lsGet('boitedefiches_installed') === '1'; }
+function markInstalled(){ lsSet('boitedefiches_installed', '1'); }
+function installSnoozed(){ return Date.now() < (parseInt(lsGet('boitedefiches_installSnoozeUntil') || '0', 10) || 0); }
+function snoozeInstallBanner(){
+  lsSet('boitedefiches_installSnoozeUntil', String(Date.now() + INSTALL_SNOOZE_DAYS * 86400000));
   installBanner.style.display = 'none';
-  try{ localStorage.setItem('boitedefiches_installBannerDismissed', '1'); }catch(e){}
 }
-
-function refreshInstallUI(){
-  if(isStandaloneApp()){
-    installSection.style.display = 'none';
-    installBanner.style.display = 'none';
-    return;
+// migrare: vechiul ✕ ascundea bannerul pentru totdeauna - il transformam intr-o amanare obisnuita
+(function migrateOldInstallDismissal(){
+  if(lsGet('boitedefiches_installBannerDismissed') === '1'){
+    if(!lsGet('boitedefiches_installSnoozeUntil')) lsSet('boitedefiches_installSnoozeUntil', String(Date.now() + INSTALL_SNOOZE_DAYS * 86400000));
+    try{ localStorage.removeItem('boitedefiches_installBannerDismissed'); }catch(e){}
   }
-  if(deferredInstallPrompt){
-    // Chrome/Edge/Samsung Internet/majoritatea browserelor Android - prompt nativ disponibil
-    installSection.style.display = 'block';
-    installContent.innerHTML = `<button class="chip active" id="installBtnSheet" style="width:100%;text-align:center;">📲 Instalează aplicația</button>`;
-    document.getElementById('installBtnSheet').addEventListener('click', triggerNativeInstall);
-
-    if(!installDismissed()){
-      installBannerText.textContent = 'Poți instala La Boîte de Fiches pe telefon, ca aplicație.';
-      installBannerBtn.textContent = 'Instalează';
-      installBannerBtn.onclick = triggerNativeInstall;
-      installBanner.style.display = 'flex';
-    }
-  } else if(isIOSDevice()){
-    // Safari iOS nu are prompt programatic - doar instructiuni
-    const msg = 'Pe iPhone/iPad: apasă butonul Distribuie (pătrat cu săgeată în sus) din bara Safari, apoi „Adaugă pe ecranul principal".';
-    installSection.style.display = 'block';
-    installContent.innerHTML = `<div class="upload-status">${msg}</div>`;
-
-    if(!installDismissed()){
-      installBannerText.textContent = 'Poți instala aplicația: Distribuie → Adaugă pe ecranul principal.';
-      installBannerBtn.textContent = 'Am înțeles';
-      installBannerBtn.onclick = dismissInstallBanner;
-      installBanner.style.display = 'flex';
-    }
-  } else {
-    installSection.style.display = 'none';
-    installBanner.style.display = 'none';
-  }
+})();
+// implicare reala: prima runda terminata (marcaj salvat), sau utilizator vechi, cu cel putin
+// 15 cuvinte deja exersate (nu-l punem sa mai termine o runda ca sa vada bannerul)
+function isEngaged(){
+  if(lsGet('boitedefiches_engaged') === '1') return true;
+  try{ return Object.keys(wordStats || {}).length >= 15; }catch(e){ return false; }
 }
-
+function markEngaged(){
+  if(lsGet('boitedefiches_engaged') === '1') return;
+  lsSet('boitedefiches_engaged', '1');
+  refreshInstallUI();
+}
+function updateBannerVisible(){
+  const u = document.getElementById('updateBanner');
+  return !!u && u.style.display !== 'none' && u.style.display !== '';
+}
+// modul de instalare potrivit dispozitivului/browserului curent
+function getInstallMode(){
+  if(isStandaloneApp() || isMarkedInstalled()) return 'installed';
+  if(isInAppBrowser()) return isAndroidDevice() ? 'inapp-android' : 'inapp-other';
+  if(deferredInstallPrompt) return 'native';
+  if(isIOSDevice()) return 'ios';
+  return 'hint';
+}
+function iosStepsHtml(){
+  return `<ol class="install-steps"><li>Apasă ${SHARE_ICON_SVG} <b>Partajare</b> (jos în Safari; pe iPad, sus).</li><li>Alege <b>„Adaugă pe ecranul principal"</b>.</li></ol>`;
+}
+function chromeIntentUrl(){
+  const rest = APP_URL.replace(/^https:\/\//, '');
+  return `intent://${rest}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(APP_URL)};end`;
+}
+function openInChrome(){ window.location.href = chromeIntentUrl(); }
+async function copyAppLink(statusEl){
+  let ok = false;
+  try{ await navigator.clipboard.writeText(APP_URL); ok = true; }catch(e){}
+  if(!ok){
+    // rezerva pt browserele interne care blocheaza API-ul clipboard
+    const ta = document.createElement('textarea'); ta.value = APP_URL; ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+    try{ ok = document.execCommand('copy'); }catch(e){}
+    ta.remove();
+  }
+  if(statusEl) statusEl.textContent = ok ? '✓ Link copiat — deschide Safari și lipește-l în bara de adrese.' : `Copiază manual linkul: ${APP_URL}`;
+  return ok;
+}
+async function shareApp(statusEl){
+  const data = { title: 'La Boîte de Fiches', text: APP_SHARE_TEXT, url: APP_URL };
+  if(navigator.share){
+    try{ await navigator.share(data); return; }
+    catch(e){ if(e && e.name === 'AbortError') return; } // anulat de utilizator - nimic de facut
+  }
+  let ok = false;
+  try{ await navigator.clipboard.writeText(`${APP_SHARE_TEXT}\n${APP_URL}`); ok = true; }catch(e){}
+  if(statusEl) statusEl.textContent = ok ? '✓ Textul și linkul au fost copiate — lipește-le unde vrei să le trimiți.' : `Trimite linkul: ${APP_URL}`;
+}
 async function triggerNativeInstall(){
   if(!deferredInstallPrompt) return;
   deferredInstallPrompt.prompt();
-  await deferredInstallPrompt.userChoice;
+  let outcome = null;
+  try{ outcome = (await deferredInstallPrompt.userChoice).outcome; }catch(e){}
   deferredInstallPrompt = null;
-  installBanner.style.display = 'none';
-  installSection.style.display = 'none';
+  if(outcome === 'accepted') markInstalled();
+  refreshInstallUI();
 }
-
+// continutul permanent (Setari + Ajutor) - acelasi in ambele locuri, cu actiuni prin data-*
+function renderInstallContent(mode){
+  let top = '';
+  if(mode === 'native'){
+    top = `<button class="btn-block" data-install-action="install" style="width:100%;"><span>📲 Instalează aplicația</span><span>›</span></button>`;
+  } else if(mode === 'ios'){
+    top = `<div class="upload-status">Pe iPhone/iPad, din Safari:</div>${iosStepsHtml()}`;
+  } else if(mode === 'inapp-android'){
+    top = `<div class="upload-status">Ești în browserul intern al unei aplicații (ex. Facebook), din care nu se poate instala.</div>
+      <button class="btn-block" data-install-action="chrome" style="width:100%; margin-top:6px;"><span>🌐 Deschide în Chrome</span><span>›</span></button>`;
+  } else if(mode === 'inapp-other'){
+    top = `<div class="upload-status">Ești în browserul intern al unei aplicații (ex. Instagram), din care nu se poate instala. Copiază linkul și deschide-l în Safari${isIOSDevice() ? '' : ' sau Chrome'}.</div>
+      <button class="btn-block" data-install-action="copy" style="width:100%; margin-top:6px;"><span>🔗 Copiază linkul</span><span>›</span></button>`;
+  } else if(mode === 'hint'){
+    top = `<div class="upload-status">Browserul acesta nu oferă instalare directă. În Chrome sau Edge: meniul ⋮ → „Instalează aplicația". Pe iPhone/iPad: din Safari, Partajare → „Adaugă pe ecranul principal".</div>`;
+  } else {
+    top = `<div class="upload-status">✓ Aplicația e instalată pe acest dispozitiv.</div>`;
+  }
+  return top + `<button class="btn-block" data-install-action="share" style="width:100%; margin-top:8px;"><span>📤 Recomandă aplicația</span><span>›</span></button>
+    <div class="upload-status install-action-status" style="margin-top:4px;"></div>`;
+}
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('[data-install-action]');
+  if(!btn) return;
+  const status = btn.parentElement.querySelector('.install-action-status');
+  const action = btn.dataset.installAction;
+  if(action === 'install') triggerNativeInstall();
+  else if(action === 'chrome') openInChrome();
+  else if(action === 'copy') copyAppLink(status);
+  else if(action === 'share') shareApp(status);
+});
+function showInstallBanner(mode){
+  if(mode === 'native'){
+    installBannerText.textContent = 'Poți instala La Boîte de Fiches ca aplicație — se deschide mai repede și merge și fără internet.';
+    installBannerBtn.textContent = 'Instalează';
+    installBannerBtn.onclick = triggerNativeInstall;
+  } else if(mode === 'ios'){
+    installBannerText.innerHTML = `Instalează aplicația: apasă ${SHARE_ICON_SVG} Partajare, apoi „Adaugă pe ecranul principal".`;
+    installBannerBtn.textContent = 'Am înțeles';
+    installBannerBtn.onclick = snoozeInstallBanner;
+  } else if(mode === 'inapp-android'){
+    installBannerText.textContent = 'Pentru cea mai bună experiență (și ca s-o poți instala), deschide aplicația în Chrome.';
+    installBannerBtn.textContent = 'Deschide în Chrome';
+    installBannerBtn.onclick = openInChrome;
+  } else if(mode === 'inapp-other'){
+    installBannerText.textContent = 'Pentru cea mai bună experiență (și ca s-o poți instala), deschide linkul în Safari.';
+    installBannerBtn.textContent = 'Copiază linkul';
+    installBannerBtn.onclick = async ()=>{
+      const ok = await copyAppLink(null);
+      installBannerText.textContent = ok ? '✓ Link copiat — deschide Safari și lipește-l în bara de adrese.' : `Copiază manual linkul: ${APP_URL}`;
+    };
+  } else return;
+  installBanner.style.display = 'flex';
+}
+function refreshInstallUI(){
+  const mode = getInstallMode();
+  document.querySelectorAll('.install-content').forEach(el => { el.innerHTML = renderInstallContent(mode); });
+  // bannerul automat: niciodata peste cel de actualizare, niciodata in perioada de amanare,
+  // niciodata cand nu exista o actiune reala de propus (instalat / browser fara instalare)
+  const canBanner = !['installed', 'hint'].includes(mode) && !installSnoozed() && !updateBannerVisible();
+  if(!canBanner){ installBanner.style.display = 'none'; return; }
+  if(mode.startsWith('inapp')){
+    // in browserele interne propunem iesirea imediat (dupa ~2.5s), fara sa asteptam implicarea
+    if(!inAppBannerTimer && installBanner.style.display !== 'flex'){
+      inAppBannerTimer = setTimeout(()=>{
+        inAppBannerTimer = null;
+        if(!installSnoozed() && !updateBannerVisible()) showInstallBanner(getInstallMode());
+      }, 2500);
+    }
+    return;
+  }
+  if(isEngaged()) showInstallBanner(mode);
+  else installBanner.style.display = 'none';
+}
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
@@ -3136,10 +3358,10 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 window.addEventListener('appinstalled', () => {
   deferredInstallPrompt = null;
-  installBanner.style.display = 'none';
-  installSection.style.display = 'none';
+  markInstalled();
+  refreshInstallUI();
 });
-installBannerClose.addEventListener('click', dismissInstallBanner);
+installBannerClose.addEventListener('click', snoozeInstallBanner);
 
 function updateStreak(){
   try{
@@ -3938,6 +4160,347 @@ document.getElementById('openWordListBrowseBtn').addEventListener('click', ()=>{
   moduleSheet.classList.remove('show'); // overlay-ul ramane, continuitate vizuala
   wordListReturnTo = 'module';
   setTimeout(()=>{ openWordListSheet('browse'); }, 250);
+});
+
+/* ---------- Modul "Exersează vorbitul" (partener vocal) ---------- */
+// Implicit: 100% local (Chrome Prompt API / LanguageModel, Gemini Nano), fara cheie, fara cost.
+// Daca local nu-i disponibil (telefoanele - Chrome pt Android e exclus explicit - sau alte
+// browsere), utilizatorul poate alege sa continue prin Claude (cheia lui, cost mic): aceeasi
+// interfata, alt "motor". Obiectul global e "LanguageModel" (nu vechiul window.ai.languageModel).
+// Specific FR: Gemini Nano accepta doar en/ja/es/de/fr - NU romana. De aceea instructiunile
+// catre model sunt in engleza, limbile se declara explicit (fr), iar tot ce e romanesc trece prin
+// Translator (API separat, dedicat traducerii).
+let vpSession = null;
+let vpRecognizer = null;
+let vpState = 'idle'; // 'idle' | 'listening' | 'processing' | 'speaking'
+let vpMode = 'local'; // 'local' | 'claude'
+let vpMuted = false;
+let vpClaudeHistory = []; // {role, content} - Claude nu tine minte conversatia intre apeluri
+let vpConversationLines = []; // {speaker:'eu'|'partener', text} - text curat, pt salvare
+let vpLanguageDetector = null;
+let vpTranslatorToFR = null;
+let vpTranslatorToRO = null;
+let vpBilingualAvailable = false;
+let vpBilingualSetupPromise = null;
+const VP_LM_OPTIONS = {
+  expectedInputs: [{ type: 'text', languages: ['en', 'fr'] }],
+  expectedOutputs: [{ type: 'text', languages: ['fr'] }]
+};
+
+let vpRole = '';
+function loadVpRole(){
+  try{ vpRole = localStorage.getItem('boitedefiches_vpRole') || ''; }catch(e){ vpRole = ''; }
+}
+function saveVpRole(role){
+  try{ localStorage.setItem('boitedefiches_vpRole', role); }catch(e){}
+}
+loadVpRole(); // sincron, la incarcare - campul de rol se completeaza abia la deschiderea ecranului
+
+// mode 'local': corectura in franceza (modelul local nu scrie romana; traducerea romaneasca
+// de sub raspuns o face oricum Translator). mode 'claude': corectura direct in romana.
+function buildVoicePartnerSystemPrompt(mode, roleText){
+  const role = (roleText !== undefined ? roleText : vpRole).trim();
+  const identityClause = role
+    ? `You are "${role}" — you ARE this person for the whole conversation, not a generic AI assistant. Answer exactly as a real ${role} would, with the personality, attitude and interests of that role (for example, a salesperson actively tries to sell a product; a teacher checks whether the student did the homework and corrects them like a real teacher). NEVER say you are a language model, an AI or an assistant — stay in character at all times. Only if the requested role is completely impossible to apply to a simple conversation (absurd or meaningless), continue as a general conversation partner, without a role.\n\n`
+    : '';
+  const correctionRule = mode === 'claude'
+    ? `3. If the student makes a SERIOUS grammar mistake (not a small one), put a short correction IN ROMANIAN, in parentheses, at the BEGINNING of your reply — then continue the conversation normally, in French.
+4. The rest of your reply (outside the correction, if any) is STRICTLY in French, never in Romanian or English.`
+    : `3. If the student makes a SERIOUS grammar mistake (not a small one), put a very short correction in simple French, in parentheses, at the BEGINNING of your reply (for example: "(On dit : je suis allé)") — then continue the conversation normally.
+4. Your whole reply is STRICTLY in French, never in English or any other language.`;
+  return `${identityClause}You are a French conversation partner for a Romanian student at level A2-B1.
+1. Your replies are VERY SHORT - at most 1-2 sentences, never more.
+2. Every reply ends with a simple question, so the conversation continues naturally.
+${correctionRule}
+5. Stay natural and friendly, like a real conversation, not like a rigid teacher.`;
+}
+// apel dedicat, cu istoric complet - conversatie reala, cu context care creste
+async function callClaudeConversation(systemPrompt, messages, maxTokens, temperature){
+  const body = { model: 'claude-haiku-4-5-20251001', max_tokens: maxTokens, system: systemPrompt, messages };
+  if(temperature !== undefined) body.temperature = temperature;
+  const data = await postClaudeMessages(body);
+  return fixRomanianArtifacts((data.content || []).map(b => b.type === 'text' ? b.text : '').join(''));
+}
+// 4 stari posibile, nu un simplu da/nu; limbile se declara la fel ca la create()
+async function checkVoicePartnerAvailability(){
+  if(!('LanguageModel' in self)) return 'unsupported';
+  try{ return await LanguageModel.availability(VP_LM_OPTIONS); }
+  catch(err){ return 'unsupported'; }
+}
+function setVoicePartnerState(state){
+  vpState = state;
+  const btn = document.getElementById('aiVoicePartnerTalkBtn');
+  const statusEl = document.getElementById('aiVoicePartnerStatus');
+  const labels = { idle:'🎙️ Apasă pentru a vorbi', listening:'👂 Te ascult...', processing:'🤔 Procesez...', speaking:'🔊 Răspund...' };
+  btn.querySelector('span').textContent = labels[state] || labels.idle;
+  btn.disabled = (state !== 'idle');
+  statusEl.textContent = '';
+}
+function appendVoicePartnerBilingualLine(speaker, mainText, translatedText){
+  vpConversationLines.push({ speaker, text: translatedText ? `${mainText} (${translatedText})` : mainText });
+  const box = document.getElementById('aiVoicePartnerConversation');
+  const color = speaker === 'eu' ? 'var(--ink)' : 'var(--le)';
+  const label = speaker === 'eu' ? 'Tu' : 'Partener';
+  let html = `<div style="margin-bottom:8px;"><b style="color:${color};">${label}:</b> ${escapeHtml(mainText)}`;
+  if(translatedText){
+    html += `<div style="font-size:0.6875rem; color:var(--ink-soft); font-family:var(--font-ui); margin-top:2px;">${escapeHtml(translatedText)}</div>`;
+  }
+  html += `</div>`;
+  box.insertAdjacentHTML('beforeend', html);
+  box.scrollTop = box.scrollHeight;
+}
+function appendVoicePartnerLine(speaker, text){ appendVoicePartnerBilingualLine(speaker, text, null); }
+// Traducerile FR<->RO + detectorul de limba, create toate deodata si pornite din click-ul
+// utilizatorului (vezi butonul din hub). Esecul nu e fatal: modulul ramane functional, doar
+// fara traducerea romaneasca (si fara intrare in romana).
+function startVoicePartnerBilingualSetup(){
+  if(vpBilingualAvailable) return Promise.resolve(true);
+  if(vpBilingualSetupPromise) return vpBilingualSetupPromise;
+  if(!('LanguageDetector' in self) || !('Translator' in self)) return Promise.resolve(false);
+  vpBilingualSetupPromise = Promise.all([
+    LanguageDetector.create(),
+    Translator.create({ sourceLanguage: 'ro', targetLanguage: 'fr' }),
+    Translator.create({ sourceLanguage: 'fr', targetLanguage: 'ro' })
+  ]).then(([det, toFR, toRO])=>{
+    vpLanguageDetector = det; vpTranslatorToFR = toFR; vpTranslatorToRO = toRO;
+    vpBilingualAvailable = true;
+    return true;
+  }).catch(()=>{
+    vpLanguageDetector = null; vpTranslatorToFR = null; vpTranslatorToRO = null;
+    vpBilingualAvailable = false;
+    return false;
+  }).finally(()=>{ vpBilingualSetupPromise = null; });
+  return vpBilingualSetupPromise;
+}
+async function detectIsRomanian(text){
+  if(!vpLanguageDetector) return false;
+  try{
+    const results = await vpLanguageDetector.detect(text);
+    return !!(results && results[0] && results[0].detectedLanguage === 'ro');
+  }catch(err){ return false; }
+}
+// rolul poate fi scris in romana ("vânzător") - pt modelul local il traducem in franceza,
+// ca instructiunile sa ramana intr-o limba pe care o intelege
+async function vpRoleForLocalModel(){
+  const role = vpRole.trim();
+  if(!role || !vpBilingualAvailable) return role;
+  try{ return (await detectIsRomanian(role)) ? await vpTranslatorToFR.translate(role) : role; }
+  catch(e){ return role; }
+}
+function updateVoicePartnerModeNote(){
+  const note = document.getElementById('aiVoicePartnerModeNote');
+  const enableBtn = document.getElementById('aiVoicePartnerEnableTranslationBtn');
+  if(vpMode === 'local'){
+    note.textContent = vpBilingualAvailable
+      ? 'Un partener de conversație simplu, la nivel A2-B1, rulează direct pe dispozitiv — fără cheie, fără cost. Poți scrie/vorbi în română SAU franceză — se traduce automat, iar răspunsul apare în ambele limbi.'
+      : 'Un partener de conversație simplu, la nivel A2-B1, rulează direct pe dispozitiv — fără cheie, fără cost (calitatea poate fi mai simplă). Apasă, vorbește în franceză, ascultă răspunsul.';
+    // traducerea exista in browser, dar n-a putut porni (ex. pachetul de limba cere un click nou)
+    enableBtn.style.display = (!vpBilingualAvailable && 'Translator' in self && 'LanguageDetector' in self) ? 'inline-flex' : 'none';
+  } else {
+    note.textContent = 'Aceeași conversație, dar prin Claude (cheia ta) — cost mic per schimb, calitate mai bună decât varianta locală. Apasă, vorbește în franceză, ascultă răspunsul.';
+    enableBtn.style.display = 'none';
+  }
+}
+async function createVpLocalSession(monitor){
+  const opts = Object.assign({}, VP_LM_OPTIONS, {
+    initialPrompts: [{ role: 'system', content: buildVoicePartnerSystemPrompt('local', await vpRoleForLocalModel()) }]
+  });
+  if(monitor) opts.monitor = monitor;
+  return LanguageModel.create(opts);
+}
+async function recreateVpSessionSilently(){
+  if(vpSession){ try{ vpSession.destroy(); }catch(e){} vpSession = null; }
+  try{ vpSession = await createVpLocalSession(); }catch(e){ vpSession = null; }
+}
+async function initVoicePartnerView(){
+  document.getElementById('aiVoicePartnerUnsupported').style.display = 'none';
+  document.getElementById('aiVoicePartnerDownloading').style.display = 'none';
+  document.getElementById('aiVoicePartnerMain').style.display = 'none';
+  document.getElementById('aiVoicePartnerInitializing').style.display = 'block';
+  vpMode = 'local';
+
+  const availability = await checkVoicePartnerAvailability();
+  if(availability === 'unsupported' || availability === 'unavailable'){
+    document.getElementById('aiVoicePartnerInitializing').style.display = 'none';
+    document.getElementById('aiVoicePartnerUnsupported').style.display = 'block';
+    return;
+  }
+  await (vpBilingualSetupPromise || Promise.resolve()); // rolul poate avea nevoie de traducere
+  if(!vpSession){
+    if(availability === 'downloadable' || availability === 'downloading'){
+      document.getElementById('aiVoicePartnerInitializing').style.display = 'none';
+      document.getElementById('aiVoicePartnerDownloading').style.display = 'block';
+    }
+    try{
+      vpSession = await createVpLocalSession((m)=>{
+        m.addEventListener('downloadprogress', (e)=>{
+          const el = document.querySelector('#aiVoicePartnerDownloading .upload-status');
+          if(el) el.textContent = `Se descarcă modelul local... ${Math.round((e.loaded||0)*100)}%`;
+        });
+      });
+    }catch(err){
+      document.getElementById('aiVoicePartnerInitializing').style.display = 'none';
+      document.getElementById('aiVoicePartnerDownloading').style.display = 'none';
+      document.getElementById('aiVoicePartnerUnsupported').style.display = 'block';
+      return;
+    }
+  }
+  document.getElementById('aiVoicePartnerInitializing').style.display = 'none';
+  document.getElementById('aiVoicePartnerDownloading').style.display = 'none';
+  updateVoicePartnerModeNote();
+  document.getElementById('aiVoicePartnerRoleInput').value = vpRole;
+  document.getElementById('aiVoicePartnerMain').style.display = 'block';
+  setVoicePartnerState('idle');
+}
+function startVoicePartnerClaudeMode(){
+  const key = loadClaudeKey();
+  if(!key || !key.startsWith('sk-ant-')){
+    document.querySelector('#aiVoicePartnerUnsupported .upload-status').textContent =
+      'Nu ai încă o cheie Claude salvată — mergi în ⚙ (Setări) → „AI (Claude)" ca s-o adaugi, apoi revino aici.';
+    return;
+  }
+  vpMode = 'claude';
+  vpClaudeHistory = [];
+  vpConversationLines = [];
+  document.getElementById('aiVoicePartnerUnsupported').style.display = 'none';
+  document.getElementById('aiVoicePartnerConversation').innerHTML = '';
+  updateVoicePartnerModeNote();
+  document.getElementById('aiVoicePartnerRoleInput').value = vpRole;
+  document.getElementById('aiVoicePartnerMain').style.display = 'block';
+  setVoicePartnerState('idle');
+}
+function stopVoicePartnerListening(){
+  if(vpRecognizer){ try{ vpRecognizer.abort(); }catch(e){} vpRecognizer = null; }
+  if(vpState === 'speaking' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+  if(vpState !== 'idle') setVoicePartnerState('idle');
+}
+document.getElementById('aiVoicePartnerUseClaudeBtn').addEventListener('click', startVoicePartnerClaudeMode);
+document.getElementById('aiVoicePartnerEnableTranslationBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('aiVoicePartnerEnableTranslationBtn');
+  btn.disabled = true; btn.textContent = '🌐 Se pregătește traducerea...';
+  const ok = await startVoicePartnerBilingualSetup();
+  btn.disabled = false; btn.textContent = '🌐 Activează traducerea română';
+  updateVoicePartnerModeNote();
+  if(!ok) document.getElementById('aiVoicePartnerStatus').textContent = 'Traducerea română nu a putut porni în acest browser.';
+});
+// emoji-urile suna ciudat la sinteza vocala - le scoatem din text cu totul
+function stripEmoji(text){
+  return String(text).replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\uFE0F]/gu, '').replace(/\s{2,}/g, ' ').trim();
+}
+function speakVoicePartnerReply(reply){
+  setVoicePartnerState('speaking');
+  if(vpMuted) setVoicePartnerState('idle');
+  else speakFrench(reply, ()=>{ if(vpState === 'speaking') setVoicePartnerState('idle'); });
+}
+// vorbit SAU tastat ajung amandoua aici
+async function processVoicePartnerInput(rawText){
+  try{
+    if(vpMode === 'local' && vpBilingualAvailable){
+      // local, bilingv: romana -> franceza inainte de model, raspunsul -> romana pt afisare 1-la-1
+      const isRomanian = await detectIsRomanian(rawText);
+      const frenchText = isRomanian ? await vpTranslatorToFR.translate(rawText) : rawText;
+      appendVoicePartnerBilingualLine('eu', rawText, isRomanian ? frenchText : null);
+      setVoicePartnerState('processing');
+      const reply = stripEmoji(await vpSession.prompt(frenchText));
+      const replyRo = stripEmoji(fixRomanianArtifacts(await vpTranslatorToRO.translate(reply)));
+      appendVoicePartnerBilingualLine('partener', reply, replyRo);
+      speakVoicePartnerReply(reply);
+    } else {
+      appendVoicePartnerLine('eu', rawText);
+      setVoicePartnerState('processing');
+      let reply;
+      if(vpMode === 'local'){
+        reply = stripEmoji(await vpSession.prompt(rawText));
+      } else {
+        vpClaudeHistory.push({ role: 'user', content: rawText });
+        reply = stripEmoji(await callClaudeConversation(buildVoicePartnerSystemPrompt('claude'), vpClaudeHistory, 300, AI_TEMP.chat));
+        vpClaudeHistory.push({ role: 'assistant', content: reply });
+      }
+      appendVoicePartnerLine('partener', reply);
+      speakVoicePartnerReply(reply);
+    }
+  }catch(err){
+    document.getElementById('aiVoicePartnerStatus').textContent = `✗ ${err.message || 'Eroare la procesare'}`;
+    setVoicePartnerState('idle');
+  }
+}
+document.getElementById('aiVoicePartnerMuteBtn').addEventListener('click', function(){
+  vpMuted = !vpMuted;
+  this.querySelector('span').textContent = vpMuted ? '🔇' : '🔊';
+  if(vpMuted){
+    if('speechSynthesis' in window) window.speechSynthesis.cancel();
+    if(vpState === 'speaking') setVoicePartnerState('idle');
+  }
+});
+document.getElementById('aiVoicePartnerTalkBtn').addEventListener('click', ()=>{
+  if(vpState !== 'idle') return;
+  if(vpMode === 'local' && !vpSession) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    document.getElementById('aiVoicePartnerStatus').textContent = 'Recunoașterea vocală nu e disponibilă — scrie în câmpul de mai jos, în schimb.';
+    return;
+  }
+  setVoicePartnerState('listening');
+  vpRecognizer = new SR();
+  vpRecognizer.lang = 'fr-FR';
+  vpRecognizer.maxAlternatives = 1;
+  vpRecognizer.interimResults = false;
+  vpRecognizer.onresult = (e)=> processVoicePartnerInput(e.results[0][0].transcript);
+  vpRecognizer.onerror = (e)=>{
+    if(e.error === 'not-allowed' || e.error === 'permission-denied'){
+      document.getElementById('aiVoicePartnerStatus').textContent = 'Acces la microfon refuzat — scrie în câmpul de mai jos, în schimb.';
+    } else if(e.error !== 'aborted'){
+      document.getElementById('aiVoicePartnerStatus').textContent = 'Nu te-am auzit — încearcă din nou, sau scrie mai jos.';
+    }
+    setVoicePartnerState('idle');
+  };
+  vpRecognizer.onend = ()=>{ if(vpState === 'listening') setVoicePartnerState('idle'); };
+  vpRecognizer.start();
+});
+function sendVoicePartnerTextInput(){
+  if(vpState !== 'idle') return;
+  if(vpMode === 'local' && !vpSession) return;
+  const input = document.getElementById('aiVoicePartnerTextInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  processVoicePartnerInput(text);
+}
+document.getElementById('aiVoicePartnerTextSendBtn').addEventListener('click', sendVoicePartnerTextInput);
+document.getElementById('aiVoicePartnerTextInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ e.preventDefault(); sendVoicePartnerTextInput(); }
+});
+document.getElementById('aiVoicePartnerSaveBtn').addEventListener('click', ()=>{
+  if(!vpConversationLines.length){
+    document.getElementById('aiVoicePartnerStatus').textContent = 'Nimic de salvat încă — începe o conversație întâi.';
+    return;
+  }
+  const dateStr = new Date().toISOString().slice(0,10);
+  const modeLabel = vpMode === 'local' ? 'local (offline)' : 'Claude';
+  const content = `Conversație — Exersează vorbitul (${modeLabel})\n${dateStr}\n\n` +
+    vpConversationLines.map(l => `${l.speaker === 'eu' ? 'Tu' : 'Partener'}: ${l.text}`).join('\n');
+  downloadBlob(content, `conversatie-${dateStr}.txt`, 'text/plain;charset=utf-8');
+});
+document.getElementById('aiVoicePartnerResetBtn').addEventListener('click', async ()=>{
+  stopVoicePartnerListening();
+  document.getElementById('aiVoicePartnerConversation').innerHTML = '';
+  vpConversationLines = [];
+  vpRole = document.getElementById('aiVoicePartnerRoleInput').value;
+  saveVpRole(vpRole);
+  if(vpMode === 'claude'){ vpClaudeHistory = []; return; } // promptul se reface la fiecare mesaj
+  // modul local "coace" promptul de sistem in sesiune - rolul nou cere o sesiune noua
+  if(vpSession){ try{ vpSession.destroy(); }catch(e){} vpSession = null; }
+  await initVoicePartnerView();
+});
+// rolul scris INAINTE de prima replica se aplica automat; la mijlocul conversatiei - "↺ Nouă"
+document.getElementById('aiVoicePartnerRoleInput').addEventListener('change', async ()=>{
+  if(vpConversationLines.length > 0) return;
+  const newRole = document.getElementById('aiVoicePartnerRoleInput').value;
+  if(newRole === vpRole) return;
+  vpRole = newRole;
+  saveVpRole(vpRole);
+  if(vpMode === 'claude') return;
+  await recreateVpSessionSilently();
 });
 
 /* ---------- Modul "Cuvinte in pereche" - exersare de consolidare, FARA update pe stelute ---------- */
@@ -5432,6 +5995,7 @@ if ('serviceWorker' in navigator) {
   const swHadController = !!navigator.serviceWorker.controller;
   function showUpdateBanner(){
     document.getElementById('updateBanner').style.display = 'flex';
+    document.getElementById('installBanner').style.display = 'none'; // actualizarea are prioritate
   }
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg=>{

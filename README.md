@@ -73,6 +73,20 @@ Fișierele modificate se încarcă direct în acest repository (Add file → Upl
 
 ## Changelog
 
+**v39** — lotul 6 („Exersează vorbitul") și instalarea / recomandarea aplicației.
+- **🗣️ Exersează vorbitul** (portat din Karteikarten v103–v131): partener de conversație la nivel A2–B1, implicit 100% local, prin AI-ul integrat în Chrome (Gemini Nano), fără cheie și fără cost; alternativ prin Claude (cheia utilizatorului), cu aceeași interfață. Microfon (fr-FR) sau text, răspunsuri scurte cu o întrebare, rostite cu vocea franceză aleasă; rol opțional (aplicat automat înainte de prima replică, „↺ Nouă" la mijlocul conversației); mut; salvare în fișier text; mesaje separate pentru „nedisponibil", „se pregătește" și „se descarcă" (cu procent).
+  - Specifice FR: Gemini Nano acceptă doar en/ja/es/de/fr, nu și româna — de aceea limbile se declară explicit (`expectedInputs` en+fr, `expectedOutputs` fr) atât la verificare, cât și la creare; instrucțiunile către model sunt în engleză, iar corectura e în franceză în modul local (cea românească o dă traducerea de dedesubt) și în română prin Claude. Rolul scris în română se traduce în franceză pentru modelul local.
+  - Traducerea FR↔RO 1-la-1 (Translator + LanguageDetector) pornește chiar din click-ul de deschidere, cele trei componente deodată: la prima folosire Chrome descarcă pachetele de limbă și cere un gest recent al utilizatorului. Dacă totuși nu pornește, apare butonul „🌐 Activează traducerea română", care reîncearcă dintr-un click nou. Diacriticele din traducere trec prin aceeași corecție ş/ţ → ș/ț.
+  - Părăsirea ecranului (←, alt modul, închiderea panoului, click pe fundal) oprește microfonul și rostirea.
+  - 🤖 e acum mereu vizibil (înainte doar cu o cheie salvată), ca modulul local să fie accesibil fără cheie; în hub, „Exersează vorbitul" rămâne activ și fără cheie.
+- **Instalare și recomandare** (după modelul din „Știri în neștire"):
+  - Bannerul de instalare apare abia după prima rundă terminată (sau imediat, la utilizatorii care au deja cel puțin 15 cuvinte exersate); ✕ îl amână 14 zile, nu pentru totdeauna (vechiul marcaj permanent se transformă automat într-o amânare); bannerul „Versiune nouă" are prioritate.
+  - Mod separat pentru Android/PC (butonul nativ „Instalează"), iPhone și iPad (pași cu iconița de Partajare; iPad-urile care se prezintă ca Mac sunt recunoscute după ecranul tactil) și browserele fără instalare (doar indicație în Setări).
+  - Browserele interne (Facebook, Instagram, Messenger etc.): după ~2,5 s, „Deschide în Chrome" pe Android (adresă `intent://`, cu rezervă către site) sau „Copiază linkul" pentru Safari.
+  - Secțiune permanentă „Instalare și recomandare" în Setări și în Ajutor, cu „📤 Recomandă aplicația" (Web Share, cu rezervă prin copiere în clipboard).
+  - Previzualizarea linkului: etichete Open Graph și Twitter, imaginea `og-image.png` (1200×630, în culorile aplicației; textul românesc în Literata, pentru că Special Elite nu are ș/ț). `apple-mobile-web-app-title` aliniat cu `short_name` din manifest („Boîte de Fiches").
+- Testat în browser real (Chromium, Playwright): 33 de verificări pentru „Exersează vorbitul" (cu AI local, traducere, microfon și Claude simulate), 34 pentru instalare și recomandare pe 7 tipuri de browser; suitele loturilor anterioare și auditul de contrast rerulate, toate trecute.
+
 **v38** — două ajustări după v37.
 - **Cuvântul de tradus, centrat pe calculator** (preluat din Karteikarten): pe ecrane cu mouse, de la 600px lățime, eticheta și cuvântul formează un bloc centrat orizontal și vertical deasupra variantelor, iar golul de la fonturi mici se împarte egal sus și jos (la 85%: 90/94px, față de 16/178px înainte). Cuvântul poate crește peste limita de telefon, dar la zoom mare rămâne exact cât era, ca variantele să nu coboare. Telefoanele și tabletele nu sunt atinse: capturi identice pixel cu pixel la 85%, 100% și 170%, în modul normal și pe verbe.
 - **Ștampila „CORRECT !" pe tema întunecată**: fundalul ei semitransparent lăsa să treacă cardul închis, iar contrastul cobora la 3,8:1. Acum fundalul e opac pe tema întunecată (4,6:1).
