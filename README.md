@@ -73,6 +73,11 @@ Fișierele modificate se încarcă direct în acest repository (Add file → Upl
 
 ## Changelog
 
+**v38** — două ajustări după v37.
+- **Cuvântul de tradus, centrat pe calculator** (preluat din Karteikarten): pe ecrane cu mouse, de la 600px lățime, eticheta și cuvântul formează un bloc centrat orizontal și vertical deasupra variantelor, iar golul de la fonturi mici se împarte egal sus și jos (la 85%: 90/94px, față de 16/178px înainte). Cuvântul poate crește peste limita de telefon, dar la zoom mare rămâne exact cât era, ca variantele să nu coboare. Telefoanele și tabletele nu sunt atinse: capturi identice pixel cu pixel la 85%, 100% și 170%, în modul normal și pe verbe.
+- **Ștampila „CORRECT !" pe tema întunecată**: fundalul ei semitransparent lăsa să treacă cardul închis, iar contrastul cobora la 3,8:1. Acum fundalul e opac pe tema întunecată (4,6:1).
+- Suitele de teste ale versiunii v37 rerulate integral, toate trecute.
+
 **v37** — alinierea cu Karteikarten (DE v134), loturile 3, 4 și 5: interfața și navigarea, tema întunecată, vocea și modulul „Cuvinte în pereche".
 - **Interfață și navigare** (lotul 3):
   - **Setări pe tot ecranul**, cu antet fix (← Înapoi, titlu, zoom), redenumite din „Setări listă"; secțiunea „Mărime font" (dublura zoom-ului) eliminată.

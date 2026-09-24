@@ -76,6 +76,9 @@
   [data-theme="dark"] .install-banner-close{ color:var(--ink); }
   /* butoanele aurii (evidentiate): textul deschis pe auriu nu se citeste - text inchis */
   [data-theme="dark"] .paste-highlight{ color:#1c1a17; }
+  /* stampila: fundal de hartie opac pe intuneric (semi-transparenta lasa sa treaca fundalul inchis
+     si scade contrastul lui "CORRECT !" sub prag) */
+  [data-theme="dark"] .stamp{ background:#fbf7ee; }
   /* Corecturile din textul utilizatorului, in rezultatul traducerii: de fond (gramatica, cuvinte,
      topica) evidentiate vizibil; de forma (diacritice, majuscule, cratime) doar subliniate punctat */
   .corr-mark{ background:rgba(201,154,46,0.30); border-radius:3px; padding:0 2px; }
@@ -218,6 +221,21 @@
   .speak-btn.inline{ width:32px; height:32px; font-size:1.05rem; margin-left:8px; }
 
   .options{ display:flex; flex-direction:column; gap:10px; margin-top:auto; }
+  /* Pe calculator (mouse, ecran de cel putin 600px), eticheta si cuvantul de tradus formeaza un
+     bloc centrat in spatiul liber de deasupra variantelor: la fonturi mici, golul se imparte
+     echilibrat sus si jos, in loc sa se adune la mijloc. Telefoanele si tabletele (atingere) nu
+     sunt atinse deloc - acolo textul umple deja ecranul ingust si inalt. */
+  @media (hover:hover) and (pointer:fine) and (min-width:600px){
+    .prompt-block{
+      flex:1 0 auto; display:flex; flex-direction:column; justify-content:center; align-items:center;
+      text-align:center; padding:0 0 20px;
+    }
+    .prompt-block .prompt-row{ justify-content:center; }
+    /* cuvantul poate creste peste limita gandita pt telefon, dar la zoom mare ramane exact cat
+       era (2rem), ca sa nu impinga variantele mai jos decat inainte */
+    .prompt-block .prompt-word{ font-size:max(2rem, min(2.6rem, 44px)); margin-bottom:0; }
+    .prompt-block + .options{ margin-top:0; }
+  }
   .opt{
     text-align:left; font-family:var(--font-text); font-size:1rem; background:var(--paper); color:var(--ink);
     border:1.5px solid var(--ink); border-radius:10px; padding:14px 14px; cursor:pointer;
@@ -2158,10 +2176,12 @@ function renderQuestion(){
       ${wordStageStars(q.id)}
       <button class="skip-btn" id="skipBtn">Sari →</button>
     </div>
-    <div class="prompt-label">${promptLabel}</div>
-    <div class="prompt-row">
-      <div class="prompt-word">${q.prompt.html}</div>
-      ${promptSpeaker}
+    <div class="prompt-block">
+      <div class="prompt-label">${promptLabel}</div>
+      <div class="prompt-row">
+        <div class="prompt-word">${q.prompt.html}</div>
+        ${promptSpeaker}
+      </div>
     </div>
     <div class="options" id="options">
       ${q.options.map((opt,i)=>`<button class="opt" data-value="${encodeURIComponent(opt.value)}"><span class="letter">${letters[i]})</span> <span>${opt.html}</span></button>`).join("")}
