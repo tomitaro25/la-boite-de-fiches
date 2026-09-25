@@ -62,7 +62,7 @@
   @font-face{ font-family:'Special Elite'; font-style:normal; font-weight:400; font-display:swap;
     src:url('fonts/special-elite-latin-400-normal.woff2') format('woff2'); unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
   :root{
-    --font-text:'Literata', serif; --font-ui:'IBM Plex Mono', monospace; --font-display:'Special Elite', monospace;
+    --font-text:'Literata', serif; --font-ui:'IBM Plex Mono', monospace; --font-display:'Special Elite', 'IBM Plex Mono', monospace; /* Special Elite nu are ș/ț - le ia din IBM Plex Mono */
     --paper:#F2E9D8; --paper-dark:#E7DAC0; --ink:#242A31; --ink-soft:#57606b;
     --red:#B23A2E; --green:#3F7D53; --gold:#C99A2E; --line:#c9bba0;
     --le:#2C5F8A; --la:#B23A6A; --card-bg:#fbf7ee; --pasted:#1a2b6d; --ink-pressed:#3a4149;
@@ -1487,7 +1487,7 @@ function needsElision(word){
   // elidare franceza: le/la -> l' inaintea unei vocale sau h MUT (nu h aspirat - vezi lista de mai sus)
   const w = word.trim().toLowerCase();
   if(ASPIRATED_H_WORDS.has(w)) return false;
-  return /^[aeiouâàäéèêëïîôöùûüh]/i.test(w);
+  return /^[aeiouâàäéèêëïîôöùûüœæh]/i.test(w); // inclusiv œ/æ: l'œil, l'œuf, l'œuvre
 }
 // helper unificat: intoarce HTML-ul corect (articol/l' + cuvant) pt un cuvant cu articol -
 // singurul loc care ar trebui sa concateneze articol+cuvant, ca sa nu se repete bug-ul de elidare
@@ -1828,6 +1828,9 @@ const FUNCTION_WORDS = new Set([
 function classifyWord(word){
   const fr = word.fr.trim();
   if(word.artikel) return 'noun';
+  const lowerFull = fr.toLowerCase();
+  if(/^(se |s')/.test(lowerFull)) return 'verb';   // verbe reflexive: se souvenir, s'évader
+  if(/^les /.test(lowerFull)) return 'noun';        // substantive doar la plural: les gens, les vacances
   if(fr.includes(' ')) return 'phrase'; // expresii/verbe cu particula, locutiuni
   const lower = fr.toLowerCase();
   if(FUNCTION_WORDS.has(lower)) return 'function';
@@ -2213,8 +2216,12 @@ function buildRound(){
     const sameCategory = others.filter(o => classifyWord(o) === wordCategory);
     const candidatePools = [sameCategory, others]; // incercam mai intai aceeasi categorie, apoi relaxam
     const distractors = [];
+    // nicio varianta gresita care impartaseste un sens romanesc cu raspunsul corect (je/moi = „eu",
+    // pas/non = „nu"): altfel intrebarea ar avea doua raspunsuri corecte
+    const correctSenses = new Set(pmRoSenses(word));
     for(const pool2 of candidatePools){
       for(const o of pool2){
+        if(pmRoSenses(o).some(s => correctSenses.has(s))) continue;
         const val = formatSide(o, answerSide);
         if(val.value !== correct.value && !distractors.some(d => d.value === val.value)) distractors.push(val);
         if(distractors.length === 3) break;
@@ -2614,8 +2621,8 @@ document.getElementById('uploadBtn').addEventListener('click', ()=> document.get
 document.getElementById('fileInput').addEventListener('change', handleFile);
 /* Biblioteca Excel (SheetJS 0.18.5, ~880 KB) - gazduita in lib/ si incarcata DOAR la primul
    import de .xlsx/.xls, nu la fiecare pornire (inainte: script blocant in <head>, de pe cdnjs,
-   citit si executat la fiecare deschidere a aplicatiei). Dupa prima folosire ramane in cache-ul
-   service worker-ului, deci merge si offline. CSV/TSV nu au nevoie deloc de ea. */
+   citit si executat la fiecare deschidere a aplicatiei). Service worker-ul o salveaza deja la
+   instalare, deci importul merge offline chiar de la prima folosire. CSV/TSV nu au nevoie deloc de ea. */
 let xlsxLoadPromise = null;
 function loadXlsxLib(){
   if(window.XLSX) return Promise.resolve(window.XLSX);

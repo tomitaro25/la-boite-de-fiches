@@ -73,6 +73,23 @@ Fișierele modificate se încarcă direct în acest repository (Add file → Upl
 
 ## Changelog
 
+**v42** — corecturi și lotul 7 (vocabularul).
+- **Importul de liste .xlsx reparat**: biblioteca Excel era împachetată din v37 sub un nume greșit (`lib/xlsx_full_min.js` în loc de `lib/xlsx.full.min.js`), deci importul din Excel dădea eroare; CSV-urile nu erau afectate. În plus (ca în Karteikarten v142), service worker-ul o salvează la instalare, deci importul merge offline chiar de la prima folosire.
+- **Auditul vocabularului** (3.541 → 3.542 intrări): 148 de intrări corectate, 6 șterse, 7 adăugate. Lista completă, cu motivul fiecărei modificări, e în `audit-vocabular-FR-v42.xlsx` (livrat separat).
+  - **Gen greșit** (ex. la chaleur, la couleur, la tempête, la formule, l'horreur, le costume, le magazine, le pyjama).
+  - **Substantive folosite doar la plural**, acum cu „les" (les gens, les vacances, les cheveux, les lunettes, les félicitations, les toilettes...).
+  - **Articol pus greșit** pe adjective, adverbe, numerale și formule de adresare (fier, étrange, volontiers, mille, cent, madame...); și articol lipsă pe substantive (le canon, le marin, le baiser...).
+  - **Verbe reflexive** scrise cu „se"/„s'" (se souvenir, se moquer, se dépêcher, s'évader...).
+  - **Traduceri corectate** (ex. quelque = vreun, nu „ceva"; la foi = credință; la campagne = la țară; heurter = a lovi; „le élu" conținea un cuvânt englezesc).
+  - **Șterse**: forme conjugate ajunse în listă din subtitrări (veuille, ramasse, comptais, brille, reparle, survit).
+  - **Adăugate**: substantivele omografe care lipseau (le dîner, le souvenir, le devoir, le pouvoir, le rire, le savoir, l'être).
+  - Parantezele și sensurile multiple („/") au rămas, cum s-a decis: ele deosebesc pronumele cu aceeași traducere (je/moi, tu/toi).
+- **Nicio întrebare cu două răspunsuri corecte**: variantele greșite nu mai pot avea un sens românesc comun cu răspunsul (ex. la „pas" nu mai apare „non" = „nu"); verificat pe 2.250 de întrebări A1–C2.
+- **Elidarea înaintea lui „œ"**: l'œil, l'œuf, l'œuvre (înainte: „le œil").
+- **Clasificarea gramaticală** (pentru variante din aceeași categorie) recunoaște verbele reflexive și substantivele la plural.
+- **ș și ț în titluri**: Special Elite nu are aceste litere; acum le ia din IBM Plex Mono (fontul aplicației), nu dintr-un font de sistem.
+- Testat: suita nouă de vocabular (9 verificări), importul Excel offline (3), plus toate suitele anterioare și auditul de contrast — toate trecute.
+
 **v41** — bara de sus pe telefon, reglată după testul pe dispozitiv.
 - **Navigarea pe telefon coboară la 100%** (ca în Karteikarten v140): la 110%, pe telefonul real, bara se întindea pe trei rânduri și ocupa prea mult din ecran.
 - **Două rânduri garantat**: bara de pe telefon e acum o grilă (titlul și 📖/⚡/🔄↔️ în stânga; Module/AI/Setări, apoi A−/A+ și scorul în dreapta), care nu poate crea un al treilea rând, oricât de mare ar fi textul — spre deosebire de v40, unde elementele se puteau rupe pe încă un rând. Spații mai strânse; procentul de zoom și ↺ rămân în antetele panourilor.

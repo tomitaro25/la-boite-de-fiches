@@ -1,4 +1,4 @@
-const CACHE_NAME = 'boite-de-fiches-v41';
+const CACHE_NAME = 'boite-de-fiches-v42';
 const APP_SHELL = [
   './index.html',
   './manifest.json',
@@ -24,11 +24,15 @@ const FONT_FILES = [
   './fonts/special-elite-latin-ext-400-normal.woff2'
 ];
 
+// Cititorul Excel (~880 KB) se salveaza tot la instalare, ca importul .xlsx sa mearga offline
+// chiar daca n-a fost folosit niciodata online. Separat si "pe cont propriu", ca fonturile.
+const OPTIONAL_FILES = FONT_FILES.concat(['./lib/xlsx.full.min.js']);
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
       await cache.addAll(APP_SHELL);
-      await Promise.allSettled(FONT_FILES.map((f) => cache.add(f)));
+      await Promise.allSettled(OPTIONAL_FILES.map((f) => cache.add(f)));
     })
   );
   self.skipWaiting();
